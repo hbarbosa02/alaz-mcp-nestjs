@@ -20,5 +20,8 @@ lerna-debug.log*
 .env.production
 
 # temp directory
-.temp
-.tmp
+**/temp
+**/tmp
+
+coverage
+.cursor

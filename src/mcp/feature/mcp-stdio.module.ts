@@ -1,0 +1,69 @@
+import { Module } from '@nestjs/common';
+import { McpModule, McpTransportType } from '@rekog/mcp-nest';
+import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
+import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
+import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
+import { GitContextService } from '@/mcp/data-access/services/git-context.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
+import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import { PathResolverService } from '@/mcp/util/data-access/services/path-resolver.service';
+import { AuthenticationResource } from '@/mcp/feature/resources/authentication.resource';
+import { ArchitectureResource } from '@/mcp/feature/resources/architecture.resource';
+import { ChangelogResource } from '@/mcp/feature/resources/changelog.resource';
+import { ConventionsResource } from '@/mcp/feature/resources/conventions.resource';
+import { EntityDiagramResource } from '@/mcp/feature/resources/entity-diagram.resource';
+import { ModuleDocsResource } from '@/mcp/feature/resources/module-docs.resource';
+import { ModuleEndpointsResource } from '@/mcp/feature/resources/module-endpoints.resource';
+import { OnboardingResource } from '@/mcp/feature/resources/onboarding.resource';
+import { CodeReviewPrompt } from '@/mcp/feature/prompts/code-review.prompt';
+import { InvestigateBugPrompt } from '@/mcp/feature/prompts/investigate-bug.prompt';
+import { NewEndpointPrompt } from '@/mcp/feature/prompts/new-endpoint.prompt';
+import { NewModulePrompt } from '@/mcp/feature/prompts/new-module.prompt';
+import { UpdateDocsPrompt } from '@/mcp/feature/prompts/update-docs.prompt';
+import { ConventionCheckerTool } from '@/mcp/feature/tools/convention-checker.tool';
+import { EndpointListerTool } from '@/mcp/feature/tools/endpoint-lister.tool';
+import { EntitySchemaTool } from '@/mcp/feature/tools/entity-schema.tool';
+import { ModuleExplorerTool } from '@/mcp/feature/tools/module-explorer.tool';
+import { RecentChangesTool } from '@/mcp/feature/tools/recent-changes.tool';
+import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
+
+@Module({
+  imports: [
+    McpModule.forRoot({
+      name: 'alaz-nestjs-mcp',
+      version: '1.0.0',
+      transport: McpTransportType.STDIO,
+    }),
+  ],
+  providers: [
+    McpLoggerService,
+    PathResolverService,
+    FileReaderService,
+    ModuleRegistryService,
+    DocumentationReaderService,
+    EntityIntrospectorService,
+    CodebaseAnalyzerService,
+    GitContextService,
+    ModuleExplorerTool,
+    EntitySchemaTool,
+    EndpointListerTool,
+    ConventionCheckerTool,
+    RecentChangesTool,
+    TestInfoTool,
+    OnboardingResource,
+    ArchitectureResource,
+    ConventionsResource,
+    AuthenticationResource,
+    ChangelogResource,
+    ModuleDocsResource,
+    EntityDiagramResource,
+    ModuleEndpointsResource,
+    NewModulePrompt,
+    NewEndpointPrompt,
+    UpdateDocsPrompt,
+    CodeReviewPrompt,
+    InvestigateBugPrompt,
+  ],
+})
+export class McpStdioModule {}
