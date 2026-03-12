@@ -2,13 +2,16 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { ConventionCheckerTool } from '@/mcp/feature/tools/convention-checker.tool';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
-import { createModuleInfo } from '../../helpers/mock-data';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { createModuleInfo, createProjectContext } from '../../helpers/mock-data';
 
 describe('ConventionCheckerTool', () => {
   let sut: ConventionCheckerTool;
   let moduleRegistry: jest.Mocked<ModuleRegistryService>;
   let fileReader: jest.Mocked<FileReaderService>;
+  let projectContext: jest.Mocked<ProjectContextService>;
 
   beforeEach(async () => {
     moduleRegistry = {
@@ -21,11 +24,22 @@ describe('ConventionCheckerTool', () => {
       readFile: jest.fn(),
     } as unknown as jest.Mocked<FileReaderService>;
 
+    projectContext = {
+      getContext: jest.fn().mockResolvedValue(
+        createProjectContext({ docsLayout: { features: 'docs/features/' } as never }),
+      ),
+    } as unknown as jest.Mocked<ProjectContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ConventionCheckerTool,
         { provide: ModuleRegistryService, useValue: moduleRegistry },
         { provide: FileReaderService, useValue: fileReader },
+        { provide: ProjectContextService, useValue: projectContext },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
       ],
     }).compile();
 

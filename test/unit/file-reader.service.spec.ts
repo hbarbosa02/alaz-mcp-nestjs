@@ -24,7 +24,7 @@ const mockGlob = glob as unknown as jest.MockedFunction<typeof glob>;
 
 describe('FileReaderService', () => {
   let sut: FileReaderService;
-  const projectRoot = '/tmp/projeto-x-project';
+  const projectRoot = '/tmp/test-project';
 
   beforeEach(async () => {
     jest.clearAllMocks();

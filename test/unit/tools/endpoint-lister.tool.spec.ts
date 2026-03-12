@@ -2,6 +2,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { EndpointListerTool } from '@/mcp/feature/tools/endpoint-lister.tool';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 
 describe('EndpointListerTool', () => {
   let sut: EndpointListerTool;
@@ -16,6 +17,7 @@ describe('EndpointListerTool', () => {
       providers: [
         EndpointListerTool,
         { provide: CodebaseAnalyzerService, useValue: codebaseAnalyzer },
+        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
       ],
     }).compile();
 

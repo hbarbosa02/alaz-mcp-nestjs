@@ -78,4 +78,55 @@ describe('GitContextService', () => {
 
     expect(result).toEqual([]);
   });
+
+  it('should return tags as array', async () => {
+    const result = await sut.getTags();
+
+    expect(Array.isArray(result)).toBe(true);
+    result.forEach((tag) => expect(typeof tag).toBe('string'));
+  });
+
+  it('should return tags in ascending order when requested', async () => {
+    const desc = await sut.getTags('desc');
+    const asc = await sut.getTags('asc');
+
+    expect(Array.isArray(desc)).toBe(true);
+    expect(Array.isArray(asc)).toBe(true);
+    expect([...asc].reverse()).toEqual(desc);
+  });
+
+  it('should return commits between refs', async () => {
+    const result = await sut.getCommitsBetween('HEAD~2', 'HEAD');
+
+    expect(Array.isArray(result)).toBe(true);
+    if (result.length > 0) {
+      expect(result[0]).toMatchObject({
+        hash: expect.any(String),
+        author: expect.any(String),
+        date: expect.any(String),
+        message: expect.any(String),
+        files: expect.any(Array),
+      });
+    }
+  });
+
+  it('should return all commits when no refs provided', async () => {
+    const result = await sut.getCommitsBetween();
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('should return tag date when tag exists', async () => {
+    const tags = await sut.getTags();
+    if (tags.length > 0) {
+      const date = await sut.getTagDate(tags[0]);
+      expect(date === null || /^\d{4}-\d{2}-\d{2}$/.test(date)).toBe(true);
+    }
+  });
+
+  it('should return null for non-existent tag date', async () => {
+    const date = await sut.getTagDate('non-existent-tag-xyz-123');
+    expect(date).toBeNull();
+  });
 });

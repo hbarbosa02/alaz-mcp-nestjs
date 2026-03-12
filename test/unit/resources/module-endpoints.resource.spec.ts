@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { ModuleEndpointsResource } from '@/mcp/feature/resources/module-endpoints.resource';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { createModuleInfo, createEndpointInfo } from '../../helpers/mock-data';
 
 describe('ModuleEndpointsResource', () => {
@@ -23,6 +24,7 @@ describe('ModuleEndpointsResource', () => {
         ModuleEndpointsResource,
         { provide: ModuleRegistryService, useValue: moduleRegistry },
         { provide: CodebaseAnalyzerService, useValue: codebaseAnalyzer },
+        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
       ],
     }).compile();
 

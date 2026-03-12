@@ -3,20 +3,21 @@ import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
-
 @Injectable()
 export class ConventionCheckerTool {
   constructor(
     private readonly moduleRegistry: ModuleRegistryService,
     private readonly fileReader: FileReaderService,
+    private readonly projectContext: ProjectContextService,
     private readonly mcpLogger: McpLoggerService,
   ) {}
 
   @Tool({
     name: 'check-conventions',
     description:
-      'Validates if a module follows projeto-X conventions (structure, naming, barrel exports)',
+      'Validates if a module follows project conventions (structure, naming, barrel exports)',
     parameters: z.object({
       moduleName: z.string().describe('Module name to validate'),
     }),
@@ -30,39 +31,51 @@ export class ConventionCheckerTool {
       return notFoundMsg;
     }
 
+    const context = await this.projectContext.getContext();
     const checks: {
       name: string;
       status: 'pass' | 'fail' | 'warning';
       msg: string;
     }[] = [];
 
-    const hasDataAccess = await this.fileReader.exists(
-      `${mod.path}/data-access`,
-    );
-    const hasDataAccessIndex = await this.fileReader.exists(
-      `${mod.path}/data-access/index.ts`,
-    );
-    checks.push({
-      name: 'data-access/ com index.ts',
-      status: hasDataAccess && hasDataAccessIndex ? 'pass' : 'fail',
-      msg:
-        hasDataAccess && hasDataAccessIndex
-          ? 'OK'
-          : 'Missing data-access/ or barrel export',
-    });
+    if (context.modulePattern === 'domain-driven') {
+      const hasDataAccess = await this.fileReader.exists(
+        `${mod.path}/data-access`,
+      );
+      const hasDataAccessIndex = await this.fileReader.exists(
+        `${mod.path}/data-access/index.ts`,
+      );
+      checks.push({
+        name: 'data-access/ com index.ts',
+        status: hasDataAccess && hasDataAccessIndex ? 'pass' : 'fail',
+        msg:
+          hasDataAccess && hasDataAccessIndex
+            ? 'OK'
+            : 'Missing data-access/ or barrel export',
+      });
 
-    const hasFeature = await this.fileReader.exists(`${mod.path}/feature`);
-    const hasModuleFile =
-      (await this.fileReader.readGlob(`${mod.path}/feature/*.module.ts`))
-        .length > 0;
-    checks.push({
-      name: 'feature/ com *.module.ts',
-      status: hasFeature && hasModuleFile ? 'pass' : 'fail',
-      msg:
-        hasFeature && hasModuleFile
-          ? 'OK'
-          : 'Missing feature/ or .module.ts file',
-    });
+      const hasFeature = await this.fileReader.exists(`${mod.path}/feature`);
+      const hasModuleFile =
+        (await this.fileReader.readGlob(`${mod.path}/feature/*.module.ts`))
+          .length > 0;
+      checks.push({
+        name: 'feature/ com *.module.ts',
+        status: hasFeature && hasModuleFile ? 'pass' : 'fail',
+        msg:
+          hasFeature && hasModuleFile
+            ? 'OK'
+            : 'Missing feature/ or .module.ts file',
+      });
+    } else {
+      const hasModuleFile =
+        (await this.fileReader.readGlob(`${mod.path}/**/*.module.ts`))
+          .length > 0;
+      checks.push({
+        name: '*.module.ts present',
+        status: hasModuleFile ? 'pass' : 'fail',
+        msg: hasModuleFile ? 'OK' : 'Missing .module.ts file',
+      });
+    }
 
     const controllerFiles = await this.fileReader.readGlob(
       `${mod.path}/**/*.controller.ts`,
@@ -84,10 +97,13 @@ export class ConventionCheckerTool {
             : 'Missing @ApiTags',
     });
 
+    const docMsg = context.docsLayout.features
+      ? 'No doc in docs/features/'
+      : 'No documentation found';
     checks.push({
       name: 'Documentation',
       status: mod.hasDocumentation ? 'pass' : 'warning',
-      msg: mod.hasDocumentation ? 'OK' : 'No doc in docs/features/',
+      msg: mod.hasDocumentation ? 'OK' : docMsg,
     });
 
     checks.push({

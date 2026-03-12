@@ -2,6 +2,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { EntitySchemaTool } from '@/mcp/feature/tools/entity-schema.tool';
 import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { createEntitySchema } from '../../helpers/mock-data';
 
 describe('EntitySchemaTool', () => {
@@ -16,10 +17,8 @@ describe('EntitySchemaTool', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EntitySchemaTool,
-        {
-          provide: EntityIntrospectorService,
-          useValue: entityIntrospector,
-        },
+        { provide: EntityIntrospectorService, useValue: entityIntrospector },
+        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
       ],
     }).compile();
 
@@ -51,6 +50,19 @@ describe('EntitySchemaTool', () => {
     expect(result).toContain('## Relations');
     expect(result).toContain('tenant');
     expect(result).toContain('Tenant');
+  });
+
+  it('should pass orm override when provided', async () => {
+    entityIntrospector.getEntitySchema.mockResolvedValue(
+      createEntitySchema({ filePath: 'src/user/user.entity.ts' }),
+    );
+
+    await sut.getEntitySchema({ entityName: 'User', orm: 'typeorm' });
+
+    expect(entityIntrospector.getEntitySchema).toHaveBeenCalledWith(
+      'User',
+      'typeorm',
+    );
   });
 
   it('should handle entity without tableName', async () => {

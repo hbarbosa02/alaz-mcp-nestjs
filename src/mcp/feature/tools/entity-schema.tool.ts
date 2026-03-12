@@ -13,17 +13,26 @@ export class EntitySchemaTool {
 
   @Tool({
     name: 'get-entity-schema',
-    description: 'Returns MikroORM entity schema: properties, types, relations',
+    description:
+      'Returns entity schema (MikroORM, TypeORM, or Objection): properties, types, relations. ORM is auto-detected from project if omitted.',
     parameters: z.object({
       entityName: z
         .string()
         .describe('Entity name (e.g. User, Tenant, Account)'),
+      orm: z
+        .enum(['mikroorm', 'typeorm', 'objection'])
+        .optional()
+        .describe('ORM to use. Auto-detected from project if omitted'),
     }),
   })
-  async getEntitySchema(params: { entityName: string }): Promise<string> {
+  async getEntitySchema(params: {
+    entityName: string;
+    orm?: 'mikroorm' | 'typeorm' | 'objection';
+  }): Promise<string> {
     this.mcpLogger.logToolInvoked('get-entity-schema', params);
     const schema = await this.entityIntrospector.getEntitySchema(
       params.entityName,
+      params.orm,
     );
     if (!schema) {
       const notFoundMsg = `Entity "${params.entityName}" not found.`;

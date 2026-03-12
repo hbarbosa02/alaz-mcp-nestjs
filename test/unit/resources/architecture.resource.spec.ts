@@ -2,6 +2,9 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { ArchitectureResource } from '@/mcp/feature/resources/architecture.resource';
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { createProjectContext } from '../../helpers/mock-data';
 
 describe('ArchitectureResource', () => {
   let sut: ArchitectureResource;
@@ -12,10 +15,28 @@ describe('ArchitectureResource', () => {
       getApiOverview: jest.fn(),
     } as unknown as jest.Mocked<DocumentationReaderService>;
 
+    const projectContext = {
+      getContext: jest.fn().mockResolvedValue(
+        createProjectContext({
+          docsLayout: {
+            features: 'docs/features/',
+            architecture: 'docs/architecture/',
+            changelog: 'docs/changes/4 - Changelog.md',
+            conventions: 'docs/api/API-CONVENTIONS.md',
+            testing: 'docs/tests/README-TESTS.md',
+            entities: 'docs/diagrams/DATABASE-ENTITIES.md',
+            apiOverview: 'docs/architecture/API-OVERVIEW.md',
+          },
+        }),
+      ),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ArchitectureResource,
         { provide: DocumentationReaderService, useValue: docReader },
+        { provide: ProjectContextService, useValue: projectContext },
+        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
       ],
     }).compile();
 

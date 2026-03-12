@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Prompt } from '@rekog/mcp-nest';
 import { z } from 'zod';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { withConfirmationRequirement } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 @Injectable()
 export class NewEndpointPrompt {
-  constructor(private readonly mcpLogger: McpLoggerService) {}
+  constructor(
+    private readonly projectContext: ProjectContextService,
+    private readonly mcpLogger: McpLoggerService,
+  ) {}
 
   @Prompt({
     name: 'create-endpoint',
@@ -20,13 +24,19 @@ export class NewEndpointPrompt {
       description: z.string().describe('Endpoint description'),
     }),
   })
-  getPrompt(params: {
+  async getPrompt(params: {
     moduleName: string;
     httpMethod: string;
     description: string;
   }): Promise<string> {
     this.mcpLogger.logPromptReceived('create-endpoint', params);
     const { moduleName, httpMethod, description } = params;
+    const context = await this.projectContext.getContext();
+
+    const errorSection = context.customExceptionClass
+      ? `Use \`${context.customExceptionClass}\` instead of generic HttpException.`
+      : 'Use the project custom HttpException if available, otherwise HttpException.';
+
     const sections: string[] = [
       `# Add endpoint ${httpMethod} in ${moduleName}`,
       '',
@@ -52,7 +62,7 @@ export class NewEndpointPrompt {
       '- Query params: pageNumber, pageSize, where, orderBy',
       '',
       '## 4. Errors',
-      'Use `ProjetoXHttpException` instead of generic HttpException.',
+      errorSection,
       '',
       '## 5. Documentation',
       'Update docs/features/ with the new endpoint.',
@@ -60,6 +70,6 @@ export class NewEndpointPrompt {
 
     const result = withConfirmationRequirement(sections.join('\n'));
     this.mcpLogger.logPromptResult('create-endpoint', result.length);
-    return Promise.resolve(result);
+    return result;
   }
 }

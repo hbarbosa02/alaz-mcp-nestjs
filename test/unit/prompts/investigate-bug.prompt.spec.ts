@@ -1,6 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { InvestigateBugPrompt } from '@/mcp/feature/prompts/investigate-bug.prompt';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { EXECUTION_CONFIRMATION_HEADER } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 describe('InvestigateBugPrompt', () => {
@@ -8,7 +9,10 @@ describe('InvestigateBugPrompt', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [InvestigateBugPrompt],
+      providers: [
+        InvestigateBugPrompt,
+        { provide: McpLoggerService, useValue: { logPromptReceived: jest.fn(), logPromptResult: jest.fn() } },
+      ],
     }).compile();
 
     sut = module.get(InvestigateBugPrompt);

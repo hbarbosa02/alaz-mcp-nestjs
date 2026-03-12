@@ -1,17 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { Prompt } from '@rekog/mcp-nest';
 import { z } from 'zod';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { withConfirmationRequirement } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 @Injectable()
 export class NewModulePrompt {
-  constructor(private readonly mcpLogger: McpLoggerService) {}
+  constructor(
+    private readonly projectContext: ProjectContextService,
+    private readonly mcpLogger: McpLoggerService,
+  ) {}
 
   @Prompt({
     name: 'create-module',
     description:
-      'Template to create a module following projeto-X conventions. Output includes executable steps — agent MUST ask developer for confirmation before executing.',
+      'Template to create a module following project conventions. Output includes executable steps — agent MUST ask developer for confirmation before executing.',
     parameters: z.object({
       moduleName: z
         .string()
@@ -21,43 +25,61 @@ export class NewModulePrompt {
         .describe('Whether the module will have a controller'),
       hasEntity: z
         .boolean()
-        .describe('Whether the module will have MikroORM entities'),
+        .describe('Whether the module will have entities (MikroORM, TypeORM, or Objection)'),
     }),
   })
-  getPrompt(params: {
+  async getPrompt(params: {
     moduleName: string;
     hasController: boolean;
     hasEntity: boolean;
   }): Promise<string> {
     this.mcpLogger.logPromptReceived('create-module', params);
     const { moduleName, hasController, hasEntity } = params;
+    const context = await this.projectContext.getContext();
+
+    const structureSection =
+      context.modulePattern === 'domain-driven'
+        ? [
+            'Follow the domain-driven structure:',
+            '```',
+            `src/${moduleName}/`,
+            '├── data-access/',
+            '│   ├── services/',
+            '│   └── index.ts',
+            '├── feature/',
+            '│   ├── ' + moduleName + '.module.ts',
+            ...(hasController ? [`│   ├── ${moduleName}.controller.ts`] : []),
+            '│   └── index.ts',
+            '└── util/',
+            '    └── index.ts',
+            '```',
+          ]
+        : [
+            'Follow the flat module structure:',
+            '```',
+            `src/${moduleName}/`,
+            '├── ' + moduleName + '.module.ts',
+            ...(hasController ? [`├── ${moduleName}.controller.ts`] : []),
+            '├── ' + moduleName + '.service.ts',
+            '└── index.ts',
+            '```',
+          ];
+
     const sections: string[] = [
       `# Create module: ${moduleName}`,
       '',
       '## 1. Folder structure',
-      'Follow the projeto-X domain-driven structure:',
-      '```',
-      `src/${moduleName}/`,
-      '├── data-access/',
-      '│   ├── services/',
-      '│   └── index.ts',
-      '├── feature/',
-      '│   ├── ' + moduleName + '.module.ts',
-      hasController ? `│   ├── ${moduleName}.controller.ts` : '',
-      '│   └── index.ts',
-      '└── util/',
-      '    └── index.ts',
-      '```',
+      ...structureSection,
       '',
       '## 2. Barrel exports',
-      'Create `index.ts` in each subfolder exporting public items.',
+      'Create `index.ts` exporting public items.',
       '',
     ];
 
     if (hasEntity) {
       sections.push(
         '## 3. Entity',
-        'Create the entity in `data-access/` with:',
+        'Create the entity in `data-access/` (or module root) with:',
         '- `@Entity()` and optionally `tableName`',
         '- `@Property()` for each field',
         '- Use UUID as external identifier',
@@ -79,16 +101,20 @@ export class NewModulePrompt {
       );
     }
 
+    const docsPath = context.docsLayout.features
+      ? `${context.docsLayout.features}${moduleName.toUpperCase().replace(/-/g, '_')}.md`
+      : `docs/features/${moduleName.toUpperCase().replace(/-/g, '_')}.md`;
+
     sections.push(
       '## 5. Module',
       `Register ${moduleName}Module in AppModule.`,
       '',
       '## 6. Documentation',
-      `Create docs/features/${moduleName.toUpperCase().replace(/-/g, '_')}.md and update docs/features/README.md`,
+      `Create ${docsPath} and update the docs index.`,
     );
 
     const result = withConfirmationRequirement(sections.join('\n'));
     this.mcpLogger.logPromptResult('create-module', result.length);
-    return Promise.resolve(result);
+    return result;
   }
 }

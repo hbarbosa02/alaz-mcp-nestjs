@@ -4,6 +4,7 @@ import { ModuleDocsResource } from '@/mcp/feature/resources/module-docs.resource
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { createModuleInfo, createEndpointInfo } from '../../helpers/mock-data';
 
 describe('ModuleDocsResource', () => {
@@ -29,6 +30,7 @@ describe('ModuleDocsResource', () => {
         { provide: ModuleRegistryService, useValue: moduleRegistry },
         { provide: DocumentationReaderService, useValue: docReader },
         { provide: CodebaseAnalyzerService, useValue: codebaseAnalyzer },
+        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
       ],
     }).compile();
 

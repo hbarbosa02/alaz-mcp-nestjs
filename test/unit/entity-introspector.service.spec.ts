@@ -1,7 +1,15 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import {
+  ENTITY_PARSER_STRATEGIES,
+  MikroORMParserStrategy,
+  ObjectionParserStrategy,
+  TypeORMParserStrategy,
+} from '@/mcp/data-access/strategies';
+import { createProjectContext } from '../helpers/mock-data';
 
 const sampleEntityContent = `
 @Entity({ tableName: 'users' })
@@ -20,6 +28,7 @@ export class User {
 describe('EntityIntrospectorService', () => {
   let sut: EntityIntrospectorService;
   let fileReader: jest.Mocked<FileReaderService>;
+  let projectContext: jest.Mocked<ProjectContextService>;
 
   beforeEach(async () => {
     fileReader = {
@@ -27,10 +36,24 @@ describe('EntityIntrospectorService', () => {
       readFile: jest.fn(),
     } as unknown as jest.Mocked<FileReaderService>;
 
+    projectContext = {
+      getContext: jest.fn().mockResolvedValue(
+        createProjectContext({ orm: 'mikroorm' }),
+      ),
+    } as unknown as jest.Mocked<ProjectContextService>;
+
+    const strategies = [
+      new MikroORMParserStrategy(),
+      new TypeORMParserStrategy(),
+      new ObjectionParserStrategy(),
+    ];
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EntityIntrospectorService,
         { provide: FileReaderService, useValue: fileReader },
+        { provide: ProjectContextService, useValue: projectContext },
+        { provide: ENTITY_PARSER_STRATEGIES, useValue: strategies },
       ],
     }).compile();
 

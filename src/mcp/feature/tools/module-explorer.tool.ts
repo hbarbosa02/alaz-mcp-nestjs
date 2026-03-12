@@ -18,7 +18,7 @@ export class ModuleExplorerTool {
   @Tool({
     name: 'list-modules',
     description:
-      'Lists all projeto-X project modules with paths, controllers, entities and documentation',
+      'Lists all project modules with paths, controllers, entities and documentation',
     parameters: z.object({}),
   })
   async listModules(): Promise<string> {

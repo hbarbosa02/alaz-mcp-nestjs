@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import {
-  extractClassNames,
-  extractEntityTableName,
-  extractMikroORMProperties,
-  MikroORMProperty,
-  MikroORMRelation,
-} from '@/mcp/util/util/parser';
+  ProjectContextService,
+  type OrmType,
+} from '@/mcp/data-access/services/project-context.service';
+import {
+  ENTITY_PARSER_STRATEGIES,
+  type EntityParserStrategies,
+} from '@/mcp/data-access/strategies/entity-parser-strategies.token';
+import { extractClassNames } from '@/mcp/util/util/parser';
 
 export interface EntitySchema {
   name: string;
@@ -32,27 +34,37 @@ export interface EntityRelation {
   mappedBy?: string;
 }
 
+const ENTITY_FILE_PATTERN = 'src/**/*.{entity,model}.ts';
+
 @Injectable()
 export class EntityIntrospectorService {
-  constructor(private readonly fileReader: FileReaderService) {}
+  constructor(
+    private readonly fileReader: FileReaderService,
+    private readonly projectContext: ProjectContextService,
+    @Inject(ENTITY_PARSER_STRATEGIES)
+    private readonly strategies: EntityParserStrategies,
+  ) {}
 
-  async listEntities(): Promise<EntitySchema[]> {
-    const files = await this.fileReader.readGlob('src/**/*.entity.ts');
+  async listEntities(ormOverride?: OrmType): Promise<EntitySchema[]> {
+    const files = await this.fileReader.readGlob(ENTITY_FILE_PATTERN);
     const schemas: EntitySchema[] = [];
 
     for (const filePath of files) {
       const content = await this.fileReader.readFile(filePath);
       if (!content) continue;
 
-      const schema = this.parseEntityFile(content, filePath);
+      const schema = await this.parseEntityFile(content, filePath, ormOverride);
       if (schema) schemas.push(schema);
     }
 
     return schemas;
   }
 
-  async getEntitySchema(entityName: string): Promise<EntitySchema | null> {
-    const files = await this.fileReader.readGlob(`src/**/*.entity.ts`);
+  async getEntitySchema(
+    entityName: string,
+    ormOverride?: OrmType,
+  ): Promise<EntitySchema | null> {
+    const files = await this.fileReader.readGlob(ENTITY_FILE_PATTERN);
 
     for (const filePath of files) {
       const content = await this.fileReader.readFile(filePath);
@@ -61,52 +73,54 @@ export class EntityIntrospectorService {
       const classNames = extractClassNames(content);
       if (!classNames.includes(entityName)) continue;
 
-      return this.parseEntityFile(content, filePath);
+      return this.parseEntityFile(content, filePath, ormOverride);
     }
 
     return null;
   }
 
-  private parseEntityFile(
+  private async selectStrategy(
+    content: string,
+    ormOverride?: OrmType,
+  ): Promise<EntityParserStrategies[number] | null> {
+    if (ormOverride) {
+      const strategy = this.strategies.find((s) => s.orm === ormOverride);
+      return strategy ?? null;
+    }
+
+    const context = await this.projectContext.getContext();
+    if (context.orm) {
+      const strategy = this.strategies.find((s) => s.orm === context.orm);
+      if (strategy) return strategy;
+    }
+
+    for (const strategy of this.strategies) {
+      if (strategy.canParse(content)) return strategy;
+    }
+
+    return null;
+  }
+
+  private async parseEntityFile(
     content: string,
     filePath: string,
-  ): EntitySchema | null {
-    const classNames = extractClassNames(content);
-    const entityClass =
-      classNames.find(
-        (c) => content.includes(`class ${c}`) && content.includes('@Entity'),
-      ) ?? classNames[0];
+    ormOverride?: OrmType,
+  ): Promise<EntitySchema | null> {
+    const strategy = await this.selectStrategy(content, ormOverride);
+    if (!strategy) return null;
+
+    const entityClass = strategy.extractEntityClass(content);
     if (!entityClass) return null;
 
-    const tableName = extractEntityTableName(content);
-    const { properties, relations } = extractMikroORMProperties(content);
+    const tableName = strategy.extractTableName(content);
+    const { properties, relations } = strategy.parse(content);
 
     return {
       name: entityClass,
       tableName,
       filePath,
-      properties: properties.map((p) => this.toEntityProperty(p)),
-      relations: relations.map((r) => this.toEntityRelation(r)),
-    };
-  }
-
-  private toEntityProperty(p: MikroORMProperty): EntityProperty {
-    return {
-      name: p.name,
-      type: p.type,
-      decorator: p.decorator,
-      nullable: p.nullable,
-      unique: p.unique,
-    };
-  }
-
-  private toEntityRelation(r: MikroORMRelation): EntityRelation {
-    return {
-      name: r.name,
-      type: r.type,
-      targetEntity: r.targetEntity,
-      inversedBy: r.inversedBy,
-      mappedBy: r.mappedBy,
+      properties,
+      relations,
     };
   }
 }

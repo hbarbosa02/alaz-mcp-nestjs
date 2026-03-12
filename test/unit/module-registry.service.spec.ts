@@ -1,11 +1,16 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import { createProjectContext } from '../helpers/mock-data';
 
 describe('ModuleRegistryService', () => {
   let sut: ModuleRegistryService;
   let fileReader: jest.Mocked<FileReaderService>;
+  let projectContext: jest.Mocked<ProjectContextService>;
+
+  const defaultContext = createProjectContext();
 
   beforeEach(async () => {
     fileReader = {
@@ -15,10 +20,15 @@ describe('ModuleRegistryService', () => {
       readFile: jest.fn(),
     } as unknown as jest.Mocked<FileReaderService>;
 
+    projectContext = {
+      getContext: jest.fn().mockResolvedValue(defaultContext),
+    } as unknown as jest.Mocked<ProjectContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ModuleRegistryService,
         { provide: FileReaderService, useValue: fileReader },
+        { provide: ProjectContextService, useValue: projectContext },
       ],
     }).compile();
 
@@ -79,10 +89,12 @@ describe('ModuleRegistryService', () => {
   it('should return module info when path exists', async () => {
     fileReader.exists.mockResolvedValue(true);
     fileReader.readGlob
+      .mockResolvedValueOnce(['src/user/feature/user.module.ts']) // hasModuleFile domain-driven
       .mockResolvedValueOnce(['src/user/user.entity.ts'])
       .mockResolvedValueOnce(['src/user/feature/user.controller.ts'])
       .mockResolvedValueOnce(['src/user/user.service.spec.ts'])
-      .mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]); // findDocPath
     fileReader.readDir.mockResolvedValue(['feature', 'data-access']);
 
     const result = await sut.getModule('user');

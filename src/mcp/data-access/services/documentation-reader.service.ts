@@ -1,40 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
-
-const MODULE_TO_DOC: Record<string, string> = {
-  account: 'docs/features/ACCOUNT.md',
-  'audit-log': 'docs/features/AUDIT-LOG.md',
-  authentication: 'docs/architecture/AUTHENTICATION.md',
-  'integration-log': 'docs/features/INTEGRATION-LOG.md',
-  mail: 'docs/features/MAIL.md',
-  permission: 'docs/features/PERMISSIONS.md',
-  'permission-group': 'docs/features/PERMISSIONS.md',
-  role: 'docs/features/PERMISSIONS.md',
-  storage: 'docs/features/STORAGE.md',
-  tenant: 'docs/features/TENANT.md',
-  translation: 'docs/features/TRANSLATION.md',
-  user: 'docs/features/USER.md',
-  profile: 'docs/features/USER.md',
-  'job-run': 'docs/architecture/CQRS-AND-JOBS.md',
-  queue: 'docs/architecture/CQRS-AND-JOBS.md',
-};
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 
 @Injectable()
 export class DocumentationReaderService {
-  constructor(private readonly fileReader: FileReaderService) {}
+  constructor(
+    private readonly fileReader: FileReaderService,
+    private readonly projectContext: ProjectContextService,
+  ) {}
 
   async readDoc(relativePath: string): Promise<string | null> {
     return this.fileReader.readFile(relativePath);
   }
 
   async getArchitectureDocs(): Promise<Record<string, string>> {
-    const files = await this.fileReader.readDir('docs/architecture');
+    const context = await this.projectContext.getContext();
+    const archPath = context.docsLayout.architecture;
+    const dirPath = archPath ?? 'docs/architecture';
+    const basePath = dirPath.endsWith('/') ? dirPath : `${dirPath}/`;
+
+    const files = await this.fileReader.readDir(dirPath);
     const result: Record<string, string> = {};
     for (const f of files) {
       if (f.endsWith('.md')) {
-        const content = await this.fileReader.readFile(
-          `docs/architecture/${f}`,
-        );
+        const content = await this.fileReader.readFile(`${basePath}${f}`);
         if (content) result[f] = content;
       }
     }
@@ -42,27 +31,65 @@ export class DocumentationReaderService {
   }
 
   async getFeatureDoc(moduleName: string): Promise<string | null> {
-    const path = MODULE_TO_DOC[moduleName];
-    if (path) return this.fileReader.readFile(path);
+    const candidates = await this.getFeatureDocCandidates(moduleName);
+
+    for (const path of candidates) {
+      const content = await this.fileReader.readFile(path);
+      if (content) return content;
+    }
+    return null;
+  }
+
+  private async getFeatureDocCandidates(moduleName: string): Promise<string[]> {
+    const context = await this.projectContext.getContext();
+    const { docsLayout } = context;
+    const candidates: string[] = [];
+
+    if (docsLayout.features) {
+      const upper = moduleName.toUpperCase().replace(/-/g, '_');
+      const kebab = moduleName.replace(/_/g, '-');
+      candidates.push(
+        `${docsLayout.features}${upper}.md`,
+        `${docsLayout.features}${moduleName}.md`,
+        `${docsLayout.features}${upper.replace(/_/g, '-')}.md`,
+        `${docsLayout.features}${kebab}.md`,
+      );
+    }
 
     const upperName = moduleName
       .replace(/-/g, '_')
       .split('_')
       .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
       .join('_');
-    return this.fileReader.readFile(`docs/features/${upperName}.md`);
+    candidates.push(
+      `docs/features/${upperName}.md`,
+      `docs/features/${moduleName}.md`,
+      `docs/${moduleName}.md`,
+      `docs/modules/${moduleName}.md`,
+    );
+
+    return candidates;
   }
 
   async getApiConventions(): Promise<string | null> {
-    return this.fileReader.readFile('docs/api/API-CONVENTIONS.md');
+    const context = await this.projectContext.getContext();
+    const path = context.docsLayout.conventions;
+    if (!path) return null;
+    return this.fileReader.readFile(path);
   }
 
   async getTestingDocs(): Promise<string | null> {
-    return this.fileReader.readFile('docs/tests/README-TESTS.md');
+    const context = await this.projectContext.getContext();
+    const path = context.docsLayout.testing;
+    if (!path) return null;
+    return this.fileReader.readFile(path);
   }
 
   async getChangelog(): Promise<string | null> {
-    return this.fileReader.readFile('docs/changes/4 - Changelog.md');
+    const context = await this.projectContext.getContext();
+    const path = context.docsLayout.changelog;
+    if (!path) return null;
+    return this.fileReader.readFile(path);
   }
 
   async getCursorRules(): Promise<Record<string, string>> {
@@ -78,11 +105,17 @@ export class DocumentationReaderService {
   }
 
   async getDatabaseEntities(): Promise<string | null> {
-    return this.fileReader.readFile('docs/diagrams/DATABASE-ENTITIES.md');
+    const context = await this.projectContext.getContext();
+    const path = context.docsLayout.entities;
+    if (!path) return null;
+    return this.fileReader.readFile(path);
   }
 
   async getApiOverview(): Promise<string | null> {
-    return this.fileReader.readFile('docs/architecture/API-OVERVIEW.md');
+    const context = await this.projectContext.getContext();
+    const path = context.docsLayout.apiOverview;
+    if (!path) return null;
+    return this.fileReader.readFile(path);
   }
 
   async getReadme(): Promise<string | null> {

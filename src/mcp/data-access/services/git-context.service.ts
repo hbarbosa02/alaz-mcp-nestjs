@@ -77,6 +77,64 @@ export class GitContextService {
     }
   }
 
+  async getTags(sortOrder: 'asc' | 'desc' = 'desc'): Promise<string[]> {
+    try {
+      const sortFlag =
+        sortOrder === 'asc' ? 'version:refname' : '-version:refname';
+      const { stdout } = await execFileAsync(
+        'git',
+        ['tag', '--sort=' + sortFlag],
+        { cwd: this.projectRoot, timeout: this.timeout },
+      );
+      return stdout
+        .split('\n')
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+    } catch {
+      return [];
+    }
+  }
+
+  async getCommitsBetween(
+    fromRef?: string,
+    toRef?: string,
+  ): Promise<CommitInfo[]> {
+    try {
+      const args = ['log', '--pretty=format:%H|||%an|||%ad|||%s', '--name-only', '--date=short'];
+
+      if (fromRef !== undefined && toRef !== undefined) {
+        args.push(`${fromRef}..${toRef}`);
+      } else if (toRef !== undefined) {
+        args.push(toRef);
+      } else if (fromRef !== undefined) {
+        args.push(`${fromRef}..HEAD`);
+      }
+
+      const { stdout } = await execFileAsync('git', args, {
+        cwd: this.projectRoot,
+        timeout: this.timeout,
+      });
+
+      return this.parseGitLog(stdout);
+    } catch {
+      return [];
+    }
+  }
+
+  async getTagDate(tag: string): Promise<string | null> {
+    try {
+      const { stdout } = await execFileAsync(
+        'git',
+        ['log', '-1', '--format=%ad', '--date=short', tag],
+        { cwd: this.projectRoot, timeout: this.timeout },
+      );
+      const date = stdout.trim();
+      return date.length > 0 ? date : null;
+    } catch {
+      return null;
+    }
+  }
+
   private parseGitLog(output: string): CommitInfo[] {
     const commits: CommitInfo[] = [];
     const blocks = output.split(/\n(?=[a-f0-9]{40}\|\|\|)/);

@@ -1,14 +1,15 @@
 # Alaz MCP Server
 
-MCP Server that exposes the live context of the projeto-X NestJS project to AI agents (Cursor, Claude Desktop, etc.).
+MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, etc.).
 
 ## Architecture
 
-The server dynamically reads the projeto-X project in real time:
+The server dynamically reads the target project in real time:
 
 - **Filesystem**: `src/`, `docs/`, `.cursor/rules/`
-- **Git**: `git log`, `git diff` for recent changes
-- **Static parsing**: MikroORM entities, controllers, decorators
+- **Git**: `git log`, `git diff`, `git tag` for recent changes and changelog generation
+- **Static parsing**: MikroORM, TypeORM, Objection entities; controllers; decorators
+- **package.json**: Stack detection (ORM, validation library, test framework, Redis, BullMQ, NestJS version) — used to adapt prompts and resources to the project's tooling
 
 ## Transport modes
 
@@ -17,7 +18,7 @@ The server dynamically reads the projeto-X project in real time:
 Runs on the `/mcp` route of the API. Requires `npm run start:dev`.
 
 ```bash
-PROJECT_ROOT=/path/to/projeto-x npm run start:dev
+PROJECT_ROOT=/path/to/your-nestjs-project npm run start:dev
 ```
 
 Cursor configuration (`.cursor/mcp.json`):
@@ -37,7 +38,7 @@ Cursor configuration (`.cursor/mcp.json`):
 Runs as a separate process. Does not require database or Redis.
 
 ```bash
-PROJECT_ROOT=/path/to/projeto-x npm run start:stdio
+PROJECT_ROOT=/path/to/your-nestjs-project npm run start:stdio
 ```
 
 Cursor configuration:
@@ -49,7 +50,7 @@ Cursor configuration:
       "command": "npx",
       "args": ["ts-node", "src/mcp/feature/mcp-stdio.entry.ts"],
       "env": {
-        "PROJECT_ROOT": "/path/to/projeto-x-nestjs"
+        "PROJECT_ROOT": "/path/to/your-nestjs-project"
       }
     }
   }
@@ -62,9 +63,9 @@ Cursor configuration:
 |------|------------|-------------|
 | `list-modules` | — | Lists modules with controller, entities, tests |
 | `get-module-detail` | `moduleName` | Full module details |
-| `get-entity-schema` | `entityName` | MikroORM entity schema |
+| `get-entity-schema` | `entityName`, `orm?` | Entity schema (MikroORM, TypeORM, Objection). ORM auto-detected if omitted |
 | `list-endpoints` | `moduleName?` | Lists endpoints (optional filter by module) |
-| `check-conventions` | `moduleName` | Validates projeto-X conventions |
+| `check-conventions` | `moduleName` | Validates project conventions |
 | `get-recent-changes` | `days?` | Recent commits (default 7 days) |
 | `get-test-summary` | `moduleName?` | Test summary |
 
@@ -80,7 +81,7 @@ Cursor configuration:
 | `alaz://conventions/testing` | Testing patterns |
 | `alaz://conventions/cqrs` | CQRS and Jobs |
 | `alaz://authentication` | Auth and RBAC |
-| `alaz://changelog` | Changelog |
+| `alaz://changelog` | Changelog generated from Git (versioned by tags). Fallback to static file in docs/changes/ when repository is not available |
 
 ### Templates (dynamic)
 
@@ -104,7 +105,7 @@ Cursor configuration:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `PROJECT_ROOT` | Yes | Path to the projeto-X project |
+| `PROJECT_ROOT` | Yes | Path to the target NestJS project |
 | `PORT` | No | HTTP port (default 3100) |
 | `NODE_ENV` | No | development/staging/production |
 
@@ -112,4 +113,4 @@ Cursor configuration:
 
 1. Create the class in `src/mcp/feature/tools/`, `resources/` or `prompts/`
 2. Use the `@Tool`, `@Resource`, `@ResourceTemplate` or `@Prompt` decorators
-3. Register in `ProjetoXMcpModule` and `ProjetoXMcpStdioModule`
+3. Register in `McpNestjsModule` and `McpStdioModule`

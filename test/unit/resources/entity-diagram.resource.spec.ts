@@ -2,6 +2,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { EntityDiagramResource } from '@/mcp/feature/resources/entity-diagram.resource';
 import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { createEntitySchema } from '../../helpers/mock-data';
 
 describe('EntityDiagramResource', () => {
@@ -16,10 +17,8 @@ describe('EntityDiagramResource', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EntityDiagramResource,
-        {
-          provide: EntityIntrospectorService,
-          useValue: entityIntrospector,
-        },
+        { provide: EntityIntrospectorService, useValue: entityIntrospector },
+        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
       ],
     }).compile();
 

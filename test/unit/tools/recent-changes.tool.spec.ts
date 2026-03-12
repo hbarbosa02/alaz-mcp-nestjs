@@ -2,6 +2,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { RecentChangesTool } from '@/mcp/feature/tools/recent-changes.tool';
 import { GitContextService } from '@/mcp/data-access/services/git-context.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 
 describe('RecentChangesTool', () => {
   let sut: RecentChangesTool;
@@ -16,6 +17,7 @@ describe('RecentChangesTool', () => {
       providers: [
         RecentChangesTool,
         { provide: GitContextService, useValue: gitContext },
+        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
       ],
     }).compile();
 

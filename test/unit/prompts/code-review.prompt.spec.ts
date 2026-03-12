@@ -1,14 +1,25 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { CodeReviewPrompt } from '@/mcp/feature/prompts/code-review.prompt';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { createProjectContext } from '../../helpers/mock-data';
 import { EXECUTION_CONFIRMATION_HEADER } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 describe('CodeReviewPrompt', () => {
   let sut: CodeReviewPrompt;
 
   beforeEach(async () => {
+    const projectContext = {
+      getContext: jest.fn().mockResolvedValue(createProjectContext()),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CodeReviewPrompt],
+      providers: [
+        CodeReviewPrompt,
+        { provide: ProjectContextService, useValue: projectContext },
+        { provide: McpLoggerService, useValue: { logPromptReceived: jest.fn(), logPromptResult: jest.fn() } },
+      ],
     }).compile();
 
     sut = module.get(CodeReviewPrompt);

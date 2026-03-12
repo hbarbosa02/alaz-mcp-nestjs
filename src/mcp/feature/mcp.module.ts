@@ -1,11 +1,19 @@
 import { Module } from '@nestjs/common';
 import { McpModule, McpTransportType } from '@rekog/mcp-nest';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
+import {
+  ENTITY_PARSER_STRATEGIES,
+  MikroORMParserStrategy,
+  ObjectionParserStrategy,
+  TypeORMParserStrategy,
+} from '@/mcp/data-access/strategies';
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
 import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
+import { GitChangelogService } from '@/mcp/data-access/services/git-changelog.service';
 import { GitContextService } from '@/mcp/data-access/services/git-context.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import { PathResolverService } from '@/mcp/util/data-access/services/path-resolver.service';
 import { AuthenticationResource } from '@/mcp/feature/resources/authentication.resource';
@@ -40,11 +48,29 @@ import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
     McpLoggerService,
     PathResolverService,
     FileReaderService,
+    ProjectContextService,
+    MikroORMParserStrategy,
+    TypeORMParserStrategy,
+    ObjectionParserStrategy,
+    {
+      provide: ENTITY_PARSER_STRATEGIES,
+      useFactory: (
+        mikro: MikroORMParserStrategy,
+        type: TypeORMParserStrategy,
+        objection: ObjectionParserStrategy,
+      ) => [mikro, type, objection],
+      inject: [
+        MikroORMParserStrategy,
+        TypeORMParserStrategy,
+        ObjectionParserStrategy,
+      ],
+    },
     ModuleRegistryService,
     DocumentationReaderService,
     EntityIntrospectorService,
     CodebaseAnalyzerService,
     GitContextService,
+    GitChangelogService,
     ModuleExplorerTool,
     EntitySchemaTool,
     EndpointListerTool,

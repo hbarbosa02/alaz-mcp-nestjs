@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { createModuleInfo } from '../../helpers/mock-data';
 
 describe('TestInfoTool', () => {
@@ -26,6 +27,7 @@ describe('TestInfoTool', () => {
         TestInfoTool,
         { provide: ModuleRegistryService, useValue: moduleRegistry },
         { provide: FileReaderService, useValue: fileReader },
+        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
       ],
     }).compile();
 

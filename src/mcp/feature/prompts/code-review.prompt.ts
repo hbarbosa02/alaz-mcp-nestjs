@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Prompt } from '@rekog/mcp-nest';
 import { z } from 'zod';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 
 @Injectable()
 export class CodeReviewPrompt {
-  constructor(private readonly mcpLogger: McpLoggerService) {}
+  constructor(
+    private readonly projectContext: ProjectContextService,
+    private readonly mcpLogger: McpLoggerService,
+  ) {}
 
   @Prompt({
     name: 'code-review-checklist',
@@ -14,16 +18,27 @@ export class CodeReviewPrompt {
       moduleName: z.string().describe('Name of the module to review'),
     }),
   })
-  getPrompt(params: { moduleName: string }): Promise<string> {
+  async getPrompt(params: { moduleName: string }): Promise<string> {
     this.mcpLogger.logPromptReceived('code-review-checklist', params);
     const { moduleName } = params;
+    const context = await this.projectContext.getContext();
+
+    const structureCheck =
+      context.modulePattern === 'domain-driven'
+        ? '- [ ] data-access/, feature/, util/ present as needed'
+        : '- [ ] Module structure follows project pattern';
+
+    const errorCheck = context.customExceptionClass
+      ? `- [ ] ${context.customExceptionClass} instead of HttpException`
+      : '- [ ] Project custom exception or HttpException used consistently';
+
     const result = [
       `# Code Review Checklist: ${moduleName}`,
       '',
       'Use the `check-conventions` tool to validate the structure. Additionally:',
       '',
       '## Structure',
-      '- [ ] data-access/, feature/, util/ present as needed',
+      structureCheck,
       '- [ ] Barrel exports (index.ts) in each subfolder',
       '',
       '## Controllers',
@@ -33,7 +48,7 @@ export class CodeReviewPrompt {
       '- [ ] DTOs with createZodDto (no inline ZodValidationPipe)',
       '',
       '## Errors',
-      '- [ ] ProjetoXHttpException instead of HttpException',
+      errorCheck,
       '',
       '## Entities',
       '- [ ] UUID as external identifier',
@@ -49,6 +64,6 @@ export class CodeReviewPrompt {
       '- [ ] Changelog updated',
     ].join('\n');
     this.mcpLogger.logPromptResult('code-review-checklist', result.length);
-    return Promise.resolve(result);
+    return result;
   }
 }

@@ -4,6 +4,7 @@ import { ModuleExplorerTool } from '@/mcp/feature/tools/module-explorer.tool';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { createModuleInfo, createEndpointInfo } from '../../helpers/mock-data';
 
 describe('ModuleExplorerTool', () => {
@@ -32,6 +33,7 @@ describe('ModuleExplorerTool', () => {
         { provide: ModuleRegistryService, useValue: moduleRegistry },
         { provide: DocumentationReaderService, useValue: docReader },
         { provide: CodebaseAnalyzerService, useValue: codebaseAnalyzer },
+        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
       ],
     }).compile();
 

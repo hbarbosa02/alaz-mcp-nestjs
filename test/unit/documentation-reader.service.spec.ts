@@ -1,11 +1,24 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
+import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import { createProjectContext } from '../helpers/mock-data';
+
+const defaultDocsLayout = {
+  features: 'docs/features/',
+  architecture: 'docs/architecture/',
+  changelog: 'docs/changes/4 - Changelog.md',
+  conventions: 'docs/api/API-CONVENTIONS.md',
+  testing: 'docs/tests/README-TESTS.md',
+  entities: 'docs/diagrams/DATABASE-ENTITIES.md',
+  apiOverview: 'docs/architecture/API-OVERVIEW.md',
+};
 
 describe('DocumentationReaderService', () => {
   let sut: DocumentationReaderService;
   let fileReader: jest.Mocked<FileReaderService>;
+  let projectContext: jest.Mocked<ProjectContextService>;
 
   beforeEach(async () => {
     fileReader = {
@@ -13,10 +26,17 @@ describe('DocumentationReaderService', () => {
       readDir: jest.fn(),
     } as unknown as jest.Mocked<FileReaderService>;
 
+    projectContext = {
+      getContext: jest.fn().mockResolvedValue(
+        createProjectContext({ docsLayout: defaultDocsLayout }),
+      ),
+    } as unknown as jest.Mocked<ProjectContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DocumentationReaderService,
         { provide: FileReaderService, useValue: fileReader },
+        { provide: ProjectContextService, useValue: projectContext },
       ],
     }).compile();
 
@@ -44,6 +64,15 @@ describe('DocumentationReaderService', () => {
 
   describe('getArchitectureDocs', () => {
     it('should return only .md files from docs/architecture', async () => {
+      projectContext.getContext.mockResolvedValue(
+        createProjectContext({
+          name: 'test',
+          docsLayout: {
+            ...defaultDocsLayout,
+            architecture: 'docs/architecture/',
+          },
+        }),
+      );
       fileReader.readDir.mockResolvedValue([
         'API-OVERVIEW.md',
         'AUTH.md',
@@ -75,7 +104,7 @@ describe('DocumentationReaderService', () => {
   });
 
   describe('getFeatureDoc', () => {
-    it('should use MODULE_TO_DOC mapping when module exists', async () => {
+    it('should read feature doc for module', async () => {
       fileReader.readFile.mockResolvedValue('# User docs');
 
       const result = await sut.getFeatureDoc('user');
@@ -84,15 +113,15 @@ describe('DocumentationReaderService', () => {
       expect(fileReader.readFile).toHaveBeenCalledWith('docs/features/USER.md');
     });
 
-    it('should convert module name to uppercase format when not in mapping', async () => {
-      fileReader.readFile.mockResolvedValue('# Custom module');
+    it('should try multiple paths for module doc', async () => {
+      fileReader.readFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('# Custom module');
 
       const result = await sut.getFeatureDoc('my-custom-module');
 
       expect(result).toBe('# Custom module');
-      expect(fileReader.readFile).toHaveBeenCalledWith(
-        'docs/features/My_Custom_Module.md',
-      );
     });
   });
 

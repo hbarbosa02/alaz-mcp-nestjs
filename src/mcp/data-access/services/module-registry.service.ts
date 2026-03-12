@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import {
+  ProjectContextService,
+  type ModulePattern,
+} from '@/mcp/data-access/services/project-context.service';
 
 export interface ModuleInfo {
   name: string;
@@ -14,58 +18,104 @@ export interface ModuleInfo {
   subModules: string[];
 }
 
-const MODULE_TO_DOC: Record<string, string> = {
-  account: 'docs/features/ACCOUNT.md',
-  'audit-log': 'docs/features/AUDIT-LOG.md',
-  authentication: 'docs/architecture/AUTHENTICATION.md',
-  'integration-log': 'docs/features/INTEGRATION-LOG.md',
-  mail: 'docs/features/MAIL.md',
-  permission: 'docs/features/PERMISSIONS.md',
-  'permission-group': 'docs/features/PERMISSIONS.md',
-  role: 'docs/features/PERMISSIONS.md',
-  storage: 'docs/features/STORAGE.md',
-  tenant: 'docs/features/TENANT.md',
-  translation: 'docs/features/TRANSLATION.md',
-  user: 'docs/features/USER.md',
-  profile: 'docs/features/USER.md',
-  'job-run': 'docs/architecture/CQRS-AND-JOBS.md',
-  queue: 'docs/architecture/CQRS-AND-JOBS.md',
-};
-
 @Injectable()
 export class ModuleRegistryService {
-  constructor(private readonly fileReader: FileReaderService) {}
+  constructor(
+    private readonly fileReader: FileReaderService,
+    private readonly projectContext: ProjectContextService,
+  ) {}
 
   async listModules(): Promise<ModuleInfo[]> {
+    const context = await this.projectContext.getContext();
     const modules: ModuleInfo[] = [];
-    const srcDirs = await this.fileReader.readDir('src');
 
-    for (const dir of srcDirs) {
-      if (dir === 'shared') continue;
-      const modulePath = `src/${dir}`;
-      const moduleFiles = await this.fileReader.readGlob(
-        `${modulePath}/feature/*.module.ts`,
-      );
-      if (moduleFiles.length === 0) continue;
+    if (context.modulePattern === 'nested') {
+      const modulesDirExists = await this.fileReader.exists('src/modules');
+      if (modulesDirExists) {
+        const moduleDirs = await this.fileReader.readDir('src/modules');
+        for (const dir of moduleDirs) {
+          if (dir.includes('.')) continue;
+          const modulePath = `src/modules/${dir}`;
+          const hasModule = await this.hasModuleFile(modulePath, 'nested');
+          if (hasModule) {
+            const info = await this.getModuleInfo(dir, modulePath);
+            modules.push(info);
+          }
+        }
+      }
+    } else {
+      const srcDirs = await this.fileReader.readDir('src');
+      for (const dir of srcDirs) {
+        if (dir === 'shared' || dir === 'common') continue;
+        const modulePath = `src/${dir}`;
+        const hasModule = await this.hasModuleFile(
+          modulePath,
+          context.modulePattern,
+        );
+        if (!hasModule) continue;
 
-      const info = await this.getModuleInfo(dir, modulePath);
-      modules.push(info);
+        const info = await this.getModuleInfo(dir, modulePath);
+        modules.push(info);
+      }
+
+      const sharedInfo = await this.getSharedModuleInfo();
+      if (sharedInfo) modules.push(sharedInfo);
     }
-
-    const sharedInfo = await this.getSharedModuleInfo();
-    if (sharedInfo) modules.push(sharedInfo);
 
     return modules.sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  private async hasModuleFile(
+    modulePath: string,
+    pattern: ModulePattern,
+  ): Promise<boolean> {
+    if (pattern === 'domain-driven') {
+      const files = await this.fileReader.readGlob(
+        `${modulePath}/feature/*.module.ts`,
+      );
+      if (files.length > 0) return true;
+    }
+
+    const flatFiles = await this.fileReader.readGlob(
+      `${modulePath}/*.module.ts`,
+    );
+    if (flatFiles.length > 0) return true;
+
+    const nestedFiles = await this.fileReader.readGlob(
+      `${modulePath}/**/*.module.ts`,
+    );
+    return nestedFiles.length > 0;
+  }
+
   async getModule(name: string): Promise<ModuleInfo | null> {
     const normalized = name.replace(/_/g, '-');
-    const modulePath = `src/${normalized}`;
+    const context = await this.projectContext.getContext();
 
-    const exists = await this.fileReader.exists(modulePath);
-    if (!exists) return null;
+    const candidates: { path: string; name: string }[] = [
+      { path: `src/${normalized}`, name: normalized },
+    ];
 
-    return this.getModuleInfo(normalized, modulePath);
+    if (context.modulePattern === 'nested') {
+      candidates.unshift({
+        path: `src/modules/${normalized}`,
+        name: normalized,
+      });
+    }
+
+    for (const { path: modulePath } of candidates) {
+      const exists = await this.fileReader.exists(modulePath);
+      if (!exists) continue;
+
+      const hasModule = await this.hasModuleFile(
+        modulePath,
+        context.modulePattern,
+      );
+      if (hasModule) {
+        return this.getModuleInfo(normalized, modulePath);
+      }
+    }
+
+    return null;
   }
 
   private async getModuleInfo(
@@ -94,10 +144,10 @@ export class ModuleRegistryService {
       `${modulePath}/**/*.e2e-spec.ts`,
     );
 
-    const docPath =
-      MODULE_TO_DOC[name] ??
-      `docs/features/${name.toUpperCase().replace(/-/g, '_')}.md`;
-    const hasDocumentation = await this.fileReader.exists(docPath);
+    const docPath = await this.findDocPath(name);
+    const hasDocumentation = docPath
+      ? await this.fileReader.exists(docPath)
+      : false;
 
     const subDirs = await this.fileReader.readDir(modulePath);
     const subModules = subDirs.filter((d) => !d.includes('.'));
@@ -114,6 +164,34 @@ export class ModuleRegistryService {
       documentationPath: hasDocumentation ? docPath : null,
       subModules,
     };
+  }
+
+  private async findDocPath(name: string): Promise<string | null> {
+    const context = await this.projectContext.getContext();
+    const { docsLayout } = context;
+    const candidates: string[] = [];
+
+    if (docsLayout.features) {
+      const upper = name.toUpperCase().replace(/-/g, '_');
+      const kebab = name.replace(/_/g, '-');
+      candidates.push(
+        `${docsLayout.features}${upper}.md`,
+        `${docsLayout.features}${name}.md`,
+        `${docsLayout.features}${upper.replace(/_/g, '-')}.md`,
+        `${docsLayout.features}${kebab}.md`,
+      );
+    }
+
+    candidates.push(
+      `docs/features/${name.toUpperCase().replace(/-/g, '_')}.md`,
+      `docs/${name}.md`,
+      `docs/modules/${name}.md`,
+    );
+
+    for (const candidate of candidates) {
+      if (await this.fileReader.exists(candidate)) return candidate;
+    }
+    return null;
   }
 
   private async getSharedModuleInfo(): Promise<ModuleInfo | null> {

@@ -2,6 +2,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { AuthenticationResource } from '@/mcp/feature/resources/authentication.resource';
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
+import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 
 describe('AuthenticationResource', () => {
   let sut: AuthenticationResource;
@@ -16,6 +17,7 @@ describe('AuthenticationResource', () => {
       providers: [
         AuthenticationResource,
         { provide: DocumentationReaderService, useValue: docReader },
+        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
       ],
     }).compile();
 
