@@ -15,7 +15,8 @@ export class ChangelogResource {
   @Resource({
     uri: 'alaz://changelog',
     name: 'Changelog',
-    description: 'Project changelog (Git-based when available, else static docs)',
+    description:
+      'Project changelog (Git-based when available, else static docs)',
     mimeType: 'text/markdown',
   })
   async getChangelog(): Promise<string> {

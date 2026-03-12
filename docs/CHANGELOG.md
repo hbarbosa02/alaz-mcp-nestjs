@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- apply code formatting across services and resources
+
 ## [1.1.0] - 2026-03-12
 
 ### Added

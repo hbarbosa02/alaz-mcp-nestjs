@@ -100,7 +100,12 @@ export class GitContextService {
     toRef?: string,
   ): Promise<CommitInfo[]> {
     try {
-      const args = ['log', '--pretty=format:%H|||%an|||%ad|||%s', '--name-only', '--date=short'];
+      const args = [
+        'log',
+        '--pretty=format:%H|||%an|||%ad|||%s',
+        '--name-only',
+        '--date=short',
+      ];
 
       if (fromRef !== undefined && toRef !== undefined) {
         args.push(`${fromRef}..${toRef}`);

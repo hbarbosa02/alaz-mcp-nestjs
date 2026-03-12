@@ -130,7 +130,9 @@ export class ProjectContextService {
 
     const nestPkg = deps['@nestjs/core'] ?? deps['@nestjs/common'];
     const nestVersion = nestPkg
-      ? String(nestPkg).replace(/^[\^~]/, '').split('.')[0]
+      ? String(nestPkg)
+          .replace(/^[\^~]/, '')
+          .split('.')[0]
       : null;
 
     const hasMikroORM = Object.keys(deps).some(
@@ -149,7 +151,9 @@ export class ProjectContextService {
     else if (deps['mongodb']) database = 'MongoDB';
     else if (deps['better-sqlite3']) database = 'SQLite';
 
-    const redis = Object.keys(deps).some((k) => k === 'redis' || k === 'ioredis');
+    const redis = Object.keys(deps).some(
+      (k) => k === 'redis' || k === 'ioredis',
+    );
     const bullmq = Object.keys(deps).includes('bullmq');
 
     let validation: ValidationLibrary = null;
@@ -231,9 +235,7 @@ export class ProjectContextService {
       'docs/CHANGELOG.md',
       'docs/changes/4 - Changelog.md',
     ];
-    const changelogFiles = await this.fileReader.readGlob(
-      'docs/changes/*.md',
-    );
+    const changelogFiles = await this.fileReader.readGlob('docs/changes/*.md');
     for (const c of changelogCandidates) {
       if (await this.fileReader.exists(c)) {
         layout.changelog = c;
@@ -318,12 +320,8 @@ export class ProjectContextService {
   }
 
   private async detectCustomExceptionClass(): Promise<string | null> {
-    const sharedFiles = await this.fileReader.readGlob(
-      'src/shared/**/*.ts',
-    );
-    const commonFiles = await this.fileReader.readGlob(
-      'src/common/**/*.ts',
-    );
+    const sharedFiles = await this.fileReader.readGlob('src/shared/**/*.ts');
+    const commonFiles = await this.fileReader.readGlob('src/common/**/*.ts');
     const allFiles = [...sharedFiles, ...commonFiles];
 
     for (const filePath of allFiles) {
@@ -343,10 +341,12 @@ export class ProjectContextService {
     const content = await this.fileReader.readFile('tsconfig.json');
     if (!content) return {};
     try {
-      const tsconfig = JSON.parse(content);
+      const tsconfig = JSON.parse(content) as {
+        compilerOptions?: { paths?: Record<string, string> };
+      };
       const paths = tsconfig.compilerOptions?.paths;
       if (!paths || typeof paths !== 'object') return {};
-      return paths as Record<string, string>;
+      return paths;
     } catch {
       return {};
     }

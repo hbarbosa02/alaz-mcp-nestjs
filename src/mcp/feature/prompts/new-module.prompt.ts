@@ -25,7 +25,9 @@ export class NewModulePrompt {
         .describe('Whether the module will have a controller'),
       hasEntity: z
         .boolean()
-        .describe('Whether the module will have entities (MikroORM, TypeORM, or Objection)'),
+        .describe(
+          'Whether the module will have entities (MikroORM, TypeORM, or Objection)',
+        ),
     }),
   })
   async getPrompt(params: {
