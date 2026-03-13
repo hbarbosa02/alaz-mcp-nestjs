@@ -16,6 +16,7 @@
 ### Fixed
 
 - remove inline exceptions (eslint-disable), add no-console override for entry files
+- resources return MCP ReadResourceResult format for Cursor compatibility (fixes invalid_union when reading alaz:// URIs)
 
 ### Documentation
 

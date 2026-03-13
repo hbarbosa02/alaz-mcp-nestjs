@@ -48,22 +48,27 @@ describe('EntityDiagramResource', () => {
   it('should return not found when entity does not exist', async () => {
     entityIntrospector.getEntitySchema.mockResolvedValue(null);
 
-    const result = await sut.getEntityDiagram({ entityName: 'Unknown' });
+    const result = (await sut.getEntityDiagram({
+      entityName: 'Unknown',
+    })) as { contents: { text: string }[] };
 
-    expect(result).toBe('Entity "Unknown" not found.');
+    expect(result.contents[0].text).toBe('Entity "Unknown" not found.');
   });
 
   it('should return entity schema with mermaid diagram', async () => {
     entityIntrospector.getEntitySchema.mockResolvedValue(createEntitySchema());
 
-    const result = await sut.getEntityDiagram({ entityName: 'User' });
+    const result = (await sut.getEntityDiagram({
+      entityName: 'User',
+    })) as { contents: { text: string }[] };
 
-    expect(result).toContain('# Entity: User');
-    expect(result).toContain('## Properties');
-    expect(result).toContain('## Relations');
-    expect(result).toContain('## ER Diagram (Mermaid)');
-    expect(result).toContain('```mermaid');
-    expect(result).toContain('erDiagram');
+    const text = result.contents[0].text;
+    expect(text).toContain('# Entity: User');
+    expect(text).toContain('## Properties');
+    expect(text).toContain('## Relations');
+    expect(text).toContain('## ER Diagram (Mermaid)');
+    expect(text).toContain('```mermaid');
+    expect(text).toContain('erDiagram');
   });
 
   it('should handle OneToMany relation in mermaid diagram', async () => {
@@ -81,9 +86,11 @@ describe('EntityDiagramResource', () => {
       }),
     );
 
-    const result = await sut.getEntityDiagram({ entityName: 'User' });
+    const result = (await sut.getEntityDiagram({
+      entityName: 'User',
+    })) as { contents: { text: string }[] };
 
-    expect(result).toContain('||o{');
+    expect(result.contents[0].text).toContain('||o{');
   });
 
   it('should handle entity without relations', async () => {
@@ -91,9 +98,12 @@ describe('EntityDiagramResource', () => {
       createEntitySchema({ relations: [] }),
     );
 
-    const result = await sut.getEntityDiagram({ entityName: 'User' });
+    const result = (await sut.getEntityDiagram({
+      entityName: 'User',
+    })) as { contents: { text: string }[] };
 
-    expect(result).toContain('# Entity: User');
-    expect(result).not.toContain('## Relations');
+    const text = result.contents[0].text;
+    expect(text).toContain('# Entity: User');
+    expect(text).not.toContain('## Relations');
   });
 });

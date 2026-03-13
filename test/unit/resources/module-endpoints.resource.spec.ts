@@ -54,7 +54,9 @@ describe('ModuleEndpointsResource', () => {
 
     const result = await sut.getModuleEndpoints({ moduleName: 'unknown' });
 
-    expect(result).toBe('Module "unknown" not found.');
+    expect((result.contents[0] as { text: string }).text).toBe(
+      'Module "unknown" not found.',
+    );
   });
 
   it('should return endpoints table', async () => {
@@ -65,9 +67,10 @@ describe('ModuleEndpointsResource', () => {
 
     const result = await sut.getModuleEndpoints({ moduleName: 'user' });
 
-    expect(result).toContain('# Endpoints: user');
-    expect(result).toContain('| Method | Path | Permissions | Auth |');
-    expect(result).toContain('GET');
-    expect(result).toContain('/user');
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('# Endpoints: user');
+    expect(text).toContain('| Method | Path | Permissions | Auth |');
+    expect(text).toContain('GET');
+    expect(text).toContain('/user');
   });
 });

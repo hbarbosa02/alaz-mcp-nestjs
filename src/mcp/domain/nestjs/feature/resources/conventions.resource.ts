@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
@@ -18,7 +19,7 @@ export class ConventionsResource {
     description: 'API conventions: validation, pagination, errors, identifiers',
     mimeType: 'text/markdown',
   })
-  async getApiConventions(): Promise<string> {
+  async getApiConventions() {
     this.mcpLogger.logResourceRead('alaz://conventions/api', {});
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
@@ -28,7 +29,11 @@ export class ConventionsResource {
         'alaz://conventions/api',
         unsupportedMsg.length,
       );
-      return unsupportedMsg;
+      return toReadResourceResult(
+        'alaz://conventions/api',
+        'text/markdown',
+        unsupportedMsg,
+      );
     }
     const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
     const apiConv = await docReader.getApiConventions();
@@ -40,7 +45,11 @@ export class ConventionsResource {
     if (apiRule) parts.push('## Cursor Rule', '', apiRule);
     const result = parts.join('\n') || 'Documentation not found.';
     this.mcpLogger.logResourceResult('alaz://conventions/api', result.length);
-    return result;
+    return toReadResourceResult(
+      'alaz://conventions/api',
+      'text/markdown',
+      result,
+    );
   }
 
   @Resource({
@@ -49,7 +58,7 @@ export class ConventionsResource {
     description: 'Testing patterns: AAA, sut, factories, in-memory repos',
     mimeType: 'text/markdown',
   })
-  async getTestingConventions(): Promise<string> {
+  async getTestingConventions() {
     this.mcpLogger.logResourceRead('alaz://conventions/testing', {});
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
@@ -59,7 +68,11 @@ export class ConventionsResource {
         'alaz://conventions/testing',
         unsupportedMsg.length,
       );
-      return unsupportedMsg;
+      return toReadResourceResult(
+        'alaz://conventions/testing',
+        'text/markdown',
+        unsupportedMsg,
+      );
     }
     const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
     const testingDoc = await docReader.getTestingDocs();
@@ -74,7 +87,11 @@ export class ConventionsResource {
       'alaz://conventions/testing',
       result.length,
     );
-    return result;
+    return toReadResourceResult(
+      'alaz://conventions/testing',
+      'text/markdown',
+      result,
+    );
   }
 
   @Resource({
@@ -83,7 +100,7 @@ export class ConventionsResource {
     description: 'CQRS and Jobs: commands, events, BullMQ',
     mimeType: 'text/markdown',
   })
-  async getCqrsConventions(): Promise<string> {
+  async getCqrsConventions() {
     this.mcpLogger.logResourceRead('alaz://conventions/cqrs', {});
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
@@ -93,7 +110,11 @@ export class ConventionsResource {
         'alaz://conventions/cqrs',
         unsupportedMsg.length,
       );
-      return unsupportedMsg;
+      return toReadResourceResult(
+        'alaz://conventions/cqrs',
+        'text/markdown',
+        unsupportedMsg,
+      );
     }
     const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
     const cqrsDoc = await docReader.readDoc(
@@ -107,6 +128,10 @@ export class ConventionsResource {
     if (cqrsRule) parts.push('## Cursor Rule', '', cqrsRule);
     const result = parts.join('\n') || 'Documentation not found.';
     this.mcpLogger.logResourceResult('alaz://conventions/cqrs', result.length);
-    return result;
+    return toReadResourceResult(
+      'alaz://conventions/cqrs',
+      'text/markdown',
+      result,
+    );
   }
 }

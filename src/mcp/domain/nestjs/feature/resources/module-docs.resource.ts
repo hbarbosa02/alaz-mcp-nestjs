@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
@@ -18,7 +19,7 @@ export class ModuleDocsResource {
     description: 'Module documentation and structure',
     mimeType: 'text/markdown',
   })
-  async getModuleDocs(params: { moduleName: string }): Promise<string> {
+  async getModuleDocs(params: { moduleName: string }) {
     const uri = `alaz://modules/${params.moduleName}`;
     this.mcpLogger.logResourceRead(uri, params);
     const framework = await this.frameworkDetector.detect();
@@ -26,7 +27,7 @@ export class ModuleDocsResource {
       this.adapterRegistry.getUnsupportedMessage(framework);
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
-      return unsupportedMsg;
+      return toReadResourceResult(uri, 'text/markdown', unsupportedMsg);
     }
     const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
     const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
@@ -36,7 +37,7 @@ export class ModuleDocsResource {
     if (!mod) {
       const notFoundMsg = `Module "${params.moduleName}" not found.`;
       this.mcpLogger.logResourceResult(uri, notFoundMsg.length);
-      return notFoundMsg;
+      return toReadResourceResult(uri, 'text/markdown', notFoundMsg);
     }
 
     const doc = await docReader.getFeatureDoc(params.moduleName);
@@ -71,6 +72,6 @@ export class ModuleDocsResource {
 
     const result = sections.join('\n');
     this.mcpLogger.logResourceResult(uri, result.length);
-    return result;
+    return toReadResourceResult(uri, 'text/markdown', result);
   }
 }

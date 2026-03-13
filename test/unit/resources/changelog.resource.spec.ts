@@ -54,7 +54,9 @@ describe('ChangelogResource', () => {
 
     const result = await sut.getChangelog();
 
-    expect(result).toContain('[Unreleased]');
+    expect((result.contents[0] as { text: string }).text).toContain(
+      '[Unreleased]',
+    );
     expect(docReader.getChangelog).not.toHaveBeenCalled();
   });
 
@@ -64,7 +66,9 @@ describe('ChangelogResource', () => {
 
     const result = await sut.getChangelog();
 
-    expect(result).toBe('# Static Changelog');
+    expect((result.contents[0] as { text: string }).text).toBe(
+      '# Static Changelog',
+    );
   });
 
   it('should fallback to static docs when Git changelog is empty', async () => {
@@ -73,7 +77,9 @@ describe('ChangelogResource', () => {
 
     const result = await sut.getChangelog();
 
-    expect(result).toBe('# Static Changelog');
+    expect((result.contents[0] as { text: string }).text).toBe(
+      '# Static Changelog',
+    );
   });
 
   it('should return fallback message when both sources are empty', async () => {
@@ -82,7 +88,8 @@ describe('ChangelogResource', () => {
 
     const result = await sut.getChangelog();
 
-    expect(result).toContain('# Changelog');
-    expect(result).toContain('Documentation not found');
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('# Changelog');
+    expect(text).toContain('Documentation not found');
   });
 });

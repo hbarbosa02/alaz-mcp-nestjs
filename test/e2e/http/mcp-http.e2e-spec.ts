@@ -253,8 +253,7 @@ describe('MCP Streamable HTTP (E2E)', () => {
   });
 
   describe('resources', () => {
-    // Skipped: resources/read may return streaming format that mcpRequest does not parse correctly
-    it.skip('should read alaz://onboarding', async () => {
+    it('should read alaz://onboarding', async () => {
       const result = (await mcpRequest(baseUrl, sessionId, 'resources/read', {
         uri: 'alaz://onboarding',
       })) as { contents: { uri: string }[] };
@@ -262,14 +261,14 @@ describe('MCP Streamable HTTP (E2E)', () => {
       expect(result.contents.length).toBeGreaterThan(0);
     });
 
-    it.skip('should read alaz://changelog', async () => {
+    it('should read alaz://changelog', async () => {
       const result = (await mcpRequest(baseUrl, sessionId, 'resources/read', {
         uri: 'alaz://changelog',
       })) as { contents: { uri: string }[] };
       expect(result.contents).toBeDefined();
     });
 
-    it.skip('should read template resource alaz://modules/user', async () => {
+    it('should read template resource alaz://modules/user', async () => {
       const result = (await mcpRequest(baseUrl, sessionId, 'resources/read', {
         uri: 'alaz://modules/user',
       })) as { contents: { uri: string }[] };

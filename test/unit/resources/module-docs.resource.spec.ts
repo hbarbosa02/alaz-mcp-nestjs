@@ -57,7 +57,9 @@ describe('ModuleDocsResource', () => {
 
     const result = await sut.getModuleDocs({ moduleName: 'unknown' });
 
-    expect(result).toBe('Module "unknown" not found.');
+    expect((result.contents[0] as { text: string }).text).toBe(
+      'Module "unknown" not found.',
+    );
   });
 
   it('should return module docs with endpoints and documentation', async () => {
@@ -69,9 +71,10 @@ describe('ModuleDocsResource', () => {
 
     const result = await sut.getModuleDocs({ moduleName: 'user' });
 
-    expect(result).toContain('# Module: user');
-    expect(result).toContain('## Endpoints');
-    expect(result).toContain('## Documentation');
-    expect(result).toContain('# User docs');
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('# Module: user');
+    expect(text).toContain('## Endpoints');
+    expect(text).toContain('## Documentation');
+    expect(text).toContain('# User docs');
   });
 });

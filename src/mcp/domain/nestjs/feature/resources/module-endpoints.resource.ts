@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
@@ -18,7 +19,7 @@ export class ModuleEndpointsResource {
     description: 'Module endpoints',
     mimeType: 'text/markdown',
   })
-  async getModuleEndpoints(params: { moduleName: string }): Promise<string> {
+  async getModuleEndpoints(params: { moduleName: string }) {
     const uri = `alaz://modules/${params.moduleName}/endpoints`;
     this.mcpLogger.logResourceRead(uri, params);
     const framework = await this.frameworkDetector.detect();
@@ -26,7 +27,7 @@ export class ModuleEndpointsResource {
       this.adapterRegistry.getUnsupportedMessage(framework);
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
-      return unsupportedMsg;
+      return toReadResourceResult(uri, 'text/markdown', unsupportedMsg);
     }
     const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
     const codebaseAnalyzer =
@@ -35,7 +36,7 @@ export class ModuleEndpointsResource {
     if (!mod) {
       const notFoundMsg = `Module "${params.moduleName}" not found.`;
       this.mcpLogger.logResourceResult(uri, notFoundMsg.length);
-      return notFoundMsg;
+      return toReadResourceResult(uri, 'text/markdown', notFoundMsg);
     }
 
     const endpoints = await codebaseAnalyzer.getModuleEndpoints(
@@ -55,6 +56,6 @@ export class ModuleEndpointsResource {
     }
     const result = lines.join('\n');
     this.mcpLogger.logResourceResult(uri, result.length);
-    return result;
+    return toReadResourceResult(uri, 'text/markdown', result);
   }
 }

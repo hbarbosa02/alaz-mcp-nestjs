@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
@@ -18,7 +19,7 @@ export class EntityDiagramResource {
     description: 'Entity schema and relationships',
     mimeType: 'text/markdown',
   })
-  async getEntityDiagram(params: { entityName: string }): Promise<string> {
+  async getEntityDiagram(params: { entityName: string }) {
     const uri = `alaz://entities/${params.entityName}`;
     this.mcpLogger.logResourceRead(uri, params);
     const framework = await this.frameworkDetector.detect();
@@ -34,7 +35,7 @@ export class EntityDiagramResource {
     if (!schema) {
       const notFoundMsg = `Entity "${params.entityName}" not found.`;
       this.mcpLogger.logResourceResult(uri, notFoundMsg.length);
-      return notFoundMsg;
+      return toReadResourceResult(uri, 'text/markdown', notFoundMsg);
     }
 
     const lines: string[] = [
@@ -81,6 +82,6 @@ export class EntityDiagramResource {
 
     const result = lines.join('\n');
     this.mcpLogger.logResourceResult(uri, result.length);
-    return result;
+    return toReadResourceResult(uri, 'text/markdown', result);
   }
 }

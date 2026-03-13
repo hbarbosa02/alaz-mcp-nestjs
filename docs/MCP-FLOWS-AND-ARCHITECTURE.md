@@ -298,6 +298,8 @@ flowchart LR
 
 Static and template resources follow **Option C** (see `docs/MCP-FRAMEWORK-PORTS.md`): they delegate to the framework adapter. If the framework is not supported (e.g. Angular, Laravel), they return "Em breve". URIs remain generic; content varies by detected framework.
 
+All resources use the `toReadResourceResult()` helper (`src/mcp/core/util/read-resource-result.util.ts`) to return the MCP `ReadResourceResult` format `{ contents: [{ uri, mimeType, text }] }`, ensuring spec compliance and compatibility with clients such as Cursor.
+
 ```mermaid
 flowchart TB
     subgraph Static["Static Resources (delegate to adapter)"]

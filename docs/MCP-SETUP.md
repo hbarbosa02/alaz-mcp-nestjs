@@ -247,3 +247,4 @@ All transports are covered by E2E tests (`npm run test:e2e`):
 | Connection refused | Start the server with `npm run start:dev` for HTTP/SSE |
 | STDIO not found | Use absolute path for `cwd` in mcp.json |
 | Framework not supported | Target project must be NestJS (package.json with @nestjs/core) |
+| invalid_union when reading alaz:// URIs (e.g. alaz://onboarding) | Fixed: resources now return the proper MCP `ReadResourceResult` format (`{ contents: [{ uri, mimeType, text }] }`). Ensure you use the latest server version. |

@@ -69,7 +69,12 @@ describe('ArchitectureResource', () => {
 
     const result = await sut.getArchitecture();
 
-    expect(result).toBe('# API Overview');
+    expect(result).toMatchObject({
+      contents: [{ uri: 'alaz://architecture', mimeType: 'text/markdown' }],
+    });
+    expect((result.contents[0] as { text: string }).text).toBe(
+      '# API Overview',
+    );
   });
 
   it('should return fallback when documentation not found', async () => {
@@ -77,8 +82,9 @@ describe('ArchitectureResource', () => {
 
     const result = await sut.getArchitecture();
 
-    expect(result).toContain('# Architecture');
-    expect(result).toContain('Documentation not found');
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('# Architecture');
+    expect(text).toContain('Documentation not found');
   });
 
   it('should return unsupported message when framework not detected', async () => {
@@ -89,6 +95,8 @@ describe('ArchitectureResource', () => {
 
     const result = await sut.getArchitecture();
 
-    expect(result).toBe('Framework not supported.');
+    expect((result.contents[0] as { text: string }).text).toBe(
+      'Framework not supported.',
+    );
   });
 });

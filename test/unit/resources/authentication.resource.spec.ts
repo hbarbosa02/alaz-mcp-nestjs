@@ -47,7 +47,7 @@ describe('AuthenticationResource', () => {
 
     const result = await sut.getAuthentication();
 
-    expect(result).toBe('# Auth docs');
+    expect((result.contents[0] as { text: string }).text).toBe('# Auth docs');
     expect(docReader.readDoc).toHaveBeenCalledWith(
       'docs/architecture/AUTHENTICATION.md',
     );
@@ -58,7 +58,8 @@ describe('AuthenticationResource', () => {
 
     const result = await sut.getAuthentication();
 
-    expect(result).toContain('# Authentication');
-    expect(result).toContain('Documentation not found');
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('# Authentication');
+    expect(text).toContain('Documentation not found');
   });
 });

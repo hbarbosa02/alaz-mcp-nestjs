@@ -61,10 +61,11 @@ describe('ConventionsResource', () => {
 
       const result = await sut.getApiConventions();
 
-      expect(result).toContain('# API Conventions');
-      expect(result).toContain('# API');
-      expect(result).toContain('## Cursor Rule');
-      expect(result).toContain('# Rule');
+      const text = (result.contents[0] as { text: string }).text;
+      expect(text).toContain('# API Conventions');
+      expect(text).toContain('# API');
+      expect(text).toContain('## Cursor Rule');
+      expect(text).toContain('# Rule');
     });
 
     it('should return minimal content when no docs', async () => {
@@ -73,7 +74,9 @@ describe('ConventionsResource', () => {
 
       const result = await sut.getApiConventions();
 
-      expect(result).toContain('# API Conventions');
+      expect((result.contents[0] as { text: string }).text).toContain(
+        '# API Conventions',
+      );
     });
   });
 
@@ -86,8 +89,9 @@ describe('ConventionsResource', () => {
 
       const result = await sut.getTestingConventions();
 
-      expect(result).toContain('# Testing Conventions');
-      expect(result).toContain('# Testing');
+      const text = (result.contents[0] as { text: string }).text;
+      expect(text).toContain('# Testing Conventions');
+      expect(text).toContain('# Testing');
     });
   });
 
@@ -100,8 +104,9 @@ describe('ConventionsResource', () => {
 
       const result = await sut.getCqrsConventions();
 
-      expect(result).toContain('# CQRS and Jobs');
-      expect(result).toContain('# CQRS');
+      const text = (result.contents[0] as { text: string }).text;
+      expect(text).toContain('# CQRS and Jobs');
+      expect(text).toContain('# CQRS');
       expect(docReader.readDoc).toHaveBeenCalledWith(
         'docs/architecture/CQRS-AND-JOBS.md',
       );

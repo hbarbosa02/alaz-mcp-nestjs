@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
@@ -18,7 +19,7 @@ export class AuthenticationResource {
     description: 'Authentication and authorization: JWT, Auth0, RBAC',
     mimeType: 'text/markdown',
   })
-  async getAuthentication(): Promise<string> {
+  async getAuthentication() {
     this.mcpLogger.logResourceRead('alaz://authentication', {});
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
@@ -28,7 +29,11 @@ export class AuthenticationResource {
         'alaz://authentication',
         unsupportedMsg.length,
       );
-      return unsupportedMsg;
+      return toReadResourceResult(
+        'alaz://authentication',
+        'text/markdown',
+        unsupportedMsg,
+      );
     }
     const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
     const content = await docReader.readDoc(
@@ -38,6 +43,10 @@ export class AuthenticationResource {
       content ??
       '# Authentication\n\nDocumentation not found at docs/architecture/AUTHENTICATION.md';
     this.mcpLogger.logResourceResult('alaz://authentication', result.length);
-    return result;
+    return toReadResourceResult(
+      'alaz://authentication',
+      'text/markdown',
+      result,
+    );
   }
 }

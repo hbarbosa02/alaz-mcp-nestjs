@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { GitChangelogService } from '@/mcp/core/data-access/services/git-changelog.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
@@ -21,7 +22,7 @@ export class ChangelogResource {
       'Project changelog (Git-based when available, else static docs)',
     mimeType: 'text/markdown',
   })
-  async getChangelog(): Promise<string> {
+  async getChangelog() {
     this.mcpLogger.logResourceRead('alaz://changelog', {});
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
@@ -31,7 +32,11 @@ export class ChangelogResource {
         'alaz://changelog',
         unsupportedMsg.length,
       );
-      return unsupportedMsg;
+      return toReadResourceResult(
+        'alaz://changelog',
+        'text/markdown',
+        unsupportedMsg,
+      );
     }
     const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
     const gitContent = await this.gitChangelog.generateChangelog();
@@ -43,6 +48,6 @@ export class ChangelogResource {
       content ??
       '# Changelog\n\nDocumentation not found at docs/changes/4 - Changelog.md';
     this.mcpLogger.logResourceResult('alaz://changelog', result.length);
-    return result;
+    return toReadResourceResult('alaz://changelog', 'text/markdown', result);
   }
 }

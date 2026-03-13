@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
@@ -18,7 +19,7 @@ export class ArchitectureResource {
     description: 'Project architecture overview',
     mimeType: 'text/markdown',
   })
-  async getArchitecture(): Promise<string> {
+  async getArchitecture() {
     this.mcpLogger.logResourceRead('alaz://architecture', {});
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
@@ -28,7 +29,11 @@ export class ArchitectureResource {
         'alaz://architecture',
         unsupportedMsg.length,
       );
-      return unsupportedMsg;
+      return toReadResourceResult(
+        'alaz://architecture',
+        'text/markdown',
+        unsupportedMsg,
+      );
     }
     const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
     const projectContext = this.adapterRegistry.getProjectContext(framework)!;
@@ -39,6 +44,6 @@ export class ArchitectureResource {
     const result =
       content ?? `# Architecture\n\nDocumentation not found at ${fallbackPath}`;
     this.mcpLogger.logResourceResult('alaz://architecture', result.length);
-    return result;
+    return toReadResourceResult('alaz://architecture', 'text/markdown', result);
   }
 }

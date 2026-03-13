@@ -78,13 +78,17 @@ describe('OnboardingResource', () => {
 
     const result = await sut.getOnboarding();
 
-    expect(result).toContain('# Onboarding — test-project');
-    expect(result).toContain('## README');
-    expect(result).toContain('# Project');
-    expect(result).toContain('## Architecture');
-    expect(result).toContain('## Modules');
-    expect(result).toContain('Total: 1');
-    expect(result).toContain('user');
+    expect(result).toMatchObject({
+      contents: [{ uri: 'alaz://onboarding', mimeType: 'text/markdown' }],
+    });
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('# Onboarding — test-project');
+    expect(text).toContain('## README');
+    expect(text).toContain('# Project');
+    expect(text).toContain('## Architecture');
+    expect(text).toContain('## Modules');
+    expect(text).toContain('Total: 1');
+    expect(text).toContain('user');
   });
 
   it('should handle more than 20 modules', async () => {
@@ -114,6 +118,8 @@ describe('OnboardingResource', () => {
 
     const result = await sut.getOnboarding();
 
-    expect(result).toContain('... and 5 more');
+    expect((result.contents[0] as { text: string }).text).toContain(
+      '... and 5 more',
+    );
   });
 });
