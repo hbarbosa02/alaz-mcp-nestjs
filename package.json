@@ -1,6 +1,6 @@
 {
   "name": "alaz-nestjs-mcp",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Alaz MCP Server — Living project context for AI agents",
   "scripts": {
     "build": "nest build",

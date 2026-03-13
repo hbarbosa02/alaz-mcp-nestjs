@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-13
+
 ### Added
 
 - FrameworkDetectorService for package.json and composer.json detection
