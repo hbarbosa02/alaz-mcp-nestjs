@@ -10,6 +10,7 @@
     "start:prod": "node dist/main",
     "start:stdio": "ts-node -r tsconfig-paths/register src/mcp/feature/mcp-stdio.entry.ts",
     "test": "jest",
+    "test:e2e": "jest --config jest-e2e.config.js",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "lint": "eslint \"{src,test}/**/*.ts\"",
