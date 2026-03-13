@@ -5,6 +5,7 @@ import { ModuleRegistryService } from '@/mcp/data-access/services/module-registr
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 import { createModuleInfo, createEndpointInfo } from '../../helpers/mock-data';
 
 describe('ModuleExplorerTool', () => {
@@ -27,6 +28,10 @@ describe('ModuleExplorerTool', () => {
       getModuleEndpoints: jest.fn(),
     } as unknown as jest.Mocked<CodebaseAnalyzerService>;
 
+    const projectRootContext = {
+      run: jest.fn((root: string, fn: () => unknown) => fn()),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ModuleExplorerTool,
@@ -34,6 +39,7 @@ describe('ModuleExplorerTool', () => {
         { provide: DocumentationReaderService, useValue: docReader },
         { provide: CodebaseAnalyzerService, useValue: codebaseAnalyzer },
         { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();
 

@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { RecentChangesTool } from '@/mcp/feature/tools/recent-changes.tool';
 import { GitContextService } from '@/mcp/data-access/services/git-context.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 
 describe('RecentChangesTool', () => {
   let sut: RecentChangesTool;
@@ -13,11 +14,16 @@ describe('RecentChangesTool', () => {
       getRecentCommits: jest.fn(),
     } as unknown as jest.Mocked<GitContextService>;
 
+    const projectRootContext = {
+      run: jest.fn((root: string, fn: () => unknown) => fn()),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecentChangesTool,
         { provide: GitContextService, useValue: gitContext },
         { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();
 

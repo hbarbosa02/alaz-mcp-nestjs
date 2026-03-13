@@ -14,6 +14,7 @@ import { GitContextService } from '@/mcp/data-access/services/git-context.servic
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import { PathResolverService } from '@/mcp/util/data-access/services/path-resolver.service';
 import { AuthenticationResource } from '@/mcp/feature/resources/authentication.resource';
@@ -45,6 +46,7 @@ import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
     }),
   ],
   providers: [
+    ProjectRootContextService,
     McpLoggerService,
     PathResolverService,
     FileReaderService,

@@ -4,7 +4,14 @@ import { z } from 'zod';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+
+const projectRootParam = z
+  .string()
+  .optional()
+  .describe('Path to NestJS project root. Overrides MCP config.');
+
 @Injectable()
 export class ConventionCheckerTool {
   constructor(
@@ -12,6 +19,7 @@ export class ConventionCheckerTool {
     private readonly fileReader: FileReaderService,
     private readonly projectContext: ProjectContextService,
     private readonly mcpLogger: McpLoggerService,
+    private readonly projectRootContext: ProjectRootContextService,
   ) {}
 
   @Tool({
@@ -20,9 +28,14 @@ export class ConventionCheckerTool {
       'Validates if a module follows project conventions (structure, naming, barrel exports)',
     parameters: z.object({
       moduleName: z.string().describe('Module name to validate'),
+      projectRoot: projectRootParam,
     }),
   })
-  async checkConventions(params: { moduleName: string }): Promise<string> {
+  async checkConventions(params: {
+    moduleName: string;
+    projectRoot?: string;
+  }): Promise<string> {
+    const doWork = async () => {
     this.mcpLogger.logToolInvoked('check-conventions', params);
     const mod = await this.moduleRegistry.getModule(params.moduleName);
     if (!mod) {
@@ -125,5 +138,10 @@ export class ConventionCheckerTool {
     const result = lines.join('\n');
     this.mcpLogger.logToolResult('check-conventions', result.length);
     return result;
+    };
+    if (params.projectRoot) {
+      return this.projectRootContext.run(params.projectRoot, doWork);
+    }
+    return doWork();
   }
 }

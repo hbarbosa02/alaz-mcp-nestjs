@@ -3,12 +3,19 @@ import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+
+const projectRootParam = z
+  .string()
+  .optional()
+  .describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class EntitySchemaTool {
   constructor(
     private readonly entityIntrospector: EntityIntrospectorService,
     private readonly mcpLogger: McpLoggerService,
+    private readonly projectRootContext: ProjectRootContextService,
   ) {}
 
   @Tool({
@@ -23,12 +30,15 @@ export class EntitySchemaTool {
         .enum(['mikroorm', 'typeorm', 'objection'])
         .optional()
         .describe('ORM to use. Auto-detected from project if omitted'),
+      projectRoot: projectRootParam,
     }),
   })
   async getEntitySchema(params: {
     entityName: string;
     orm?: 'mikroorm' | 'typeorm' | 'objection';
+    projectRoot?: string;
   }): Promise<string> {
+    const doWork = async () => {
     this.mcpLogger.logToolInvoked('get-entity-schema', params);
     const schema = await this.entityIntrospector.getEntitySchema(
       params.entityName,
@@ -68,5 +78,10 @@ export class EntitySchemaTool {
     const result = lines.join('\n');
     this.mcpLogger.logToolResult('get-entity-schema', result.length);
     return result;
+    };
+    if (params.projectRoot) {
+      return this.projectRootContext.run(params.projectRoot, doWork);
+    }
+    return doWork();
   }
 }

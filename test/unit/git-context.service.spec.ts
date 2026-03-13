@@ -1,22 +1,22 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { GitContextService } from '@/mcp/data-access/services/git-context.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 
 describe('GitContextService', () => {
   let sut: GitContextService;
 
   beforeEach(async () => {
     const projectRoot = path.resolve(__dirname, '../..');
-    const configService = {
-      getOrThrow: jest.fn().mockReturnValue(projectRoot),
-    } as unknown as jest.Mocked<ConfigService>;
+    const projectRootContext = {
+      getProjectRoot: jest.fn().mockReturnValue(projectRoot),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GitContextService,
-        { provide: ConfigService, useValue: configService },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();
 
@@ -62,14 +62,14 @@ describe('GitContextService', () => {
   });
 
   it('should return empty array when project root is invalid', async () => {
-    const configService = {
-      getOrThrow: jest.fn().mockReturnValue('/nonexistent/path/12345'),
-    } as unknown as jest.Mocked<ConfigService>;
+    const projectRootContext = {
+      getProjectRoot: jest.fn().mockReturnValue('/nonexistent/path/12345'),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GitContextService,
-        { provide: ConfigService, useValue: configService },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();
 

@@ -4,6 +4,12 @@ import { z } from 'zod';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+
+const projectRootParam = z
+  .string()
+  .optional()
+  .describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class TestInfoTool {
@@ -11,6 +17,7 @@ export class TestInfoTool {
     private readonly moduleRegistry: ModuleRegistryService,
     private readonly fileReader: FileReaderService,
     private readonly mcpLogger: McpLoggerService,
+    private readonly projectRootContext: ProjectRootContextService,
   ) {}
 
   @Tool({
@@ -19,9 +26,14 @@ export class TestInfoTool {
       'Test summary for project or module: unit, e2e, factories, in-memory repos',
     parameters: z.object({
       moduleName: z.string().optional().describe('Filter by module'),
+      projectRoot: projectRootParam,
     }),
   })
-  async getTestSummary(params: { moduleName?: string }): Promise<string> {
+  async getTestSummary(params: {
+    moduleName?: string;
+    projectRoot?: string;
+  }): Promise<string> {
+    const doWork = async () => {
     this.mcpLogger.logToolInvoked('get-test-summary', params);
     if (params.moduleName) {
       const mod = await this.moduleRegistry.getModule(params.moduleName);
@@ -80,5 +92,10 @@ export class TestInfoTool {
     ].join('\n');
     this.mcpLogger.logToolResult('get-test-summary', result.length);
     return result;
+    };
+    if (params.projectRoot) {
+      return this.projectRootContext.run(params.projectRoot, doWork);
+    }
+    return doWork();
   }
 }

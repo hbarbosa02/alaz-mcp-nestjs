@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { McpModule, McpTransportType } from '@rekog/mcp-nest';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
 import {
@@ -14,6 +19,7 @@ import { GitContextService } from '@/mcp/data-access/services/git-context.servic
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import { PathResolverService } from '@/mcp/util/data-access/services/path-resolver.service';
 import { AuthenticationResource } from '@/mcp/feature/resources/authentication.resource';
@@ -35,6 +41,7 @@ import { EntitySchemaTool } from '@/mcp/feature/tools/entity-schema.tool';
 import { ModuleExplorerTool } from '@/mcp/feature/tools/module-explorer.tool';
 import { RecentChangesTool } from '@/mcp/feature/tools/recent-changes.tool';
 import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
+import { ProjectRootMiddleware } from '@/mcp/feature/middleware/project-root.middleware';
 
 @Module({
   imports: [
@@ -45,6 +52,8 @@ import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
     }),
   ],
   providers: [
+    ProjectRootContextService,
+    ProjectRootMiddleware,
     McpLoggerService,
     PathResolverService,
     FileReaderService,
@@ -92,4 +101,10 @@ import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
     InvestigateBugPrompt,
   ],
 })
-export class McpNestjsModule {}
+export class McpNestjsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer
+      .apply(ProjectRootMiddleware)
+      .forRoutes({ path: 'mcp', method: RequestMethod.ALL });
+  }
+}

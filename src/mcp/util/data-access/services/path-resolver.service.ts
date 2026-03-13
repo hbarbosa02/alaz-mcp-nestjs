@@ -1,20 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 
 @Injectable()
 export class PathResolverService {
-  private readonly projectRoot: string;
-
-  constructor(private readonly config: ConfigService) {
-    this.projectRoot = this.config.getOrThrow<string>('PROJECT_ROOT');
-  }
+  constructor(
+    private readonly projectRootContext: ProjectRootContextService,
+  ) {}
 
   resolve(...segments: string[]): string {
-    return path.join(this.projectRoot, ...segments);
+    return path.join(this.projectRootContext.getProjectRoot(), ...segments);
   }
 
   get root(): string {
-    return this.projectRoot;
+    return this.projectRootContext.getProjectRoot();
   }
 }

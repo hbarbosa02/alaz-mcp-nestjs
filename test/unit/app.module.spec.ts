@@ -5,7 +5,6 @@ describe('AppModule', () => {
   const originalEnv = process.env;
 
   beforeAll(() => {
-    process.env.PROJECT_ROOT = '/tmp/test-project';
     process.env.NODE_ENV = 'development';
   });
 

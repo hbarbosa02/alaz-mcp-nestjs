@@ -5,6 +5,12 @@ import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-ana
 import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+
+const projectRootParam = z
+  .string()
+  .optional()
+  .describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class ModuleExplorerTool {
@@ -13,16 +19,18 @@ export class ModuleExplorerTool {
     private readonly docReader: DocumentationReaderService,
     private readonly codebaseAnalyzer: CodebaseAnalyzerService,
     private readonly mcpLogger: McpLoggerService,
+    private readonly projectRootContext: ProjectRootContextService,
   ) {}
 
   @Tool({
     name: 'list-modules',
     description:
       'Lists all project modules with paths, controllers, entities and documentation',
-    parameters: z.object({}),
+    parameters: z.object({ projectRoot: projectRootParam }),
   })
-  async listModules(): Promise<string> {
-    this.mcpLogger.logToolInvoked('list-modules', {});
+  async listModules(params: { projectRoot?: string } = {}): Promise<string> {
+    const doWork = async () => {
+    this.mcpLogger.logToolInvoked('list-modules', params);
     const modules = await this.moduleRegistry.listModules();
     const lines = [
       '| Module | Controller | Entities | Tests | Docs |',
@@ -36,6 +44,11 @@ export class ModuleExplorerTool {
     const result = lines.join('\n');
     this.mcpLogger.logToolResult('list-modules', result.length);
     return result;
+    };
+    if (params.projectRoot) {
+      return this.projectRootContext.run(params.projectRoot, doWork);
+    }
+    return doWork();
   }
 
   @Tool({
@@ -46,9 +59,14 @@ export class ModuleExplorerTool {
       moduleName: z
         .string()
         .describe('Module name (e.g. user, account, tenant)'),
+      projectRoot: projectRootParam,
     }),
   })
-  async getModuleDetail(params: { moduleName: string }): Promise<string> {
+  async getModuleDetail(params: {
+    moduleName: string;
+    projectRoot?: string;
+  }): Promise<string> {
+    const doWork = async () => {
     this.mcpLogger.logToolInvoked('get-module-detail', params);
     const mod = await this.moduleRegistry.getModule(params.moduleName);
     if (!mod) {
@@ -97,5 +115,10 @@ export class ModuleExplorerTool {
     const result = sections.join('\n');
     this.mcpLogger.logToolResult('get-module-detail', result.length);
     return result;
+    };
+    if (params.projectRoot) {
+      return this.projectRootContext.run(params.projectRoot, doWork);
+    }
+    return doWork();
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 
 const execFileAsync = promisify(execFile);
 
@@ -15,15 +15,15 @@ export interface CommitInfo {
 
 @Injectable()
 export class GitContextService {
-  private readonly projectRoot: string;
   private readonly timeout = 10000;
 
-  constructor(private readonly config: ConfigService) {
-    this.projectRoot = this.config.getOrThrow<string>('PROJECT_ROOT');
-  }
+  constructor(
+    private readonly projectRootContext: ProjectRootContextService,
+  ) {}
 
   async getRecentCommits(days = 7): Promise<CommitInfo[]> {
     try {
+      const projectRoot = this.projectRootContext.getProjectRoot();
       const { stdout } = await execFileAsync(
         'git',
         [
@@ -33,7 +33,7 @@ export class GitContextService {
           '--name-only',
           '--date=short',
         ],
-        { cwd: this.projectRoot, timeout: this.timeout },
+        { cwd: projectRoot, timeout: this.timeout },
       );
 
       return this.parseGitLog(stdout);
@@ -55,7 +55,7 @@ export class GitContextService {
           '--',
           `src/${moduleName}/`,
         ],
-        { cwd: this.projectRoot, timeout: this.timeout },
+        { cwd: this.projectRootContext.getProjectRoot(), timeout: this.timeout },
       );
 
       return this.parseGitLog(stdout);
@@ -68,7 +68,7 @@ export class GitContextService {
     try {
       const args = ref ? ['diff', ref] : ['diff'];
       const { stdout } = await execFileAsync('git', args, {
-        cwd: this.projectRoot,
+        cwd: this.projectRootContext.getProjectRoot(),
         timeout: this.timeout,
       });
       return stdout;
@@ -84,7 +84,7 @@ export class GitContextService {
       const { stdout } = await execFileAsync(
         'git',
         ['tag', '--sort=' + sortFlag],
-        { cwd: this.projectRoot, timeout: this.timeout },
+        { cwd: this.projectRootContext.getProjectRoot(), timeout: this.timeout },
       );
       return stdout
         .split('\n')
@@ -116,7 +116,7 @@ export class GitContextService {
       }
 
       const { stdout } = await execFileAsync('git', args, {
-        cwd: this.projectRoot,
+        cwd: this.projectRootContext.getProjectRoot(),
         timeout: this.timeout,
       });
 
@@ -131,7 +131,7 @@ export class GitContextService {
       const { stdout } = await execFileAsync(
         'git',
         ['log', '-1', '--format=%ad', '--date=short', tag],
-        { cwd: this.projectRoot, timeout: this.timeout },
+        { cwd: this.projectRootContext.getProjectRoot(), timeout: this.timeout },
       );
       const date = stdout.trim();
       return date.length > 0 ? date : null;

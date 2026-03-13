@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { EndpointListerTool } from '@/mcp/feature/tools/endpoint-lister.tool';
 import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 
 describe('EndpointListerTool', () => {
   let sut: EndpointListerTool;
@@ -13,11 +14,16 @@ describe('EndpointListerTool', () => {
       getEndpoints: jest.fn(),
     } as unknown as jest.Mocked<CodebaseAnalyzerService>;
 
+    const projectRootContext = {
+      run: jest.fn((root: string, fn: () => unknown) => fn()),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EndpointListerTool,
         { provide: CodebaseAnalyzerService, useValue: codebaseAnalyzer },
         { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();
 

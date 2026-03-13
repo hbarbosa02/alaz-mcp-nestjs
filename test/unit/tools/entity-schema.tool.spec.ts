@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { EntitySchemaTool } from '@/mcp/feature/tools/entity-schema.tool';
 import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 import { createEntitySchema } from '../../helpers/mock-data';
 
 describe('EntitySchemaTool', () => {
@@ -14,11 +15,16 @@ describe('EntitySchemaTool', () => {
       getEntitySchema: jest.fn(),
     } as unknown as jest.Mocked<EntityIntrospectorService>;
 
+    const projectRootContext = {
+      run: jest.fn((root: string, fn: () => unknown) => fn()),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EntitySchemaTool,
         { provide: EntityIntrospectorService, useValue: entityIntrospector },
         { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();
 

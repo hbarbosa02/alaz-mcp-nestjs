@@ -4,6 +4,7 @@ import { TestInfoTool } from '@/mcp/feature/tools/test-info.tool';
 import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
 import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
 import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
 import { createModuleInfo } from '../../helpers/mock-data';
 
 describe('TestInfoTool', () => {
@@ -22,12 +23,17 @@ describe('TestInfoTool', () => {
       exists: jest.fn(),
     } as unknown as jest.Mocked<FileReaderService>;
 
+    const projectRootContext = {
+      run: jest.fn((root: string, fn: () => unknown) => fn()),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TestInfoTool,
         { provide: ModuleRegistryService, useValue: moduleRegistry },
         { provide: FileReaderService, useValue: fileReader },
         { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();
 
