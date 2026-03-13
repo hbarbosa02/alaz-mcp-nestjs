@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- E2E test suite for HTTP, SSE, and STDIO transports
+- MCP-SETUP.md with step-by-step configuration for Cursor, Claude Desktop, Copilot
+- example prompts for requesting information from the MCP
+
+### Documentation
+
+- update MCP-SERVER.md with transport validation note and setup reference
+- update README with link to MCP-SETUP.md
+
 ## [1.2.0] - 2026-03-13
 
 ### Added

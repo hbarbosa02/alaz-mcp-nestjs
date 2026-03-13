@@ -104,4 +104,5 @@ Tools accept an optional `projectRoot` parameter to override the config per requ
 
 ## Documentation
 
-See [docs/MCP-SERVER.md](docs/MCP-SERVER.md) for technical details.
+- [docs/MCP-SERVER.md](docs/MCP-SERVER.md) — Technical details, tools, resources, prompts
+- [docs/MCP-SETUP.md](docs/MCP-SETUP.md) — Step-by-step setup (Cursor, Claude Desktop, Copilot) and example prompts

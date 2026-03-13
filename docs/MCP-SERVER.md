@@ -1,6 +1,8 @@
 # Alaz MCP Server
 
-MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, etc.). Suporte para Angular e Laravel está planejado.
+MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, GitHub Copilot). Suporte para Angular e Laravel está planejado.
+
+**Transport validation:** HTTP, SSE, and STDIO are validated by E2E tests (`npm run test:e2e`). See [MCP-SETUP.md](./MCP-SETUP.md) for step-by-step configuration and example prompts.
 
 ## Architecture
 
@@ -17,6 +19,8 @@ O servidor detecta o framework do projeto via `package.json` (NestJS, Angular) o
 
 ## Transport modes
 
+All transports are validated by E2E tests. For step-by-step setup (Cursor, Claude Desktop, Copilot) and example prompts, see [MCP-SETUP.md](./MCP-SETUP.md).
+
 ### Streamable HTTP (primary)
 
 Runs on the `/mcp` route of the API. Requires `npm run start:dev`. The client must send the `X-Project-Root` header with the project path.
@@ -25,20 +29,9 @@ Runs on the `/mcp` route of the API. Requires `npm run start:dev`. The client mu
 npm run start:dev
 ```
 
-Cursor configuration (`.cursor/mcp.json`):
+### SSE (Server-Sent Events)
 
-```json
-{
-  "mcpServers": {
-    "alaz-nestjs": {
-      "url": "http://localhost:3100/mcp",
-      "headers": {
-        "X-Project-Root": "${workspaceFolder}"
-      }
-    }
-  }
-}
-```
+Runs on the `/sse` route. Same server as HTTP. Requires `X-Project-Root` header.
 
 ### STDIO (lightweight mode)
 
@@ -48,18 +41,29 @@ Runs as a separate process. Does not require database or Redis. Requires `PROJEC
 npm run start:stdio
 ```
 
-Cursor configuration:
+### Quick config reference
 
+**HTTP/SSE** — Add to mcp.json:
+```json
+{
+  "mcpServers": {
+    "alaz-nestjs": {
+      "url": "http://localhost:3100/mcp",
+      "headers": { "X-Project-Root": "${workspaceFolder}" }
+    }
+  }
+}
+```
+
+**STDIO** — Add to mcp.json:
 ```json
 {
   "mcpServers": {
     "alaz-nestjs-stdio": {
       "command": "npx",
-      "args": ["ts-node", "src/mcp/feature/mcp-stdio.entry.ts"],
+      "args": ["ts-node", "-r", "tsconfig-paths/register", "src/mcp/feature/mcp-stdio.entry.ts"],
       "cwd": "/path/to/alaz-mcp-nestjs",
-      "env": {
-        "PROJECT_ROOT": "${workspaceFolder}"
-      }
+      "env": { "PROJECT_ROOT": "${workspaceFolder}" }
     }
   }
 }
