@@ -17,15 +17,14 @@ npm install
 
 ## Configuration
 
-Create a `.env` file:
+The project root path is **required** and must come from the MCP configuration (mcp.json), not from `.env`. Use `${workspaceFolder}` for the current workspace.
+
+Create a `.env` file for the server (optional):
 
 ```env
-PROJECT_ROOT=/path/to/your-nestjs-project
 PORT=3100
 NODE_ENV=development
 ```
-
-`PROJECT_ROOT` must point to the target NestJS project root (with `src/`, `docs/`, etc.).
 
 ## Usage
 
@@ -35,32 +34,35 @@ NODE_ENV=development
 npm run start:dev
 ```
 
-The MCP is available at `http://localhost:3100/mcp`.
+The MCP is available at `http://localhost:3100/mcp`. The client must send the `X-Project-Root` header with the project path.
 
 ### STDIO mode (lightweight, no server)
 
 ```bash
-PROJECT_ROOT=/path/to/your-nestjs-project npm run start:stdio
+npm run start:stdio
 ```
 
-Useful when the target project environment is not running (Docker, database, etc.).
+Requires `PROJECT_ROOT` in the MCP config (see below). Useful when the target project environment is not running (Docker, database, etc.).
 
 ## Cursor configuration
 
 Add to your project's or Cursor's `.cursor/mcp.json`:
 
-**HTTP:**
+**HTTP** (requires `X-Project-Root` header):
 ```json
 {
   "mcpServers": {
     "alaz-nestjs": {
-      "url": "http://localhost:3100/mcp"
+      "url": "http://localhost:3100/mcp",
+      "headers": {
+        "X-Project-Root": "${workspaceFolder}"
+      }
     }
   }
 }
 ```
 
-**STDIO:**
+**STDIO** (recommended for workspace-based projects):
 ```json
 {
   "mcpServers": {
@@ -69,12 +71,14 @@ Add to your project's or Cursor's `.cursor/mcp.json`:
       "args": ["ts-node", "src/mcp/feature/mcp-stdio.entry.ts"],
       "cwd": "/path/to/alaz-mcp-nestjs",
       "env": {
-        "PROJECT_ROOT": "/path/to/your-nestjs-project"
+        "PROJECT_ROOT": "${workspaceFolder}"
       }
     }
   }
 }
 ```
+
+Tools accept an optional `projectRoot` parameter to override the config per request.
 
 ## Available Tools
 

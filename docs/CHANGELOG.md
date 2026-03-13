@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- add MCP flows and architecture report with Mermaid diagrams
+
 ### Changed
 
 - apply code formatting across services and resources

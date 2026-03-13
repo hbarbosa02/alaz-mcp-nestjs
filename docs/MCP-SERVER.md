@@ -15,10 +15,10 @@ The server dynamically reads the target project in real time:
 
 ### Streamable HTTP (primary)
 
-Runs on the `/mcp` route of the API. Requires `npm run start:dev`.
+Runs on the `/mcp` route of the API. Requires `npm run start:dev`. The client must send the `X-Project-Root` header with the project path.
 
 ```bash
-PROJECT_ROOT=/path/to/your-nestjs-project npm run start:dev
+npm run start:dev
 ```
 
 Cursor configuration (`.cursor/mcp.json`):
@@ -27,7 +27,10 @@ Cursor configuration (`.cursor/mcp.json`):
 {
   "mcpServers": {
     "alaz-nestjs": {
-      "url": "http://localhost:3100/mcp"
+      "url": "http://localhost:3100/mcp",
+      "headers": {
+        "X-Project-Root": "${workspaceFolder}"
+      }
     }
   }
 }
@@ -35,10 +38,10 @@ Cursor configuration (`.cursor/mcp.json`):
 
 ### STDIO (lightweight mode)
 
-Runs as a separate process. Does not require database or Redis.
+Runs as a separate process. Does not require database or Redis. Requires `PROJECT_ROOT` in the MCP config.
 
 ```bash
-PROJECT_ROOT=/path/to/your-nestjs-project npm run start:stdio
+npm run start:stdio
 ```
 
 Cursor configuration:
@@ -49,8 +52,9 @@ Cursor configuration:
     "alaz-nestjs-stdio": {
       "command": "npx",
       "args": ["ts-node", "src/mcp/feature/mcp-stdio.entry.ts"],
+      "cwd": "/path/to/alaz-mcp-nestjs",
       "env": {
-        "PROJECT_ROOT": "/path/to/your-nestjs-project"
+        "PROJECT_ROOT": "${workspaceFolder}"
       }
     }
   }
@@ -61,13 +65,13 @@ Cursor configuration:
 
 | Tool | Parameters | Description |
 |------|------------|-------------|
-| `list-modules` | — | Lists modules with controller, entities, tests |
-| `get-module-detail` | `moduleName` | Full module details |
-| `get-entity-schema` | `entityName`, `orm?` | Entity schema (MikroORM, TypeORM, Objection). ORM auto-detected if omitted |
-| `list-endpoints` | `moduleName?` | Lists endpoints (optional filter by module) |
-| `check-conventions` | `moduleName` | Validates project conventions |
-| `get-recent-changes` | `days?` | Recent commits (default 7 days) |
-| `get-test-summary` | `moduleName?` | Test summary |
+| `list-modules` | `projectRoot?` | Lists modules with controller, entities, tests |
+| `get-module-detail` | `moduleName`, `projectRoot?` | Full module details |
+| `get-entity-schema` | `entityName`, `orm?`, `projectRoot?` | Entity schema (MikroORM, TypeORM, Objection). ORM auto-detected if omitted |
+| `list-endpoints` | `moduleName?`, `projectRoot?` | Lists endpoints (optional filter by module) |
+| `check-conventions` | `moduleName`, `projectRoot?` | Validates project conventions |
+| `get-recent-changes` | `days?`, `projectRoot?` | Recent commits (default 7 days) |
+| `get-test-summary` | `moduleName?`, `projectRoot?` | Test summary |
 
 ## Resources
 
@@ -101,11 +105,19 @@ Cursor configuration:
 | `code-review-checklist` | `moduleName` | Review checklist |
 | `investigate-bug` | `moduleName`, `bugDescription` | Guide to investigate a bug. Output includes executable steps — agent MUST ask developer for confirmation before executing. |
 
-## Environment variables
+## Project root
+
+The project root path is **required** and must come from the MCP configuration:
+
+- **HTTP**: `headers["X-Project-Root"]` in mcp.json (e.g. `"${workspaceFolder}"`)
+- **STDIO**: `env.PROJECT_ROOT` in mcp.json (e.g. `"${workspaceFolder}"`)
+
+Tools accept an optional `projectRoot` parameter to override per request. If the path is not provided, the MCP returns an error.
+
+## Environment variables (server)
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `PROJECT_ROOT` | Yes | Path to the target NestJS project |
 | `PORT` | No | HTTP port (default 3100) |
 | `NODE_ENV` | No | development/staging/production |
 
