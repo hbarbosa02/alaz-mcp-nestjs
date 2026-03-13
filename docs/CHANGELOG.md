@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-13
+
 ### Added
 
 - E2E test suite for HTTP, SSE, and STDIO transports (validated by npm run test:e2e)
