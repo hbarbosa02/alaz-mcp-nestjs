@@ -87,6 +87,27 @@ export function createEndpointInfo(
   };
 }
 
+export function createFrameworkAdapterMocks(adapters: {
+  moduleRegistry?: unknown;
+  entityIntrospector?: unknown;
+  codebaseAnalyzer?: unknown;
+  documentationReader?: unknown;
+  projectContext?: unknown;
+}) {
+  const frameworkDetector = {
+    detect: jest.fn().mockResolvedValue('nestjs' as const),
+  };
+  const adapterRegistry = {
+    getUnsupportedMessage: jest.fn().mockReturnValue(null),
+    getModuleRegistry: jest.fn().mockReturnValue(adapters.moduleRegistry ?? null),
+    getEntityIntrospector: jest.fn().mockReturnValue(adapters.entityIntrospector ?? null),
+    getCodebaseAnalyzer: jest.fn().mockReturnValue(adapters.codebaseAnalyzer ?? null),
+    getDocumentationReader: jest.fn().mockReturnValue(adapters.documentationReader ?? null),
+    getProjectContext: jest.fn().mockReturnValue(adapters.projectContext ?? null),
+  };
+  return { frameworkDetector, adapterRegistry };
+}
+
 export function createEntitySchema(
   overrides: Partial<EntitySchema> = {},
 ): EntitySchema {

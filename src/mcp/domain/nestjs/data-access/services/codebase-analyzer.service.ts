@@ -1,18 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
+import type { ICodebaseAnalyzer } from '@/mcp/core/ports/codebase-analyzer.port';
+import type { EndpointInfo } from '@/mcp/core/ports/types';
 
-export interface EndpointInfo {
-  method: string;
-  path: string;
-  controllerClass: string;
-  controllerTag: string;
-  permissions: string[];
-  authType: string;
-  moduleName: string;
-}
+export type { EndpointInfo };
 
 @Injectable()
-export class CodebaseAnalyzerService {
+export class CodebaseAnalyzerService implements ICodebaseAnalyzer {
   constructor(private readonly fileReader: FileReaderService) {}
 
   async getEndpoints(moduleName?: string): Promise<EndpointInfo[]> {

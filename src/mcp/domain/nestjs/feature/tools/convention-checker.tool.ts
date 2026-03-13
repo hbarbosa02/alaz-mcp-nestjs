@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
-import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
-import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 
 const projectRootParam = z
   .string()
@@ -15,9 +15,9 @@ const projectRootParam = z
 @Injectable()
 export class ConventionCheckerTool {
   constructor(
-    private readonly moduleRegistry: ModuleRegistryService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly fileReader: FileReaderService,
-    private readonly projectContext: ProjectContextService,
     private readonly mcpLogger: McpLoggerService,
     private readonly projectRootContext: ProjectRootContextService,
   ) {}
@@ -37,14 +37,22 @@ export class ConventionCheckerTool {
   }): Promise<string> {
     const doWork = async () => {
     this.mcpLogger.logToolInvoked('check-conventions', params);
-    const mod = await this.moduleRegistry.getModule(params.moduleName);
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logToolResult('check-conventions', unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
+    const projectContext = this.adapterRegistry.getProjectContext(framework)!;
+    const mod = await moduleRegistry.getModule(params.moduleName);
     if (!mod) {
       const notFoundMsg = `Module "${params.moduleName}" not found.`;
       this.mcpLogger.logToolResult('check-conventions', notFoundMsg.length);
       return notFoundMsg;
     }
 
-    const context = await this.projectContext.getContext();
+    const context = await projectContext.getContext();
     const checks: {
       name: string;
       status: 'pass' | 'fail' | 'warning';

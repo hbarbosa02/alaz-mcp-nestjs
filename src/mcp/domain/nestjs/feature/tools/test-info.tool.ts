@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 
 const projectRootParam = z
   .string()
@@ -14,7 +15,8 @@ const projectRootParam = z
 @Injectable()
 export class TestInfoTool {
   constructor(
-    private readonly moduleRegistry: ModuleRegistryService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly fileReader: FileReaderService,
     private readonly mcpLogger: McpLoggerService,
     private readonly projectRootContext: ProjectRootContextService,
@@ -35,8 +37,15 @@ export class TestInfoTool {
   }): Promise<string> {
     const doWork = async () => {
     this.mcpLogger.logToolInvoked('get-test-summary', params);
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logToolResult('get-test-summary', unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
     if (params.moduleName) {
-      const mod = await this.moduleRegistry.getModule(params.moduleName);
+      const mod = await moduleRegistry.getModule(params.moduleName);
       if (!mod) {
         const notFoundMsg = `Module "${params.moduleName}" not found.`;
         this.mcpLogger.logToolResult('get-test-summary', notFoundMsg.length);
@@ -68,7 +77,7 @@ export class TestInfoTool {
       return result;
     }
 
-    const modules = await this.moduleRegistry.listModules();
+    const modules = await moduleRegistry.listModules();
     let totalSpec = 0;
     let totalE2e = 0;
     for (const m of modules) {

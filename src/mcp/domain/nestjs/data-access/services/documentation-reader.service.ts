@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
+import type { IDocumentationReader } from '@/mcp/core/ports/documentation-reader.port';
 import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 
 @Injectable()
-export class DocumentationReaderService {
+export class DocumentationReaderService implements IDocumentationReader {
   constructor(
     private readonly fileReader: FileReaderService,
     private readonly projectContext: ProjectContextService,

@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
-import { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 
 const projectRootParam = z
   .string()
@@ -13,7 +14,8 @@ const projectRootParam = z
 @Injectable()
 export class EntitySchemaTool {
   constructor(
-    private readonly entityIntrospector: EntityIntrospectorService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly mcpLogger: McpLoggerService,
     private readonly projectRootContext: ProjectRootContextService,
   ) {}
@@ -40,9 +42,16 @@ export class EntitySchemaTool {
   }): Promise<string> {
     const doWork = async () => {
     this.mcpLogger.logToolInvoked('get-entity-schema', params);
-    const schema = await this.entityIntrospector.getEntitySchema(
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logToolResult('get-entity-schema', unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const entityIntrospector = this.adapterRegistry.getEntityIntrospector(framework)!;
+    const schema = await entityIntrospector.getEntitySchema(
       params.entityName,
-      params.orm,
+      params.orm as 'mikroorm' | 'typeorm' | 'objection' | undefined,
     );
     if (!schema) {
       const notFoundMsg = `Entity "${params.entityName}" not found.`;

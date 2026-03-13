@@ -2,10 +2,12 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { TestInfoTool } from '@/mcp/domain/nestjs/feature/tools/test-info.tool';
 import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
-import { createModuleInfo } from '../../helpers/mock-data';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { createModuleInfo, createFrameworkAdapterMocks } from '../../helpers/mock-data';
 
 describe('TestInfoTool', () => {
   let sut: TestInfoTool;
@@ -23,14 +25,19 @@ describe('TestInfoTool', () => {
       exists: jest.fn(),
     } as unknown as jest.Mocked<FileReaderService>;
 
+    const { frameworkDetector, adapterRegistry } = createFrameworkAdapterMocks({
+      moduleRegistry,
+    });
+
     const projectRootContext = {
-      run: jest.fn((root: string, fn: () => unknown) => fn()),
+      run: jest.fn((_root: string, fn: () => unknown) => fn()),
     } as unknown as jest.Mocked<ProjectRootContextService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TestInfoTool,
-        { provide: ModuleRegistryService, useValue: moduleRegistry },
+        { provide: FrameworkDetectorService, useValue: frameworkDetector },
+        { provide: FrameworkAdapterRegistryService, useValue: adapterRegistry },
         { provide: FileReaderService, useValue: fileReader },
         { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
         { provide: ProjectRootContextService, useValue: projectRootContext },

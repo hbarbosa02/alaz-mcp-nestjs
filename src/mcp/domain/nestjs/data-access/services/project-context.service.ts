@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
+import type { IProjectContext } from '@/mcp/core/ports/project-context.port';
 
 export type ModulePattern = 'domain-driven' | 'flat' | 'nested';
 
@@ -45,7 +46,7 @@ export interface ProjectContext {
 }
 
 @Injectable()
-export class ProjectContextService {
+export class ProjectContextService implements IProjectContext {
   private context: ProjectContext | null = null;
   private packageJsonPromise: Promise<Record<string, unknown> | null> | null =
     null;

@@ -1,25 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
+import type { IModuleRegistry } from '@/mcp/core/ports/module-registry.port';
+import type { ModuleInfo } from '@/mcp/core/ports/types';
 import {
   ProjectContextService,
   type ModulePattern,
 } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 
-export interface ModuleInfo {
-  name: string;
-  path: string;
-  hasController: boolean;
-  hasEntities: boolean;
-  entityNames: string[];
-  hasTests: boolean;
-  hasE2eTests: boolean;
-  hasDocumentation: boolean;
-  documentationPath: string | null;
-  subModules: string[];
-}
+export type { ModuleInfo };
 
 @Injectable()
-export class ModuleRegistryService {
+export class ModuleRegistryService implements IModuleRegistry {
   constructor(
     private readonly fileReader: FileReaderService,
     private readonly projectContext: ProjectContextService,

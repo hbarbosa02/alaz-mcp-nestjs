@@ -5,6 +5,7 @@ import { ObjectionParserStrategy } from './data-access/strategies/objection-pars
 import { ENTITY_PARSER_STRATEGIES } from './data-access/strategies/entity-parser-strategies.token';
 import { ProjectContextService } from './data-access/services/project-context.service';
 import { ModuleRegistryService } from './data-access/services/module-registry.service';
+import { FrameworkAdapterRegistryService } from './data-access/services/framework-adapter-registry.service';
 import { CodebaseAnalyzerService } from './data-access/services/codebase-analyzer.service';
 import { EntityIntrospectorService } from './data-access/services/entity-introspector.service';
 import { DocumentationReaderService } from './data-access/services/documentation-reader.service';
@@ -51,6 +52,7 @@ import { McpCoreModule } from '@/mcp/core/mcp-core.module';
     DocumentationReaderService,
     EntityIntrospectorService,
     CodebaseAnalyzerService,
+    FrameworkAdapterRegistryService,
     ModuleExplorerTool,
     EntitySchemaTool,
     EndpointListerTool,
@@ -75,6 +77,7 @@ import { McpCoreModule } from '@/mcp/core/mcp-core.module';
     DocumentationReaderService,
     EntityIntrospectorService,
     CodebaseAnalyzerService,
+    FrameworkAdapterRegistryService,
     ModuleExplorerTool,
     EntitySchemaTool,
     EndpointListerTool,

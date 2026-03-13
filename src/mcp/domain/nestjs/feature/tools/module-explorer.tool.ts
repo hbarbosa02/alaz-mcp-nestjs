@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
-import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
-import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 
 const projectRootParam = z
   .string()
@@ -15,9 +14,8 @@ const projectRootParam = z
 @Injectable()
 export class ModuleExplorerTool {
   constructor(
-    private readonly moduleRegistry: ModuleRegistryService,
-    private readonly docReader: DocumentationReaderService,
-    private readonly codebaseAnalyzer: CodebaseAnalyzerService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly mcpLogger: McpLoggerService,
     private readonly projectRootContext: ProjectRootContextService,
   ) {}
@@ -31,7 +29,16 @@ export class ModuleExplorerTool {
   async listModules(params: { projectRoot?: string } = {}): Promise<string> {
     const doWork = async () => {
     this.mcpLogger.logToolInvoked('list-modules', params);
-    const modules = await this.moduleRegistry.listModules();
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logToolResult('list-modules', unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
+    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const codebaseAnalyzer = this.adapterRegistry.getCodebaseAnalyzer(framework)!;
+    const modules = await moduleRegistry.listModules();
     const lines = [
       '| Module | Controller | Entities | Tests | Docs |',
       '|--------|------------|-----------|--------|------|',
@@ -68,15 +75,24 @@ export class ModuleExplorerTool {
   }): Promise<string> {
     const doWork = async () => {
     this.mcpLogger.logToolInvoked('get-module-detail', params);
-    const mod = await this.moduleRegistry.getModule(params.moduleName);
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logToolResult('get-module-detail', unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
+    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const codebaseAnalyzer = this.adapterRegistry.getCodebaseAnalyzer(framework)!;
+    const mod = await moduleRegistry.getModule(params.moduleName);
     if (!mod) {
       const notFoundMsg = `Module "${params.moduleName}" not found. Use list-modules to see available modules.`;
       this.mcpLogger.logToolResult('get-module-detail', notFoundMsg.length);
       return notFoundMsg;
     }
 
-    const doc = await this.docReader.getFeatureDoc(params.moduleName);
-    const endpoints = await this.codebaseAnalyzer.getModuleEndpoints(
+    const doc = await docReader.getFeatureDoc(params.moduleName);
+    const endpoints = await codebaseAnalyzer.getModuleEndpoints(
       params.moduleName,
     );
 

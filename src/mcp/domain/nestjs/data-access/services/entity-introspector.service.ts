@@ -1,5 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
+import type { IEntityIntrospector } from '@/mcp/core/ports/entity-introspector.port';
+import type { EntitySchema } from '@/mcp/core/ports/types';
 import {
   ProjectContextService,
   type OrmType,
@@ -10,34 +12,12 @@ import {
 } from '../strategies/entity-parser-strategies.token';
 import { extractClassNames } from '@/mcp/util/util/parser';
 
-export interface EntitySchema {
-  name: string;
-  tableName: string | null;
-  filePath: string;
-  properties: EntityProperty[];
-  relations: EntityRelation[];
-}
-
-export interface EntityProperty {
-  name: string;
-  type: string;
-  decorator: string;
-  nullable: boolean;
-  unique: boolean;
-}
-
-export interface EntityRelation {
-  name: string;
-  type: string;
-  targetEntity: string;
-  inversedBy?: string;
-  mappedBy?: string;
-}
+export type { EntitySchema };
 
 const ENTITY_FILE_PATTERN = 'src/**/*.{entity,model}.ts';
 
 @Injectable()
-export class EntityIntrospectorService {
+export class EntityIntrospectorService implements IEntityIntrospector {
   constructor(
     private readonly fileReader: FileReaderService,
     private readonly projectContext: ProjectContextService,

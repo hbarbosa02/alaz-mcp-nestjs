@@ -4,15 +4,19 @@ import { ModuleExplorerTool } from '@/mcp/domain/nestjs/feature/tools/module-exp
 import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
 import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
 import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
-import { createModuleInfo, createEndpointInfo } from '../../helpers/mock-data';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { createModuleInfo, createEndpointInfo, createFrameworkAdapterMocks } from '../../helpers/mock-data';
 
 describe('ModuleExplorerTool', () => {
   let sut: ModuleExplorerTool;
   let moduleRegistry: jest.Mocked<ModuleRegistryService>;
   let docReader: jest.Mocked<DocumentationReaderService>;
   let codebaseAnalyzer: jest.Mocked<CodebaseAnalyzerService>;
+  let frameworkDetector: { detect: jest.Mock };
+  let adapterRegistry: { getUnsupportedMessage: jest.Mock };
 
   beforeEach(async () => {
     moduleRegistry = {
@@ -28,16 +32,23 @@ describe('ModuleExplorerTool', () => {
       getModuleEndpoints: jest.fn(),
     } as unknown as jest.Mocked<CodebaseAnalyzerService>;
 
+    const mocks = createFrameworkAdapterMocks({
+      moduleRegistry,
+      documentationReader: docReader,
+      codebaseAnalyzer,
+    });
+    frameworkDetector = mocks.frameworkDetector as { detect: jest.Mock };
+    adapterRegistry = mocks.adapterRegistry as { getUnsupportedMessage: jest.Mock };
+
     const projectRootContext = {
-      run: jest.fn((root: string, fn: () => unknown) => fn()),
+      run: jest.fn((_root: string, fn: () => unknown) => fn()),
     } as unknown as jest.Mocked<ProjectRootContextService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ModuleExplorerTool,
-        { provide: ModuleRegistryService, useValue: moduleRegistry },
-        { provide: DocumentationReaderService, useValue: docReader },
-        { provide: CodebaseAnalyzerService, useValue: codebaseAnalyzer },
+        { provide: FrameworkDetectorService, useValue: mocks.frameworkDetector },
+        { provide: FrameworkAdapterRegistryService, useValue: mocks.adapterRegistry },
         { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
         { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
@@ -47,6 +58,17 @@ describe('ModuleExplorerTool', () => {
   });
 
   describe('listModules', () => {
+    it('should return unsupported message when framework is null', async () => {
+      frameworkDetector.detect.mockResolvedValue(null);
+      adapterRegistry.getUnsupportedMessage.mockReturnValue(
+        'Projeto não parece ser NestJS, Angular ou Laravel. Frameworks suportados: NestJS (implementado), Angular e Laravel (em breve).',
+      );
+
+      const result = await sut.listModules();
+
+      expect(result).toContain('Frameworks suportados');
+    });
+
     it('should return markdown table with modules', async () => {
       moduleRegistry.listModules.mockResolvedValue([
         createModuleInfo({ subModules: [] }),

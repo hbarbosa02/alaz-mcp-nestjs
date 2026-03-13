@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
-import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 
 const projectRootParam = z
   .string()
@@ -13,7 +14,8 @@ const projectRootParam = z
 @Injectable()
 export class EndpointListerTool {
   constructor(
-    private readonly codebaseAnalyzer: CodebaseAnalyzerService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly mcpLogger: McpLoggerService,
     private readonly projectRootContext: ProjectRootContextService,
   ) {}
@@ -35,7 +37,14 @@ export class EndpointListerTool {
   }): Promise<string> {
     const doWork = async () => {
     this.mcpLogger.logToolInvoked('list-endpoints', params);
-    const endpoints = await this.codebaseAnalyzer.getEndpoints(
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logToolResult('list-endpoints', unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const codebaseAnalyzer = this.adapterRegistry.getCodebaseAnalyzer(framework)!;
+    const endpoints = await codebaseAnalyzer.getEndpoints(
       params.moduleName,
     );
 

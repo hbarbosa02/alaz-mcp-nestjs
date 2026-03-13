@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- FrameworkDetectorService for package.json and composer.json detection
+- empty Angular and Laravel domain modules (placeholders)
+
+### Documentation
+
+- MCP-FRAMEWORK-PORTS.md with interface contracts and future considerations
+- Laravel/composer.json multi-manifest detection contract
+- static resources strategy (alaz://) and prompt equivalents per framework
+- framework adapter ports (IModuleRegistry, IEntityIntrospector, ICodebaseAnalyzer, IDocumentationReader, IProjectContext)
+- FrameworkAdapterRegistry with routing to NestJS adapters
+- tools return clear message when framework is unsupported or coming soon
+
 ### Changed
 
 - reorganize MCP into DDD structure (core, domain/nestjs, domain/shared)

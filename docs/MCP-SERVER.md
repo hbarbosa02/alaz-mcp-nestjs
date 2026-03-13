@@ -1,6 +1,6 @@
 # Alaz MCP Server
 
-MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, etc.).
+MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, etc.). Suporte para Angular e Laravel está planejado.
 
 ## Architecture
 
@@ -9,7 +9,11 @@ The server dynamically reads the target project in real time:
 - **Filesystem**: `src/`, `docs/`, `.cursor/rules/`
 - **Git**: `git log`, `git diff`, `git tag` for recent changes and changelog generation
 - **Static parsing**: MikroORM, TypeORM, Objection entities; controllers; decorators
-- **package.json**: Stack detection (ORM, validation library, test framework, Redis, BullMQ, NestJS version) — used to adapt prompts and resources to the project's tooling
+- **package.json** e **composer.json**: Framework detection (NestJS, Angular, Laravel) e stack detection (ORM, validation, test framework, etc.)
+
+### Framework detection
+
+O servidor detecta o framework do projeto via `package.json` (NestJS, Angular) ou `composer.json` (Laravel). Tools NestJS-specific retornam mensagem clara quando o projeto não é NestJS. Ver [MCP-FRAMEWORK-PORTS.md](./MCP-FRAMEWORK-PORTS.md) para contratos de interface e considerações futuras.
 
 ## Transport modes
 
