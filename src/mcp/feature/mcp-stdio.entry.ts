@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { McpStdioAppModule } from '@/mcp/feature/stdio-app.module';
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
 async function bootstrap() {
   const projectRoot = process.env.PROJECT_ROOT?.trim();

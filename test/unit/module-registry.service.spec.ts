@@ -1,8 +1,8 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
-import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
-import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 import { createProjectContext } from '../helpers/mock-data';
 
 describe('ModuleRegistryService', () => {

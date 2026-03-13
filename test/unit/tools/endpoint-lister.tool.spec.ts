@@ -1,9 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { EndpointListerTool } from '@/mcp/feature/tools/endpoint-lister.tool';
-import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { EndpointListerTool } from '@/mcp/domain/nestjs/feature/tools/endpoint-lister.tool';
+import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
 describe('EndpointListerTool', () => {
   let sut: EndpointListerTool;

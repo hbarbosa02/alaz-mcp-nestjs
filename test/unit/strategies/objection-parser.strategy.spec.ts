@@ -1,4 +1,4 @@
-import { ObjectionParserStrategy } from '@/mcp/data-access/strategies';
+import { ObjectionParserStrategy } from '@/mcp/domain/nestjs/data-access/strategies';
 
 describe('ObjectionParserStrategy', () => {
   let sut: ObjectionParserStrategy;

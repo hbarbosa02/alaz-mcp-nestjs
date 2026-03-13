@@ -1,9 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { ChangelogResource } from '@/mcp/feature/resources/changelog.resource';
-import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
-import { GitChangelogService } from '@/mcp/data-access/services/git-changelog.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ChangelogResource } from '@/mcp/domain/shared/feature/resources/changelog.resource';
+import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { GitChangelogService } from '@/mcp/core/data-access/services/git-changelog.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 describe('ChangelogResource', () => {
   let sut: ChangelogResource;

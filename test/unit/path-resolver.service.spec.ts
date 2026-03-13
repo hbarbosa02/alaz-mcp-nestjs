@@ -1,7 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { PathResolverService } from '@/mcp/util/data-access/services/path-resolver.service';
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { PathResolverService } from '@/mcp/core/data-access/services/path-resolver.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
 describe('PathResolverService', () => {
   let sut: PathResolverService;

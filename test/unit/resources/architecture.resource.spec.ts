@@ -1,9 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { ArchitectureResource } from '@/mcp/feature/resources/architecture.resource';
-import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
-import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ArchitectureResource } from '@/mcp/domain/nestjs/feature/resources/architecture.resource';
+import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { createProjectContext } from '../../helpers/mock-data';
 
 describe('ArchitectureResource', () => {

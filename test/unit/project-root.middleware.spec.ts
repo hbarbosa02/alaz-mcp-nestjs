@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
-import { ProjectRootMiddleware } from '@/mcp/feature/middleware/project-root.middleware';
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { ProjectRootMiddleware } from '@/mcp/core/feature/middleware/project-root.middleware';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import type { Request, Response, NextFunction } from 'express';
 
 describe('ProjectRootMiddleware', () => {

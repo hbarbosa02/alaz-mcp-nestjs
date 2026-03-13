@@ -1,8 +1,8 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { NewModulePrompt } from '@/mcp/feature/prompts/new-module.prompt';
-import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { NewModulePrompt } from '@/mcp/domain/nestjs/feature/prompts/new-module.prompt';
+import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { createProjectContext } from '../../helpers/mock-data';
 import { EXECUTION_CONFIRMATION_HEADER } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 

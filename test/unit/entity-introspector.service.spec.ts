@@ -1,14 +1,14 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
-import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
-import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 import {
   ENTITY_PARSER_STRATEGIES,
   MikroORMParserStrategy,
   ObjectionParserStrategy,
   TypeORMParserStrategy,
-} from '@/mcp/data-access/strategies';
+} from '@/mcp/domain/nestjs/data-access/strategies';
 import { createProjectContext } from '../helpers/mock-data';
 
 const sampleEntityContent = `

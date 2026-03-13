@@ -1,9 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { UpdateDocsPrompt } from '@/mcp/feature/prompts/update-docs.prompt';
-import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
-import { ProjectContextService } from '@/mcp/data-access/services/project-context.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { UpdateDocsPrompt } from '@/mcp/domain/nestjs/feature/prompts/update-docs.prompt';
+import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { createModuleInfo, createProjectContext } from '../../helpers/mock-data';
 import { EXECUTION_CONFIRMATION_HEADER } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 

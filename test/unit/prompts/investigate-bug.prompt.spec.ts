@@ -1,7 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { InvestigateBugPrompt } from '@/mcp/feature/prompts/investigate-bug.prompt';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { InvestigateBugPrompt } from '@/mcp/domain/nestjs/feature/prompts/investigate-bug.prompt';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { EXECUTION_CONFIRMATION_HEADER } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 describe('InvestigateBugPrompt', () => {

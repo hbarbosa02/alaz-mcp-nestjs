@@ -1,4 +1,4 @@
-import { TypeORMParserStrategy } from '@/mcp/data-access/strategies';
+import { TypeORMParserStrategy } from '@/mcp/domain/nestjs/data-access/strategies';
 
 describe('TypeORMParserStrategy', () => {
   let sut: TypeORMParserStrategy;

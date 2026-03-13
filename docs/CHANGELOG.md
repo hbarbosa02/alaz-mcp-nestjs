@@ -2,13 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- reorganize MCP into DDD structure (core, domain/nestjs, domain/shared)
+- apply code formatting across services and resources
+
 ### Documentation
 
 - add MCP flows and architecture report with Mermaid diagrams
-
-### Changed
-
-- apply code formatting across services and resources
 - **MCP project-agnostic**: project root from mcp.json config (env.PROJECT_ROOT for STDIO, headers["X-Project-Root"] for HTTP) instead of fixed env; no fallback — missing path returns MCP error
 
 ## [1.1.0] - 2026-03-12

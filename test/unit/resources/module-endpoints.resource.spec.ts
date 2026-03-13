@@ -1,9 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { ModuleEndpointsResource } from '@/mcp/feature/resources/module-endpoints.resource';
-import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
-import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ModuleEndpointsResource } from '@/mcp/domain/nestjs/feature/resources/module-endpoints.resource';
+import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { createModuleInfo, createEndpointInfo } from '../../helpers/mock-data';
 
 describe('ModuleEndpointsResource', () => {

@@ -1,7 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { GitChangelogService } from '@/mcp/data-access/services/git-changelog.service';
-import { GitContextService } from '@/mcp/data-access/services/git-context.service';
+import { GitChangelogService } from '@/mcp/core/data-access/services/git-changelog.service';
+import { GitContextService } from '@/mcp/core/data-access/services/git-context.service';
 
 describe('GitChangelogService', () => {
   let sut: GitChangelogService;

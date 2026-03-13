@@ -1,8 +1,8 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { EntityDiagramResource } from '@/mcp/feature/resources/entity-diagram.resource';
-import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { EntityDiagramResource } from '@/mcp/domain/nestjs/feature/resources/entity-diagram.resource';
+import { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { createEntitySchema } from '../../helpers/mock-data';
 
 describe('EntityDiagramResource', () => {

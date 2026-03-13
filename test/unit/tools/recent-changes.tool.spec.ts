@@ -1,9 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { RecentChangesTool } from '@/mcp/feature/tools/recent-changes.tool';
-import { GitContextService } from '@/mcp/data-access/services/git-context.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { RecentChangesTool } from '@/mcp/domain/shared/feature/tools/recent-changes.tool';
+import { GitContextService } from '@/mcp/core/data-access/services/git-context.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
 describe('RecentChangesTool', () => {
   let sut: RecentChangesTool;

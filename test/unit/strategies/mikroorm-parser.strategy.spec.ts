@@ -1,4 +1,4 @@
-import { MikroORMParserStrategy } from '@/mcp/data-access/strategies';
+import { MikroORMParserStrategy } from '@/mcp/domain/nestjs/data-access/strategies';
 
 describe('MikroORMParserStrategy', () => {
   let sut: MikroORMParserStrategy;

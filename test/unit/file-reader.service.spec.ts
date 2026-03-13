@@ -2,8 +2,8 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { promises as fs } from 'fs';
 import { glob } from 'glob';
-import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
-import { PathResolverService } from '@/mcp/util/data-access/services/path-resolver.service';
+import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
+import { PathResolverService } from '@/mcp/core/data-access/services/path-resolver.service';
 
 jest.mock('fs', () => ({
   promises: {

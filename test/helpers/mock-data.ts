@@ -1,10 +1,10 @@
-import type { ModuleInfo } from '@/mcp/data-access/services/module-registry.service';
-import type { EndpointInfo } from '@/mcp/data-access/services/codebase-analyzer.service';
-import type { EntitySchema } from '@/mcp/data-access/services/entity-introspector.service';
+import type { ModuleInfo } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import type { EndpointInfo } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import type { EntitySchema } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
 import type {
   ProjectContext,
   ProjectStack,
-} from '@/mcp/data-access/services/project-context.service';
+} from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 
 const defaultStack: ProjectStack = {
   nestVersion: null,

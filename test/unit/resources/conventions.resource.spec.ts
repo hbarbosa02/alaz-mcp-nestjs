@@ -1,8 +1,8 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { ConventionsResource } from '@/mcp/feature/resources/conventions.resource';
-import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ConventionsResource } from '@/mcp/domain/nestjs/feature/resources/conventions.resource';
+import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 describe('ConventionsResource', () => {
   let sut: ConventionsResource;

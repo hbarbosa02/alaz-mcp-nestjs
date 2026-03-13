@@ -1,7 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
-import { FileReaderService } from '@/mcp/util/data-access/services/file-reader.service';
+import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 
 const sampleControllerContent = `
 @ApiTags('user')

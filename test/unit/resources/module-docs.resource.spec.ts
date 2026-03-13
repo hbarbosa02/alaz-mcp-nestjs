@@ -1,10 +1,10 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { ModuleDocsResource } from '@/mcp/feature/resources/module-docs.resource';
-import { ModuleRegistryService } from '@/mcp/data-access/services/module-registry.service';
-import { DocumentationReaderService } from '@/mcp/data-access/services/documentation-reader.service';
-import { CodebaseAnalyzerService } from '@/mcp/data-access/services/codebase-analyzer.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
+import { ModuleDocsResource } from '@/mcp/domain/nestjs/feature/resources/module-docs.resource';
+import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { createModuleInfo, createEndpointInfo } from '../../helpers/mock-data';
 
 describe('ModuleDocsResource', () => {

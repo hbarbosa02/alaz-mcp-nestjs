@@ -1,8 +1,8 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import * as path from 'path';
-import { GitContextService } from '@/mcp/data-access/services/git-context.service';
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { GitContextService } from '@/mcp/core/data-access/services/git-context.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
 describe('GitContextService', () => {
   let sut: GitContextService;

@@ -2,7 +2,11 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@mcp/core/*": ["src/mcp/core/*"],
+      "@mcp/domain/nestjs/*": ["src/mcp/domain/nestjs/*"],
+      "@mcp/domain/shared/*": ["src/mcp/domain/shared/*"],
+      "@mcp/util/*": ["src/mcp/util/*"]
     },
     "module": "commonjs",
     "declaration": true,

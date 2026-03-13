@@ -1,4 +1,4 @@
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
 describe('ProjectRootContextService', () => {
   let service: ProjectRootContextService;

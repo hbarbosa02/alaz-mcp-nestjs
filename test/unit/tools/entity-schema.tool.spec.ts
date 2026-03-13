@@ -1,9 +1,9 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { EntitySchemaTool } from '@/mcp/feature/tools/entity-schema.tool';
-import { EntityIntrospectorService } from '@/mcp/data-access/services/entity-introspector.service';
-import { McpLoggerService } from '@/mcp/data-access/services/mcp-logger.service';
-import { ProjectRootContextService } from '@/mcp/data-access/services/project-root-context.service';
+import { EntitySchemaTool } from '@/mcp/domain/nestjs/feature/tools/entity-schema.tool';
+import { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { createEntitySchema } from '../../helpers/mock-data';
 
 describe('EntitySchemaTool', () => {
