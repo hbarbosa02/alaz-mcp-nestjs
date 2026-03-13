@@ -23,13 +23,15 @@ describe('FrameworkDetectorService', () => {
   });
 
   it('should detect nestjs from package.json', async () => {
-    fileReader.readFile.mockImplementation(async (path: string) => {
+    fileReader.readFile.mockImplementation((path: string) => {
       if (path === 'package.json') {
-        return JSON.stringify({
-          dependencies: { '@nestjs/core': '^11' },
-        });
+        return Promise.resolve(
+          JSON.stringify({
+            dependencies: { '@nestjs/core': '^11' },
+          }),
+        );
       }
-      return null;
+      return Promise.resolve(null);
     });
 
     const result = await sut.detect();
@@ -38,13 +40,15 @@ describe('FrameworkDetectorService', () => {
   });
 
   it('should detect angular from package.json', async () => {
-    fileReader.readFile.mockImplementation(async (path: string) => {
+    fileReader.readFile.mockImplementation((path: string) => {
       if (path === 'package.json') {
-        return JSON.stringify({
-          dependencies: { '@angular/core': '^17' },
-        });
+        return Promise.resolve(
+          JSON.stringify({
+            dependencies: { '@angular/core': '^17' },
+          }),
+        );
       }
-      return null;
+      return Promise.resolve(null);
     });
 
     const result = await sut.detect();
@@ -53,14 +57,16 @@ describe('FrameworkDetectorService', () => {
   });
 
   it('should detect laravel from composer.json', async () => {
-    fileReader.readFile.mockImplementation(async (path: string) => {
-      if (path === 'package.json') return null;
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') return Promise.resolve(null);
       if (path === 'composer.json') {
-        return JSON.stringify({
-          require: { 'laravel/framework': '^11' },
-        });
+        return Promise.resolve(
+          JSON.stringify({
+            require: { 'laravel/framework': '^11' },
+          }),
+        );
       }
-      return null;
+      return Promise.resolve(null);
     });
 
     const result = await sut.detect();
@@ -77,9 +83,9 @@ describe('FrameworkDetectorService', () => {
   });
 
   it('should return null for invalid package.json', async () => {
-    fileReader.readFile.mockImplementation(async (path: string) => {
-      if (path === 'package.json') return 'invalid json';
-      return null;
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') return Promise.resolve('invalid json');
+      return Promise.resolve(null);
     });
 
     const result = await sut.detect();

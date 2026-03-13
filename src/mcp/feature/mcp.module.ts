@@ -16,6 +16,9 @@ import { ProjectRootMiddleware } from '@/mcp/core/feature/middleware/project-roo
       name: 'alaz-nestjs-mcp',
       version: '1.0.0',
       transport: [McpTransportType.STREAMABLE_HTTP, McpTransportType.SSE],
+      streamableHttp: {
+        statelessMode: false,
+      },
     }),
     McpCoreModule,
     NestjsDomainModule,
@@ -26,6 +29,10 @@ export class McpNestjsModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer
       .apply(ProjectRootMiddleware)
-      .forRoutes({ path: 'mcp', method: RequestMethod.ALL });
+      .forRoutes(
+        { path: 'mcp', method: RequestMethod.ALL },
+        { path: 'sse', method: RequestMethod.ALL },
+        { path: 'messages', method: RequestMethod.ALL },
+      );
   }
 }

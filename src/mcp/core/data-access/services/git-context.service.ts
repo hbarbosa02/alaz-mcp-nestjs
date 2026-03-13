@@ -17,9 +17,7 @@ export interface CommitInfo {
 export class GitContextService {
   private readonly timeout = 10000;
 
-  constructor(
-    private readonly projectRootContext: ProjectRootContextService,
-  ) {}
+  constructor(private readonly projectRootContext: ProjectRootContextService) {}
 
   async getRecentCommits(days = 7): Promise<CommitInfo[]> {
     try {
@@ -55,7 +53,10 @@ export class GitContextService {
           '--',
           `src/${moduleName}/`,
         ],
-        { cwd: this.projectRootContext.getProjectRoot(), timeout: this.timeout },
+        {
+          cwd: this.projectRootContext.getProjectRoot(),
+          timeout: this.timeout,
+        },
       );
 
       return this.parseGitLog(stdout);
@@ -84,7 +85,10 @@ export class GitContextService {
       const { stdout } = await execFileAsync(
         'git',
         ['tag', '--sort=' + sortFlag],
-        { cwd: this.projectRootContext.getProjectRoot(), timeout: this.timeout },
+        {
+          cwd: this.projectRootContext.getProjectRoot(),
+          timeout: this.timeout,
+        },
       );
       return stdout
         .split('\n')
@@ -131,7 +135,10 @@ export class GitContextService {
       const { stdout } = await execFileAsync(
         'git',
         ['log', '-1', '--format=%ad', '--date=short', tag],
-        { cwd: this.projectRootContext.getProjectRoot(), timeout: this.timeout },
+        {
+          cwd: this.projectRootContext.getProjectRoot(),
+          timeout: this.timeout,
+        },
       );
       const date = stdout.trim();
       return date.length > 0 ? date : null;

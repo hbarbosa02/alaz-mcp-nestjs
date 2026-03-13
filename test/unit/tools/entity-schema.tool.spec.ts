@@ -1,12 +1,15 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { EntitySchemaTool } from '@/mcp/domain/nestjs/feature/tools/entity-schema.tool';
-import { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import type { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import { createEntitySchema, createFrameworkAdapterMocks } from '../../helpers/mock-data';
+import {
+  createEntitySchema,
+  createFrameworkAdapterMocks,
+} from '../../helpers/mock-data';
 
 describe('EntitySchemaTool', () => {
   let sut: EntitySchemaTool;
@@ -30,7 +33,10 @@ describe('EntitySchemaTool', () => {
         EntitySchemaTool,
         { provide: FrameworkDetectorService, useValue: frameworkDetector },
         { provide: FrameworkAdapterRegistryService, useValue: adapterRegistry },
-        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
         { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();

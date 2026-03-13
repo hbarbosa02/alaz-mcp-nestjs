@@ -1,14 +1,18 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { ModuleExplorerTool } from '@/mcp/domain/nestjs/feature/tools/module-explorer.tool';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
-import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
-import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import type { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import type { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import type { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import { createModuleInfo, createEndpointInfo, createFrameworkAdapterMocks } from '../../helpers/mock-data';
+import {
+  createModuleInfo,
+  createEndpointInfo,
+  createFrameworkAdapterMocks,
+} from '../../helpers/mock-data';
 
 describe('ModuleExplorerTool', () => {
   let sut: ModuleExplorerTool;
@@ -38,7 +42,9 @@ describe('ModuleExplorerTool', () => {
       codebaseAnalyzer,
     });
     frameworkDetector = mocks.frameworkDetector as { detect: jest.Mock };
-    adapterRegistry = mocks.adapterRegistry as { getUnsupportedMessage: jest.Mock };
+    adapterRegistry = mocks.adapterRegistry as {
+      getUnsupportedMessage: jest.Mock;
+    };
 
     const projectRootContext = {
       run: jest.fn((_root: string, fn: () => unknown) => fn()),
@@ -47,9 +53,18 @@ describe('ModuleExplorerTool', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ModuleExplorerTool,
-        { provide: FrameworkDetectorService, useValue: mocks.frameworkDetector },
-        { provide: FrameworkAdapterRegistryService, useValue: mocks.adapterRegistry },
-        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        {
+          provide: FrameworkDetectorService,
+          useValue: mocks.frameworkDetector,
+        },
+        {
+          provide: FrameworkAdapterRegistryService,
+          useValue: mocks.adapterRegistry,
+        },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
         { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();

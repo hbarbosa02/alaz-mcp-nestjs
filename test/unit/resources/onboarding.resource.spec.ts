@@ -1,27 +1,29 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { OnboardingResource } from '@/mcp/domain/nestjs/feature/resources/onboarding.resource';
-import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
-import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import { createModuleInfo, createProjectContext } from '../../helpers/mock-data';
+import {
+  createModuleInfo,
+  createProjectContext,
+  createFrameworkAdapterMocks,
+} from '../../helpers/mock-data';
 
 describe('OnboardingResource', () => {
   let sut: OnboardingResource;
-  let docReader: jest.Mocked<DocumentationReaderService>;
-  let moduleRegistry: jest.Mocked<ModuleRegistryService>;
-  let projectContext: jest.Mocked<ProjectContextService>;
+  let docReader: { getReadme: jest.Mock; getApiOverview: jest.Mock };
+  let moduleRegistry: { listModules: jest.Mock };
+  let projectContext: { getContext: jest.Mock };
+  let mocks: ReturnType<typeof createFrameworkAdapterMocks>;
 
   beforeEach(async () => {
     docReader = {
       getReadme: jest.fn(),
       getApiOverview: jest.fn(),
-    } as unknown as jest.Mocked<DocumentationReaderService>;
+    };
 
-    moduleRegistry = {
-      listModules: jest.fn(),
-    } as unknown as jest.Mocked<ModuleRegistryService>;
+    moduleRegistry = { listModules: jest.fn() };
 
     projectContext = {
       getContext: jest.fn().mockResolvedValue(
@@ -37,14 +39,25 @@ describe('OnboardingResource', () => {
           },
         }),
       ),
-    } as unknown as jest.Mocked<ProjectContextService>;
+    };
+
+    mocks = createFrameworkAdapterMocks({
+      documentationReader: docReader,
+      moduleRegistry,
+      projectContext,
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OnboardingResource,
-        { provide: DocumentationReaderService, useValue: docReader },
-        { provide: ModuleRegistryService, useValue: moduleRegistry },
-        { provide: ProjectContextService, useValue: projectContext },
+        {
+          provide: FrameworkDetectorService,
+          useValue: mocks.frameworkDetector,
+        },
+        {
+          provide: FrameworkAdapterRegistryService,
+          useValue: mocks.adapterRegistry,
+        },
         {
           provide: McpLoggerService,
           useValue: {

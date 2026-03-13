@@ -22,7 +22,10 @@ describe('RecentChangesTool', () => {
       providers: [
         RecentChangesTool,
         { provide: GitContextService, useValue: gitContext },
-        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
         { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();

@@ -18,7 +18,13 @@ describe('CodeReviewPrompt', () => {
       providers: [
         CodeReviewPrompt,
         { provide: ProjectContextService, useValue: projectContext },
-        { provide: McpLoggerService, useValue: { logPromptReceived: jest.fn(), logPromptResult: jest.fn() } },
+        {
+          provide: McpLoggerService,
+          useValue: {
+            logPromptReceived: jest.fn(),
+            logPromptResult: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

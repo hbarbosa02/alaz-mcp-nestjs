@@ -99,11 +99,21 @@ export function createFrameworkAdapterMocks(adapters: {
   };
   const adapterRegistry = {
     getUnsupportedMessage: jest.fn().mockReturnValue(null),
-    getModuleRegistry: jest.fn().mockReturnValue(adapters.moduleRegistry ?? null),
-    getEntityIntrospector: jest.fn().mockReturnValue(adapters.entityIntrospector ?? null),
-    getCodebaseAnalyzer: jest.fn().mockReturnValue(adapters.codebaseAnalyzer ?? null),
-    getDocumentationReader: jest.fn().mockReturnValue(adapters.documentationReader ?? null),
-    getProjectContext: jest.fn().mockReturnValue(adapters.projectContext ?? null),
+    getModuleRegistry: jest
+      .fn()
+      .mockReturnValue(adapters.moduleRegistry ?? null),
+    getEntityIntrospector: jest
+      .fn()
+      .mockReturnValue(adapters.entityIntrospector ?? null),
+    getCodebaseAnalyzer: jest
+      .fn()
+      .mockReturnValue(adapters.codebaseAnalyzer ?? null),
+    getDocumentationReader: jest
+      .fn()
+      .mockReturnValue(adapters.documentationReader ?? null),
+    getProjectContext: jest
+      .fn()
+      .mockReturnValue(adapters.projectContext ?? null),
   };
   return { frameworkDetector, adapterRegistry };
 }

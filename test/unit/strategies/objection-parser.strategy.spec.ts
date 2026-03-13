@@ -55,7 +55,9 @@ export class Person extends Model {
 }
 `;
     const { relations } = sut.parse(content);
-    expect(relations.some((r) => r.name === 'animals' && r.type === 'OneToMany')).toBe(true);
+    expect(
+      relations.some((r) => r.name === 'animals' && r.type === 'OneToMany'),
+    ).toBe(true);
     expect(relations.some((r) => r.targetEntity === 'Animal')).toBe(true);
   });
 

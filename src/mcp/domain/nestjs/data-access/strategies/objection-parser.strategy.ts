@@ -60,7 +60,7 @@ export class ObjectionParserStrategy implements EntityParserStrategy {
     const properties: ParsedProperty[] = [];
 
     // declare prop: Type
-    const declareRegex = /declare\s+(\w+)\s*[?:]?\s*:\s*([\w<>\[\]|]+)/g;
+    const declareRegex = /declare\s+(\w+)\s*[?:]?\s*:\s*([\w<>[\]|]+)/g;
     let m: RegExpExecArray | null;
     while ((m = declareRegex.exec(content)) !== null) {
       if (['relationMappings', 'tableName', 'idColumn'].includes(m[1]))

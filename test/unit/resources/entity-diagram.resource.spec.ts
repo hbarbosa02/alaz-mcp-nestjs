@@ -1,24 +1,44 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { EntityDiagramResource } from '@/mcp/domain/nestjs/feature/resources/entity-diagram.resource';
-import { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import { createEntitySchema } from '../../helpers/mock-data';
+import {
+  createEntitySchema,
+  createFrameworkAdapterMocks,
+} from '../../helpers/mock-data';
 
 describe('EntityDiagramResource', () => {
   let sut: EntityDiagramResource;
-  let entityIntrospector: jest.Mocked<EntityIntrospectorService>;
+  let entityIntrospector: { getEntitySchema: jest.Mock };
+  let mocks: ReturnType<typeof createFrameworkAdapterMocks>;
 
   beforeEach(async () => {
-    entityIntrospector = {
-      getEntitySchema: jest.fn(),
-    } as unknown as jest.Mocked<EntityIntrospectorService>;
+    entityIntrospector = { getEntitySchema: jest.fn() };
+
+    mocks = createFrameworkAdapterMocks({
+      entityIntrospector,
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EntityDiagramResource,
-        { provide: EntityIntrospectorService, useValue: entityIntrospector },
-        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
+        {
+          provide: FrameworkDetectorService,
+          useValue: mocks.frameworkDetector,
+        },
+        {
+          provide: FrameworkAdapterRegistryService,
+          useValue: mocks.adapterRegistry,
+        },
+        {
+          provide: McpLoggerService,
+          useValue: {
+            logResourceRead: jest.fn(),
+            logResourceResult: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

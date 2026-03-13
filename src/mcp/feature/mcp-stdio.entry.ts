@@ -5,7 +5,6 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 async function bootstrap() {
   const projectRoot = process.env.PROJECT_ROOT?.trim();
   if (!projectRoot) {
-    // eslint-disable-next-line no-console -- startup error
     console.error(
       'PROJECT_ROOT is required for STDIO mode. Configure env.PROJECT_ROOT in mcp.json (e.g. "${workspaceFolder}").',
     );
@@ -24,7 +23,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((err) => {
-  // eslint-disable-next-line no-console -- error handler
   console.error(err);
   process.exit(1);
 });

@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
-import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 @Injectable()
 export class ConventionsResource {
   constructor(
-    private readonly docReader: DocumentationReaderService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly mcpLogger: McpLoggerService,
   ) {}
 
@@ -18,8 +20,19 @@ export class ConventionsResource {
   })
   async getApiConventions(): Promise<string> {
     this.mcpLogger.logResourceRead('alaz://conventions/api', {});
-    const apiConv = await this.docReader.getApiConventions();
-    const rules = await this.docReader.getCursorRules();
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg =
+      this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logResourceResult(
+        'alaz://conventions/api',
+        unsupportedMsg.length,
+      );
+      return unsupportedMsg;
+    }
+    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const apiConv = await docReader.getApiConventions();
+    const rules = await docReader.getCursorRules();
     const apiRule = rules['api-conventions.mdc'] ?? '';
 
     const parts: string[] = ['# API Conventions', ''];
@@ -38,8 +51,19 @@ export class ConventionsResource {
   })
   async getTestingConventions(): Promise<string> {
     this.mcpLogger.logResourceRead('alaz://conventions/testing', {});
-    const testingDoc = await this.docReader.getTestingDocs();
-    const rules = await this.docReader.getCursorRules();
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg =
+      this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logResourceResult(
+        'alaz://conventions/testing',
+        unsupportedMsg.length,
+      );
+      return unsupportedMsg;
+    }
+    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const testingDoc = await docReader.getTestingDocs();
+    const rules = await docReader.getCursorRules();
     const testingRule = rules['testing-patterns.mdc'] ?? '';
 
     const parts: string[] = ['# Testing Conventions', ''];
@@ -61,10 +85,21 @@ export class ConventionsResource {
   })
   async getCqrsConventions(): Promise<string> {
     this.mcpLogger.logResourceRead('alaz://conventions/cqrs', {});
-    const cqrsDoc = await this.docReader.readDoc(
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg =
+      this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logResourceResult(
+        'alaz://conventions/cqrs',
+        unsupportedMsg.length,
+      );
+      return unsupportedMsg;
+    }
+    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const cqrsDoc = await docReader.readDoc(
       'docs/architecture/CQRS-AND-JOBS.md',
     );
-    const rules = await this.docReader.getCursorRules();
+    const rules = await docReader.getCursorRules();
     const cqrsRule = rules['cqrs-and-jobs.mdc'] ?? '';
 
     const parts: string[] = ['# CQRS and Jobs', ''];

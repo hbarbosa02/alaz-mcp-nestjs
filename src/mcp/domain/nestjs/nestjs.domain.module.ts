@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { McpModule } from '@rekog/mcp-nest';
 import { MikroORMParserStrategy } from './data-access/strategies/mikroorm-parser.strategy';
 import { TypeORMParserStrategy } from './data-access/strategies/typeorm-parser.strategy';
 import { ObjectionParserStrategy } from './data-access/strategies/objection-parser.strategy';
@@ -28,8 +29,34 @@ import { CodeReviewPrompt } from './feature/prompts/code-review.prompt';
 import { InvestigateBugPrompt } from './feature/prompts/investigate-bug.prompt';
 import { McpCoreModule } from '@/mcp/core/mcp-core.module';
 
+const MCP_SERVER_NAME = 'alaz-nestjs-mcp';
+
 @Module({
-  imports: [McpCoreModule],
+  imports: [
+    McpCoreModule,
+    McpModule.forFeature(
+      [
+        ModuleExplorerTool,
+        EntitySchemaTool,
+        EndpointListerTool,
+        ConventionCheckerTool,
+        TestInfoTool,
+        OnboardingResource,
+        ArchitectureResource,
+        ConventionsResource,
+        AuthenticationResource,
+        ModuleDocsResource,
+        EntityDiagramResource,
+        ModuleEndpointsResource,
+        NewModulePrompt,
+        NewEndpointPrompt,
+        UpdateDocsPrompt,
+        CodeReviewPrompt,
+        InvestigateBugPrompt,
+      ],
+      MCP_SERVER_NAME,
+    ),
+  ],
   providers: [
     ProjectContextService,
     MikroORMParserStrategy,

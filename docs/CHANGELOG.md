@@ -4,13 +4,23 @@
 
 ### Added
 
-- E2E test suite for HTTP, SSE, and STDIO transports
+- E2E test suite for HTTP, SSE, and STDIO transports (validated by npm run test:e2e)
 - MCP-SETUP.md with step-by-step configuration for Cursor, Claude Desktop, Copilot
 - example prompts for requesting information from the MCP
+
+### Changed
+
+- apply Option C for static resources (delegate to framework adapter)
+- extend IDocumentationReader port with getApiOverview, getCursorRules, getTestingDocs, readDoc, getChangelog
+
+### Fixed
+
+- remove inline exceptions (eslint-disable), add no-console override for entry files
 
 ### Documentation
 
 - update MCP-SERVER.md with transport validation note and setup reference
+- update MCP-FRAMEWORK-PORTS and MCP-FLOWS-AND-ARCHITECTURE for Option C
 - update README with link to MCP-SETUP.md
 
 ## [1.2.0] - 2026-03-13

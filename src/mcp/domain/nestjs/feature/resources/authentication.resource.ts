@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
-import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 @Injectable()
 export class AuthenticationResource {
   constructor(
-    private readonly docReader: DocumentationReaderService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly mcpLogger: McpLoggerService,
   ) {}
 
@@ -18,7 +20,18 @@ export class AuthenticationResource {
   })
   async getAuthentication(): Promise<string> {
     this.mcpLogger.logResourceRead('alaz://authentication', {});
-    const content = await this.docReader.readDoc(
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg =
+      this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logResourceResult(
+        'alaz://authentication',
+        unsupportedMsg.length,
+      );
+      return unsupportedMsg;
+    }
+    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const content = await docReader.readDoc(
       'docs/architecture/AUTHENTICATION.md',
     );
     const result =

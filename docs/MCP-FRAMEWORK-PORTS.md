@@ -139,13 +139,15 @@ Contrato de detecção:
 
 ### Estratégia de recursos estáticos (alaz://)
 
+**Implementado: Opção C** — Recursos genéricos que delegam ao adapter do framework.
+
 Recursos estáticos como `alaz://conventions/api`, `alaz://authentication`, `alaz://architecture`:
 
 - **Opção A**: Manter como templates NestJS até haver equivalentes por framework
 - **Opção B**: Criar variantes por framework (`alaz://conventions/nestjs`, `alaz://conventions/laravel`, etc.)
-- **Opção C**: Recursos genéricos que delegam ao adapter do framework (ex.: `alaz://conventions` → adapter retorna conteúdo conforme framework)
+- **Opção C** ✓: Recursos genéricos que delegam ao adapter do framework (ex.: `alaz://conventions/api` → adapter retorna conteúdo conforme framework)
 
-Recomendação: Opção C — um único URI que delega ao adapter. Se o framework não tiver implementação, retornar mensagem "Em breve" ou conteúdo genérico.
+Cada recurso (`ArchitectureResource`, `ConventionsResource`, `AuthenticationResource`, `OnboardingResource`, `ChangelogResource`, `ModuleDocsResource`, `ModuleEndpointsResource`, `EntityDiagramResource`) injeta `FrameworkDetectorService` e `FrameworkAdapterRegistryService`. O fluxo: detecta framework → se não suportado retorna mensagem "Em breve" → senão obtém adapter do registry e delega. URIs permanecem genéricos; o conteúdo varia conforme o framework detectado.
 
 ### Equivalentes de prompts por framework
 

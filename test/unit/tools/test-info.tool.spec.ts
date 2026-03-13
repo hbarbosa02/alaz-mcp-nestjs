@@ -1,13 +1,16 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { TestInfoTool } from '@/mcp/domain/nestjs/feature/tools/test-info.tool';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import type { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import { createModuleInfo, createFrameworkAdapterMocks } from '../../helpers/mock-data';
+import {
+  createModuleInfo,
+  createFrameworkAdapterMocks,
+} from '../../helpers/mock-data';
 
 describe('TestInfoTool', () => {
   let sut: TestInfoTool;
@@ -39,7 +42,10 @@ describe('TestInfoTool', () => {
         { provide: FrameworkDetectorService, useValue: frameworkDetector },
         { provide: FrameworkAdapterRegistryService, useValue: adapterRegistry },
         { provide: FileReaderService, useValue: fileReader },
-        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
         { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();

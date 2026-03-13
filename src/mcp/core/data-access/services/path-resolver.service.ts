@@ -4,9 +4,7 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 
 @Injectable()
 export class PathResolverService {
-  constructor(
-    private readonly projectRootContext: ProjectRootContextService,
-  ) {}
+  constructor(private readonly projectRootContext: ProjectRootContextService) {}
 
   resolve(...segments: string[]): string {
     return path.join(this.projectRootContext.getProjectRoot(), ...segments);

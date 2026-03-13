@@ -36,30 +36,30 @@ export class EndpointListerTool {
     projectRoot?: string;
   }): Promise<string> {
     const doWork = async () => {
-    this.mcpLogger.logToolInvoked('list-endpoints', params);
-    const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
-    if (unsupportedMsg) {
-      this.mcpLogger.logToolResult('list-endpoints', unsupportedMsg.length);
-      return unsupportedMsg;
-    }
-    const codebaseAnalyzer = this.adapterRegistry.getCodebaseAnalyzer(framework)!;
-    const endpoints = await codebaseAnalyzer.getEndpoints(
-      params.moduleName,
-    );
+      this.mcpLogger.logToolInvoked('list-endpoints', params);
+      const framework = await this.frameworkDetector.detect();
+      const unsupportedMsg =
+        this.adapterRegistry.getUnsupportedMessage(framework);
+      if (unsupportedMsg) {
+        this.mcpLogger.logToolResult('list-endpoints', unsupportedMsg.length);
+        return unsupportedMsg;
+      }
+      const codebaseAnalyzer =
+        this.adapterRegistry.getCodebaseAnalyzer(framework)!;
+      const endpoints = await codebaseAnalyzer.getEndpoints(params.moduleName);
 
-    const lines = [
-      '| Method | Path | Controller | Permissions | Auth |',
-      '|--------|------|------------|-------------|------|',
-    ];
-    for (const ep of endpoints) {
-      lines.push(
-        `| ${ep.method} | ${ep.path} | ${ep.controllerClass} | ${ep.permissions.join(', ') || '-'} | ${ep.authType} |`,
-      );
-    }
-    const result = lines.join('\n');
-    this.mcpLogger.logToolResult('list-endpoints', result.length);
-    return result;
+      const lines = [
+        '| Method | Path | Controller | Permissions | Auth |',
+        '|--------|------|------------|-------------|------|',
+      ];
+      for (const ep of endpoints) {
+        lines.push(
+          `| ${ep.method} | ${ep.path} | ${ep.controllerClass} | ${ep.permissions.join(', ') || '-'} | ${ep.authType} |`,
+        );
+      }
+      const result = lines.join('\n');
+      this.mcpLogger.logToolResult('list-endpoints', result.length);
+      return result;
     };
     if (params.projectRoot) {
       return this.projectRootContext.run(params.projectRoot, doWork);

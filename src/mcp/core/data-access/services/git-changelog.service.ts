@@ -26,7 +26,10 @@ export class GitChangelogService {
       const lines: string[] = ['# Changelog', ''];
 
       if (tags.length === 0) {
-        const commits = await this.gitContext.getCommitsBetween(undefined, 'HEAD');
+        const commits = await this.gitContext.getCommitsBetween(
+          undefined,
+          'HEAD',
+        );
         lines.push('## [Unreleased]', '');
         lines.push(...this.formatCommits(commits));
         return lines.join('\n').trim() || null;
@@ -68,7 +71,7 @@ export class GitChangelogService {
     for (const c of commits) {
       const match = c.message.match(CONVENTIONAL_COMMIT_REGEX);
       const section = match
-        ? TYPE_TO_SECTION[match[1].toLowerCase()] ?? 'Other'
+        ? (TYPE_TO_SECTION[match[1].toLowerCase()] ?? 'Other')
         : 'Other';
 
       if (!bySection.has(section)) {
@@ -78,7 +81,13 @@ export class GitChangelogService {
       bySection.get(section)!.push(`- ${displayMessage}`);
     }
 
-    const sectionOrder = ['Added', 'Changed', 'Fixed', 'Documentation', 'Other'];
+    const sectionOrder = [
+      'Added',
+      'Changed',
+      'Fixed',
+      'Documentation',
+      'Other',
+    ];
     const result: string[] = [];
 
     for (const section of sectionOrder) {

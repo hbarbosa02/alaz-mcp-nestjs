@@ -12,7 +12,9 @@ describe('NewModulePrompt', () => {
   beforeEach(async () => {
     const projectContext = {
       getContext: jest.fn().mockResolvedValue(
-        createProjectContext({ docsLayout: { features: 'docs/features/' } as never }),
+        createProjectContext({
+          docsLayout: { features: 'docs/features/' } as never,
+        }),
       ),
     };
 
@@ -20,7 +22,13 @@ describe('NewModulePrompt', () => {
       providers: [
         NewModulePrompt,
         { provide: ProjectContextService, useValue: projectContext },
-        { provide: McpLoggerService, useValue: { logPromptReceived: jest.fn(), logPromptResult: jest.fn() } },
+        {
+          provide: McpLoggerService,
+          useValue: {
+            logPromptReceived: jest.fn(),
+            logPromptResult: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

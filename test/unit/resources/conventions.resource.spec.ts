@@ -1,12 +1,20 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { ConventionsResource } from '@/mcp/domain/nestjs/feature/resources/conventions.resource';
-import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
+import { createFrameworkAdapterMocks } from '../../helpers/mock-data';
 
 describe('ConventionsResource', () => {
   let sut: ConventionsResource;
-  let docReader: jest.Mocked<DocumentationReaderService>;
+  let docReader: {
+    getApiConventions: jest.Mock;
+    getTestingDocs: jest.Mock;
+    readDoc: jest.Mock;
+    getCursorRules: jest.Mock;
+  };
+  let mocks: ReturnType<typeof createFrameworkAdapterMocks>;
 
   beforeEach(async () => {
     docReader = {
@@ -14,13 +22,30 @@ describe('ConventionsResource', () => {
       getTestingDocs: jest.fn(),
       readDoc: jest.fn(),
       getCursorRules: jest.fn(),
-    } as unknown as jest.Mocked<DocumentationReaderService>;
+    };
+
+    mocks = createFrameworkAdapterMocks({
+      documentationReader: docReader,
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ConventionsResource,
-        { provide: DocumentationReaderService, useValue: docReader },
-        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
+        {
+          provide: FrameworkDetectorService,
+          useValue: mocks.frameworkDetector,
+        },
+        {
+          provide: FrameworkAdapterRegistryService,
+          useValue: mocks.adapterRegistry,
+        },
+        {
+          provide: McpLoggerService,
+          useValue: {
+            logResourceRead: jest.fn(),
+            logResourceResult: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

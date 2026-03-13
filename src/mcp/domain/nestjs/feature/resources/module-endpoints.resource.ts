@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
-import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 @Injectable()
 export class ModuleEndpointsResource {
   constructor(
-    private readonly moduleRegistry: ModuleRegistryService,
-    private readonly codebaseAnalyzer: CodebaseAnalyzerService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly mcpLogger: McpLoggerService,
   ) {}
 
@@ -21,14 +21,24 @@ export class ModuleEndpointsResource {
   async getModuleEndpoints(params: { moduleName: string }): Promise<string> {
     const uri = `alaz://modules/${params.moduleName}/endpoints`;
     this.mcpLogger.logResourceRead(uri, params);
-    const mod = await this.moduleRegistry.getModule(params.moduleName);
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg =
+      this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
+    const codebaseAnalyzer =
+      this.adapterRegistry.getCodebaseAnalyzer(framework)!;
+    const mod = await moduleRegistry.getModule(params.moduleName);
     if (!mod) {
       const notFoundMsg = `Module "${params.moduleName}" not found.`;
       this.mcpLogger.logResourceResult(uri, notFoundMsg.length);
       return notFoundMsg;
     }
 
-    const endpoints = await this.codebaseAnalyzer.getModuleEndpoints(
+    const endpoints = await codebaseAnalyzer.getModuleEndpoints(
       params.moduleName,
     );
 

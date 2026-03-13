@@ -1,14 +1,18 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { ConventionCheckerTool } from '@/mcp/domain/nestjs/feature/tools/convention-checker.tool';
-import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
-import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import type { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
+import type { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import { createModuleInfo, createProjectContext, createFrameworkAdapterMocks } from '../../helpers/mock-data';
+import {
+  createModuleInfo,
+  createProjectContext,
+  createFrameworkAdapterMocks,
+} from '../../helpers/mock-data';
 
 describe('ConventionCheckerTool', () => {
   let sut: ConventionCheckerTool;
@@ -29,7 +33,9 @@ describe('ConventionCheckerTool', () => {
 
     projectContext = {
       getContext: jest.fn().mockResolvedValue(
-        createProjectContext({ docsLayout: { features: 'docs/features/' } as never }),
+        createProjectContext({
+          docsLayout: { features: 'docs/features/' } as never,
+        }),
       ),
     } as unknown as jest.Mocked<ProjectContextService>;
 

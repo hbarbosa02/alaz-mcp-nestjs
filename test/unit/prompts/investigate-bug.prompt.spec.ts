@@ -11,7 +11,13 @@ describe('InvestigateBugPrompt', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InvestigateBugPrompt,
-        { provide: McpLoggerService, useValue: { logPromptReceived: jest.fn(), logPromptResult: jest.fn() } },
+        {
+          provide: McpLoggerService,
+          useValue: {
+            logPromptReceived: jest.fn(),
+            logPromptResult: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

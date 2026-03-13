@@ -90,9 +90,27 @@ describe('GitChangelogService', () => {
   it('should categorize commits by Conventional Commits', async () => {
     gitContext.getTags.mockResolvedValue([]);
     gitContext.getCommitsBetween.mockResolvedValue([
-      { hash: '1', author: 'A', date: '2025-01-01', message: 'feat: new feature', files: [] },
-      { hash: '2', author: 'A', date: '2025-01-02', message: 'fix: bug fix', files: [] },
-      { hash: '3', author: 'A', date: '2025-01-03', message: 'docs: update readme', files: [] },
+      {
+        hash: '1',
+        author: 'A',
+        date: '2025-01-01',
+        message: 'feat: new feature',
+        files: [],
+      },
+      {
+        hash: '2',
+        author: 'A',
+        date: '2025-01-02',
+        message: 'fix: bug fix',
+        files: [],
+      },
+      {
+        hash: '3',
+        author: 'A',
+        date: '2025-01-03',
+        message: 'docs: update readme',
+        files: [],
+      },
     ]);
 
     const result = await sut.generateChangelog();

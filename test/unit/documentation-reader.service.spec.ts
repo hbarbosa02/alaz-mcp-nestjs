@@ -27,9 +27,11 @@ describe('DocumentationReaderService', () => {
     } as unknown as jest.Mocked<FileReaderService>;
 
     projectContext = {
-      getContext: jest.fn().mockResolvedValue(
-        createProjectContext({ docsLayout: defaultDocsLayout }),
-      ),
+      getContext: jest
+        .fn()
+        .mockResolvedValue(
+          createProjectContext({ docsLayout: defaultDocsLayout }),
+        ),
     } as unknown as jest.Mocked<ProjectContextService>;
 
     const module: TestingModule = await Test.createTestingModule({

@@ -1,7 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { EndpointListerTool } from '@/mcp/domain/nestjs/feature/tools/endpoint-lister.tool';
-import { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import type { CodebaseAnalyzerService } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
@@ -30,7 +30,10 @@ describe('EndpointListerTool', () => {
         EndpointListerTool,
         { provide: FrameworkDetectorService, useValue: frameworkDetector },
         { provide: FrameworkAdapterRegistryService, useValue: adapterRegistry },
-        { provide: McpLoggerService, useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() } },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
         { provide: ProjectRootContextService, useValue: projectRootContext },
       ],
     }).compile();

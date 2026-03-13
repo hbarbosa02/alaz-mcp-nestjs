@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
-import { EntityIntrospectorService } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 @Injectable()
 export class EntityDiagramResource {
   constructor(
-    private readonly entityIntrospector: EntityIntrospectorService,
+    private readonly frameworkDetector: FrameworkDetectorService,
+    private readonly adapterRegistry: FrameworkAdapterRegistryService,
     private readonly mcpLogger: McpLoggerService,
   ) {}
 
@@ -19,9 +21,16 @@ export class EntityDiagramResource {
   async getEntityDiagram(params: { entityName: string }): Promise<string> {
     const uri = `alaz://entities/${params.entityName}`;
     this.mcpLogger.logResourceRead(uri, params);
-    const schema = await this.entityIntrospector.getEntitySchema(
-      params.entityName,
-    );
+    const framework = await this.frameworkDetector.detect();
+    const unsupportedMsg =
+      this.adapterRegistry.getUnsupportedMessage(framework);
+    if (unsupportedMsg) {
+      this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
+      return unsupportedMsg;
+    }
+    const entityIntrospector =
+      this.adapterRegistry.getEntityIntrospector(framework)!;
+    const schema = await entityIntrospector.getEntitySchema(params.entityName);
     if (!schema) {
       const notFoundMsg = `Entity "${params.entityName}" not found.`;
       this.mcpLogger.logResourceResult(uri, notFoundMsg.length);

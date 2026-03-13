@@ -41,52 +41,57 @@ export class EntitySchemaTool {
     projectRoot?: string;
   }): Promise<string> {
     const doWork = async () => {
-    this.mcpLogger.logToolInvoked('get-entity-schema', params);
-    const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
-    if (unsupportedMsg) {
-      this.mcpLogger.logToolResult('get-entity-schema', unsupportedMsg.length);
-      return unsupportedMsg;
-    }
-    const entityIntrospector = this.adapterRegistry.getEntityIntrospector(framework)!;
-    const schema = await entityIntrospector.getEntitySchema(
-      params.entityName,
-      params.orm as 'mikroorm' | 'typeorm' | 'objection' | undefined,
-    );
-    if (!schema) {
-      const notFoundMsg = `Entity "${params.entityName}" not found.`;
-      this.mcpLogger.logToolResult('get-entity-schema', notFoundMsg.length);
-      return notFoundMsg;
-    }
-
-    const lines: string[] = [
-      `# Entity: ${schema.name}`,
-      `File: \`${schema.filePath}\``,
-      schema.tableName ? `Table: \`${schema.tableName}\`` : '',
-      '',
-      '## Properties',
-      '| Name | Type | Nullable | Unique |',
-      '|------|------|----------|--------|',
-    ];
-
-    for (const p of schema.properties) {
-      lines.push(`| ${p.name} | ${p.type} | ${p.nullable} | ${p.unique} |`);
-    }
-
-    if (schema.relations.length > 0) {
-      lines.push('', '## Relations');
-      lines.push('| Name | Type | Target | inversedBy | mappedBy |');
-      lines.push('|------|------|--------|------------|----------|');
-      for (const r of schema.relations) {
-        lines.push(
-          `| ${r.name} | ${r.type} | ${r.targetEntity} | ${r.inversedBy ?? '-'} | ${r.mappedBy ?? '-'} |`,
+      this.mcpLogger.logToolInvoked('get-entity-schema', params);
+      const framework = await this.frameworkDetector.detect();
+      const unsupportedMsg =
+        this.adapterRegistry.getUnsupportedMessage(framework);
+      if (unsupportedMsg) {
+        this.mcpLogger.logToolResult(
+          'get-entity-schema',
+          unsupportedMsg.length,
         );
+        return unsupportedMsg;
       }
-    }
+      const entityIntrospector =
+        this.adapterRegistry.getEntityIntrospector(framework)!;
+      const schema = await entityIntrospector.getEntitySchema(
+        params.entityName,
+        params.orm,
+      );
+      if (!schema) {
+        const notFoundMsg = `Entity "${params.entityName}" not found.`;
+        this.mcpLogger.logToolResult('get-entity-schema', notFoundMsg.length);
+        return notFoundMsg;
+      }
 
-    const result = lines.join('\n');
-    this.mcpLogger.logToolResult('get-entity-schema', result.length);
-    return result;
+      const lines: string[] = [
+        `# Entity: ${schema.name}`,
+        `File: \`${schema.filePath}\``,
+        schema.tableName ? `Table: \`${schema.tableName}\`` : '',
+        '',
+        '## Properties',
+        '| Name | Type | Nullable | Unique |',
+        '|------|------|----------|--------|',
+      ];
+
+      for (const p of schema.properties) {
+        lines.push(`| ${p.name} | ${p.type} | ${p.nullable} | ${p.unique} |`);
+      }
+
+      if (schema.relations.length > 0) {
+        lines.push('', '## Relations');
+        lines.push('| Name | Type | Target | inversedBy | mappedBy |');
+        lines.push('|------|------|--------|------------|----------|');
+        for (const r of schema.relations) {
+          lines.push(
+            `| ${r.name} | ${r.type} | ${r.targetEntity} | ${r.inversedBy ?? '-'} | ${r.mappedBy ?? '-'} |`,
+          );
+        }
+      }
+
+      const result = lines.join('\n');
+      this.mcpLogger.logToolResult('get-entity-schema', result.length);
+      return result;
     };
     if (params.projectRoot) {
       return this.projectRootContext.run(params.projectRoot, doWork);

@@ -50,6 +50,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/main.ts', 'src/mcp/feature/mcp-stdio.entry.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
     files: ['test/**/*.ts'],
     rules: {
       '@typescript-eslint/unbound-method': 'off',

@@ -296,9 +296,11 @@ flowchart LR
 
 ## 10. Resources & Prompts Overview
 
+Static and template resources follow **Option C** (see `docs/MCP-FRAMEWORK-PORTS.md`): they delegate to the framework adapter. If the framework is not supported (e.g. Angular, Laravel), they return "Em breve". URIs remain generic; content varies by detected framework.
+
 ```mermaid
 flowchart TB
-    subgraph Static["Static Resources"]
+    subgraph Static["Static Resources (delegate to adapter)"]
         R1[alaz://onboarding]
         R2[alaz://architecture]
         R3[alaz://conventions/api]

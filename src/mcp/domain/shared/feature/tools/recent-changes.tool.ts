@@ -31,30 +31,30 @@ export class RecentChangesTool {
     projectRoot?: string;
   }): Promise<string> {
     const doWork = async () => {
-    this.mcpLogger.logToolInvoked('get-recent-changes', params);
-    const commits = await this.gitContext.getRecentCommits(params.days);
+      this.mcpLogger.logToolInvoked('get-recent-changes', params);
+      const commits = await this.gitContext.getRecentCommits(params.days);
 
-    if (commits.length === 0) {
-      const emptyMsg = `No commits in the last ${params.days} days.`;
-      this.mcpLogger.logToolResult('get-recent-changes', emptyMsg.length);
-      return emptyMsg;
-    }
-
-    const lines = [`# Commits (last ${params.days} days)`, ''];
-    for (const c of commits) {
-      lines.push(`## ${c.hash.slice(0, 7)} - ${c.message}`);
-      lines.push(`- Author: ${c.author}`);
-      lines.push(`- Date: ${c.date}`);
-      if (c.files.length > 0) {
-        lines.push(
-          `- Files: ${c.files.slice(0, 5).join(', ')}${c.files.length > 5 ? '...' : ''}`,
-        );
+      if (commits.length === 0) {
+        const emptyMsg = `No commits in the last ${params.days} days.`;
+        this.mcpLogger.logToolResult('get-recent-changes', emptyMsg.length);
+        return emptyMsg;
       }
-      lines.push('');
-    }
-    const result = lines.join('\n');
-    this.mcpLogger.logToolResult('get-recent-changes', result.length);
-    return result;
+
+      const lines = [`# Commits (last ${params.days} days)`, ''];
+      for (const c of commits) {
+        lines.push(`## ${c.hash.slice(0, 7)} - ${c.message}`);
+        lines.push(`- Author: ${c.author}`);
+        lines.push(`- Date: ${c.date}`);
+        if (c.files.length > 0) {
+          lines.push(
+            `- Files: ${c.files.slice(0, 5).join(', ')}${c.files.length > 5 ? '...' : ''}`,
+          );
+        }
+        lines.push('');
+      }
+      const result = lines.join('\n');
+      this.mcpLogger.logToolResult('get-recent-changes', result.length);
+      return result;
     };
     if (params.projectRoot) {
       return this.projectRootContext.run(params.projectRoot, doWork);

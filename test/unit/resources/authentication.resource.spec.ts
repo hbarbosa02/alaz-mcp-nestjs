@@ -1,23 +1,41 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { AuthenticationResource } from '@/mcp/domain/nestjs/feature/resources/authentication.resource';
-import { DocumentationReaderService } from '@/mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
+import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
+import { createFrameworkAdapterMocks } from '../../helpers/mock-data';
 
 describe('AuthenticationResource', () => {
   let sut: AuthenticationResource;
-  let docReader: jest.Mocked<DocumentationReaderService>;
+  let docReader: { readDoc: jest.Mock };
+  let mocks: ReturnType<typeof createFrameworkAdapterMocks>;
 
   beforeEach(async () => {
-    docReader = {
-      readDoc: jest.fn(),
-    } as unknown as jest.Mocked<DocumentationReaderService>;
+    docReader = { readDoc: jest.fn() };
+
+    mocks = createFrameworkAdapterMocks({
+      documentationReader: docReader,
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationResource,
-        { provide: DocumentationReaderService, useValue: docReader },
-        { provide: McpLoggerService, useValue: { logResourceRead: jest.fn(), logResourceResult: jest.fn() } },
+        {
+          provide: FrameworkDetectorService,
+          useValue: mocks.frameworkDetector,
+        },
+        {
+          provide: FrameworkAdapterRegistryService,
+          useValue: mocks.adapterRegistry,
+        },
+        {
+          provide: McpLoggerService,
+          useValue: {
+            logResourceRead: jest.fn(),
+            logResourceResult: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

@@ -25,9 +25,9 @@ describe('ProjectRootContextService', () => {
   });
 
   it('should throw when run() receives whitespace only', () => {
-    expect(() =>
-      service.run('   ', () => service.getProjectRoot()),
-    ).toThrow(/Project root is required/);
+    expect(() => service.run('   ', () => service.getProjectRoot())).toThrow(
+      /Project root is required/,
+    );
   });
 
   it('should trim project root in run()', () => {

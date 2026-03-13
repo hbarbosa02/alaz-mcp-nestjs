@@ -34,10 +34,7 @@ export class UpdateDocsPrompt {
       ...modules
         .filter((m) => m.documentationPath)
         .slice(0, 15)
-        .map(
-          (m) =>
-            `| ${m.name} | ${m.documentationPath ?? '—'} |`,
-        ),
+        .map((m) => `| ${m.name} | ${m.documentationPath ?? '—'} |`),
     ];
     if (modules.length > 15) {
       moduleTableLines.push(`| ... | docs/features/<MODULE>.md |`);

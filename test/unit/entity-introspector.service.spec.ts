@@ -37,9 +37,9 @@ describe('EntityIntrospectorService', () => {
     } as unknown as jest.Mocked<FileReaderService>;
 
     projectContext = {
-      getContext: jest.fn().mockResolvedValue(
-        createProjectContext({ orm: 'mikroorm' }),
-      ),
+      getContext: jest
+        .fn()
+        .mockResolvedValue(createProjectContext({ orm: 'mikroorm' })),
     } as unknown as jest.Mocked<ProjectContextService>;
 
     const strategies = [
