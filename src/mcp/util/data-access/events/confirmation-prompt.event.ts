@@ -17,3 +17,15 @@ export const EXECUTION_CONFIRMATION_HEADER = `> ⚠️ **EXECUTION REQUIRES DEVE
 export function withConfirmationRequirement(content: string): string {
   return EXECUTION_CONFIRMATION_HEADER + content;
 }
+
+/**
+ * Converts prompt text to MCP GetPromptResult format.
+ * Prompts must return { messages: [...] } per the MCP spec.
+ */
+export function toPromptResult(text: string): {
+  messages: { role: 'user'; content: { type: 'text'; text: string } }[];
+} {
+  return {
+    messages: [{ role: 'user', content: { type: 'text', text } }],
+  };
+}

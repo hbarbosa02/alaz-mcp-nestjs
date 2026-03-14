@@ -1,0 +1,26 @@
+services:
+  app-http:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3100:3100"
+    environment:
+      - NODE_ENV=production
+      - PORT=3100
+    command: ["node", "dist/src/main.js"]
+
+  app-stdio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - PROJECT_ROOT=${PROJECT_ROOT:-/workspace}
+    volumes:
+      - "${PROJECT_ROOT:-.}:/workspace:ro"
+    stdin_open: true
+    tty: true
+    command: ["node", "dist/src/mcp/feature/mcp-stdio.entry.js"]
+    profiles:
+      - stdio

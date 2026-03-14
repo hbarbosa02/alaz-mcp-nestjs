@@ -20,6 +20,11 @@ export class ProjectRootContextService {
     const fromStorage = this.storage.getStore();
     if (fromStorage) return fromStorage;
 
+    // STDIO fallback: when AsyncLocalStorage context is lost (e.g. MCP handler),
+    // use process.env.PROJECT_ROOT set at bootstrap
+    const fromEnv = process.env.PROJECT_ROOT?.trim();
+    if (fromEnv) return fromEnv;
+
     throw new Error(PROJECT_ROOT_REQUIRED);
   }
 

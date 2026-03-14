@@ -41,6 +41,15 @@ Runs as a separate process. Does not require database or Redis. Requires `PROJEC
 npm run start:stdio
 ```
 
+### Docker
+
+| Mode | Command | Use case |
+|------|---------|----------|
+| **HTTP** | `docker compose up --build` | Server at `http://localhost:3100/mcp` |
+| **STDIO** | `docker compose run --rm -e PROJECT_ROOT=/workspace -v /path/to/project:/workspace:ro app-stdio` | Spawned by MCP client; mount project to analyze |
+
+See [MCP-SETUP.md](./MCP-SETUP.md) for mcp.json configuration with Docker.
+
 ### Quick config reference
 
 **HTTP/SSE** — Add to mcp.json:
@@ -131,6 +140,6 @@ Tools accept an optional `projectRoot` parameter to override per request. If the
 
 ## Adding new Tools/Resources/Prompts
 
-1. Create the class in `src/mcp/feature/tools/`, `resources/` or `prompts/`
-2. Use the `@Tool`, `@Resource`, `@ResourceTemplate` or `@Prompt` decorators
-3. Register in `McpNestjsModule` and `McpStdioModule`
+1. Create the class in `src/mcp/domain/nestjs/feature/tools/`, `resources/` or `prompts/` (or `src/mcp/domain/shared/feature/` for shared capabilities)
+2. Use the `@Tool`, `@Resource`, `@ResourceTemplate` or `@Prompt` decorators from `@rekog/mcp-nest`
+3. Register in `NestjsDomainModule` or `SharedDomainModule` (imported by `McpNestjsModule` and `McpStdioModule`)

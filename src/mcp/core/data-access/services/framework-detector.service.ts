@@ -1,13 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
+import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
 export type FrameworkType = 'nestjs' | 'angular' | 'laravel' | null;
 
+const CACHE_MAX_SIZE = 10;
+
 @Injectable()
 export class FrameworkDetectorService {
-  constructor(private readonly fileReader: FileReaderService) {}
+  private readonly cache = new Map<string, Promise<FrameworkType>>();
+
+  constructor(
+    private readonly fileReader: FileReaderService,
+    private readonly projectRootContext: ProjectRootContextService,
+  ) {}
 
   async detect(): Promise<FrameworkType> {
+    const root = this.projectRootContext.getProjectRoot();
+    let cached = this.cache.get(root);
+    if (!cached) {
+      this.evictIfNeeded();
+      cached = this.detectUncached();
+      this.cache.set(root, cached);
+    }
+    return cached;
+  }
+
+  private evictIfNeeded(): void {
+    if (this.cache.size >= CACHE_MAX_SIZE) {
+      const next = this.cache.keys().next();
+      const firstKey: string | undefined = next.done ? undefined : next.value;
+      if (firstKey !== undefined) this.cache.delete(firstKey);
+    }
+  }
+
+  private async detectUncached(): Promise<FrameworkType> {
     const pkg = await this.readPackageJson();
     if (pkg) {
       const deps = {

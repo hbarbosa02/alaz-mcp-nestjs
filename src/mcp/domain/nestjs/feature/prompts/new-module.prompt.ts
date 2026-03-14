@@ -3,7 +3,10 @@ import { Prompt } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import { withConfirmationRequirement } from '@/mcp/util/data-access/events/confirmation-prompt.event';
+import {
+  withConfirmationRequirement,
+  toPromptResult,
+} from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 @Injectable()
 export class NewModulePrompt {
@@ -34,7 +37,9 @@ export class NewModulePrompt {
     moduleName: string;
     hasController: boolean;
     hasEntity: boolean;
-  }): Promise<string> {
+  }): Promise<{
+    messages: { role: 'user'; content: { type: 'text'; text: string } }[];
+  }> {
     this.mcpLogger.logPromptReceived('create-module', params);
     const { moduleName, hasController, hasEntity } = params;
     const context = await this.projectContext.getContext();
@@ -115,8 +120,8 @@ export class NewModulePrompt {
       `Create ${docsPath} and update the docs index.`,
     );
 
-    const result = withConfirmationRequirement(sections.join('\n'));
-    this.mcpLogger.logPromptResult('create-module', result.length);
-    return result;
+    const text = withConfirmationRequirement(sections.join('\n'));
+    this.mcpLogger.logPromptResult('create-module', text.length);
+    return toPromptResult(text);
   }
 }

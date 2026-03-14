@@ -413,6 +413,6 @@ flowchart LR
     D --> E[Register in McpStdioModule]
 ```
 
-1. Create the class in `src/mcp/feature/tools/`, `resources/` or `prompts/`
+1. Create the class in `src/mcp/domain/nestjs/feature/tools/`, `resources/` or `prompts/` (or `src/mcp/domain/shared/feature/` for shared capabilities)
 2. Use `@Tool`, `@Resource`, `@ResourceTemplate` or `@Prompt` from `@rekog/mcp-nest`
-3. Register in `McpNestjsModule` and `McpStdioModule` providers
+3. Register in `NestjsDomainModule` or `SharedDomainModule` (imported by `McpNestjsModule` and `McpStdioModule`)

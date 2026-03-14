@@ -44,6 +44,28 @@ npm run start:stdio
 
 Requires `PROJECT_ROOT` in the MCP config (see below). Useful when the target project environment is not running (Docker, database, etc.).
 
+## Docker
+
+### HTTP mode
+
+Build and run the server in HTTP mode (port 3100):
+
+```bash
+docker compose up --build
+```
+
+The MCP is available at `http://localhost:3100/mcp`. Stop with `Ctrl+C` or `docker compose down`.
+
+### STDIO mode
+
+Run the server in STDIO mode via Docker. Requires the project path to analyze:
+
+```bash
+docker compose run --rm -e PROJECT_ROOT=/workspace -v /path/to/your/project:/workspace:ro app-stdio
+```
+
+Replace `/path/to/your/project` with the absolute path to the NestJS project you want to analyze. For Cursor, use `${workspaceFolder}` in mcp.json (see [docs/MCP-SETUP.md](docs/MCP-SETUP.md)).
+
 ## Cursor configuration
 
 Add to your project's or Cursor's `.cursor/mcp.json`:
@@ -104,5 +126,5 @@ Tools accept an optional `projectRoot` parameter to override the config per requ
 
 ## Documentation
 
-- [docs/MCP-SERVER.md](docs/MCP-SERVER.md) — Technical details, tools, resources, prompts
-- [docs/MCP-SETUP.md](docs/MCP-SETUP.md) — Step-by-step setup (Cursor, Claude Desktop, Copilot) and example prompts
+- [docs/MCP-SERVER.md](docs/MCP-SERVER.md) — Technical details, tools, resources, prompts, Docker
+- [docs/MCP-SETUP.md](docs/MCP-SETUP.md) — Step-by-step setup (Cursor, Claude Desktop, Copilot), Docker, and example prompts
