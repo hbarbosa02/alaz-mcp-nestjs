@@ -44,7 +44,12 @@ async function initMcpSession(baseUrl: string): Promise<string> {
   });
   expect(res.status).toBe(200);
   const sessionId = res.headers.get('mcp-session-id');
-  if (!sessionId) throw new Error('No session ID in response');
+
+  if (!sessionId) {
+    throw new Error(
+      'MCP initialize response missing mcp-session-id header. Check server session handling.',
+    );
+  }
   return sessionId;
 }
 
@@ -85,7 +90,9 @@ async function mcpRequest(
     const data = JSON.parse(text) as unknown as AnyResponse;
 
     if (data.error) {
-      throw new Error(JSON.stringify(data.error));
+      throw new Error(
+        `MCP JSON-RPC error in response: ${JSON.stringify(data.error)}`,
+      );
     }
 
     return data.result;
@@ -97,7 +104,9 @@ async function mcpRequest(
     const data = JSON.parse(dataMatch[1]) as unknown as AnyResponse;
 
     if (data.error) {
-      throw new Error(JSON.stringify(data.error));
+      throw new Error(
+        `MCP JSON-RPC error in SSE data: ${JSON.stringify(data.error)}`,
+      );
     }
 
     return data.result;
@@ -109,13 +118,18 @@ async function mcpRequest(
 
   if (anyJson) {
     const parsed = JSON.parse(anyJson[0]) as unknown as AnyResponse;
+
     if (parsed.error) {
-      throw new Error(JSON.stringify(parsed.error));
+      throw new Error(
+        `MCP JSON-RPC error in parsed response: ${JSON.stringify(parsed.error)}`,
+      );
     }
     return parsed.result;
   }
 
-  throw new Error(`No JSON in response: ${text.slice(0, 300)}`);
+  throw new Error(
+    `MCP HTTP response body did not contain valid JSON. First 300 chars: ${text.slice(0, 300)}`,
+  );
 }
 
 describe('MCP Streamable HTTP (E2E)', () => {
@@ -251,6 +265,23 @@ describe('MCP Streamable HTTP (E2E)', () => {
         arguments: { projectRoot: PROJECT_ROOT },
       })) as { content: { type: string }[] };
       expect(result.content).toBeDefined();
+    });
+
+    it('should call get-create-module-guide', async () => {
+      const result = (await mcpRequest(baseUrl, sessionId, 'tools/call', {
+        name: 'get-create-module-guide',
+        arguments: {
+          moduleName: 'billing',
+          hasController: true,
+          hasEntity: true,
+          projectRoot: PROJECT_ROOT,
+        },
+      })) as { content: { type: string; text?: string }[] };
+      expect(result.content).toBeDefined();
+      expect(result.content.length).toBeGreaterThan(0);
+      const textContent = result.content.find((c) => c.type === 'text');
+      expect(textContent?.text).toBeDefined();
+      expect(textContent?.text).toContain('billing');
     });
   });
 

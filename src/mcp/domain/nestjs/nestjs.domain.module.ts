@@ -15,6 +15,7 @@ import { EntitySchemaTool } from './feature/tools/entity-schema.tool';
 import { EndpointListerTool } from './feature/tools/endpoint-lister.tool';
 import { ConventionCheckerTool } from './feature/tools/convention-checker.tool';
 import { TestInfoTool } from './feature/tools/test-info.tool';
+import { PromptGuideTools } from './feature/tools/prompt-guide.tools';
 import { OnboardingResource } from './feature/resources/onboarding.resource';
 import { ArchitectureResource } from './feature/resources/architecture.resource';
 import { ConventionsResource } from './feature/resources/conventions.resource';
@@ -41,6 +42,7 @@ const MCP_SERVER_NAME = 'alaz-nestjs-mcp';
         EndpointListerTool,
         ConventionCheckerTool,
         TestInfoTool,
+        PromptGuideTools,
         OnboardingResource,
         ArchitectureResource,
         ConventionsResource,
@@ -85,6 +87,7 @@ const MCP_SERVER_NAME = 'alaz-nestjs-mcp';
     EndpointListerTool,
     ConventionCheckerTool,
     TestInfoTool,
+    PromptGuideTools,
     OnboardingResource,
     ArchitectureResource,
     ConventionsResource,
@@ -110,6 +113,7 @@ const MCP_SERVER_NAME = 'alaz-nestjs-mcp';
     EndpointListerTool,
     ConventionCheckerTool,
     TestInfoTool,
+    PromptGuideTools,
     OnboardingResource,
     ArchitectureResource,
     ConventionsResource,

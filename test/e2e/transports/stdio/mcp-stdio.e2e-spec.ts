@@ -163,8 +163,14 @@ describe('MCP STDIO (E2E)', () => {
     expect(result[1].result).toBeDefined();
     const tools = (result[1].result as { tools?: { name: string }[] }).tools;
     expect(tools).toBeDefined();
-    expect(tools!.length).toBeGreaterThan(0);
-    expect(tools!.map((t) => t.name)).toContain('list-modules');
+
+    if (!tools) {
+      throw new Error(
+        'tools/list response missing tools array. Check MCP STDIO transport.',
+      );
+    }
+    expect(tools.length).toBeGreaterThan(0);
+    expect(tools.map((t) => t.name)).toContain('list-modules');
   }, 15000);
 
   const initRequest = {
@@ -196,7 +202,13 @@ describe('MCP STDIO (E2E)', () => {
       result[1].result as { content?: { type: string; text?: string }[] }
     )?.content;
     expect(content).toBeDefined();
-    expect(content!.some((c) => c.type === 'text')).toBe(true);
+
+    if (!content) {
+      throw new Error(
+        'list-modules tool call response missing content. Check MCP STDIO transport.',
+      );
+    }
+    expect(content.some((c) => c.type === 'text')).toBe(true);
   }, 15000);
 
   it('should call get-module-detail via stdio', async () => {
@@ -217,11 +229,17 @@ describe('MCP STDIO (E2E)', () => {
       result[1].result as { content?: { type: string; text?: string }[] }
     )?.content;
     expect(content).toBeDefined();
-    expect(content!.length).toBeGreaterThan(0);
-    const textContent = content!.find((c) => c.type === 'text');
+
+    if (!content) {
+      throw new Error(
+        'get-module-detail tool call response missing content. Check MCP STDIO transport.',
+      );
+    }
+    expect(content.length).toBeGreaterThan(0);
+    const textContent = content.find((c) => c.type === 'text');
     expect(textContent?.text).toBeDefined();
     // May contain module details or unsupported message depending on project root resolution
-    expect(typeof textContent!.text).toBe('string');
+    expect(typeof textContent?.text).toBe('string');
   }, 15000);
 
   it('should call get-entity-schema via stdio', async () => {
@@ -319,6 +337,41 @@ describe('MCP STDIO (E2E)', () => {
     ).toBeDefined();
   }, 15000);
 
+  it('should call get-create-module-guide via stdio', async () => {
+    const result = await runMcpStdioWithRequests([
+      initRequest,
+      {
+        jsonrpc: '2.0',
+        id: 2,
+        method: 'tools/call',
+        params: {
+          name: 'get-create-module-guide',
+          arguments: {
+            moduleName: 'billing',
+            hasController: true,
+            hasEntity: true,
+            projectRoot: PROJECT_ROOT,
+          },
+        },
+      },
+    ]);
+    expect(result[1].error).toBeUndefined();
+    const content = (
+      result[1].result as { content?: { type: string; text?: string }[] }
+    )?.content;
+    expect(content).toBeDefined();
+
+    if (!content) {
+      throw new Error(
+        'get-create-module-guide tool call response missing content. Check MCP STDIO transport.',
+      );
+    }
+    expect(content.length).toBeGreaterThan(0);
+    const textContent = content.find((c) => c.type === 'text');
+    expect(textContent?.text).toBeDefined();
+    expect(textContent?.text).toContain('billing');
+  }, 15000);
+
   describe('resources', () => {
     it('should list resources via stdio', async () => {
       const result = await runMcpStdioWithRequests([
@@ -334,8 +387,14 @@ describe('MCP STDIO (E2E)', () => {
       const resources = (result[1].result as { resources?: { uri: string }[] })
         ?.resources;
       expect(resources).toBeDefined();
-      expect(resources!.length).toBeGreaterThan(0);
-      expect(resources!.map((r) => r.uri)).toContain('alaz://onboarding');
+
+      if (!resources) {
+        throw new Error(
+          'resources/list response missing resources array. Check MCP STDIO transport.',
+        );
+      }
+      expect(resources.length).toBeGreaterThan(0);
+      expect(resources.map((r) => r.uri)).toContain('alaz://onboarding');
     }, 15000);
 
     it('should read alaz://onboarding via stdio', async () => {
@@ -351,7 +410,13 @@ describe('MCP STDIO (E2E)', () => {
       expect(result[1].error).toBeUndefined();
       const contents = (result[1].result as { contents?: unknown[] })?.contents;
       expect(contents).toBeDefined();
-      expect(contents!.length).toBeGreaterThan(0);
+
+      if (!contents) {
+        throw new Error(
+          'resources/read alaz://onboarding response missing contents. Check MCP STDIO transport.',
+        );
+      }
+      expect(contents.length).toBeGreaterThan(0);
     }, 15000);
   });
 
@@ -379,9 +444,15 @@ describe('MCP STDIO (E2E)', () => {
       };
       expect(promptResult).toBeDefined();
       expect(promptResult.messages).toBeDefined();
-      expect(promptResult.messages!.length).toBeGreaterThan(0);
-      const textContent = promptResult
-        .messages!.map((m) =>
+
+      if (!promptResult.messages) {
+        throw new Error(
+          'prompts/get create-module response missing messages. Check MCP STDIO transport.',
+        );
+      }
+      expect(promptResult.messages.length).toBeGreaterThan(0);
+      const textContent = promptResult.messages
+        .map((m) =>
           m.content?.type === 'text' ? m.content.text : '',
         )
         .join(' ');

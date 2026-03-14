@@ -10,6 +10,11 @@ export const EXPECTED_TOOLS = [
   'check-conventions',
   'get-recent-changes',
   'get-test-summary',
+  'get-create-module-guide',
+  'get-create-endpoint-guide',
+  'get-update-docs-guide',
+  'get-code-review-checklist',
+  'get-investigate-bug-guide',
 ] as const;
 
 export const EXPECTED_STATIC_RESOURCES = [
