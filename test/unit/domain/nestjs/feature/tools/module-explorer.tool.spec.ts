@@ -97,6 +97,42 @@ describe('ModuleExplorerTool', () => {
       expect(result).toContain('user');
       expect(result).toContain('✓');
     });
+
+    it('should use projectRootContext.run when projectRoot provided', async () => {
+      const runMock = jest.fn((_root: string, fn: () => unknown) => fn());
+      const projectRootContext = {
+        run: runMock,
+      } as unknown as jest.Mocked<ProjectRootContextService>;
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          ModuleExplorerTool,
+          {
+            provide: FrameworkDetectorService,
+            useValue: frameworkDetector,
+          },
+          {
+            provide: FrameworkAdapterRegistryService,
+            useValue: adapterRegistry,
+          },
+          {
+            provide: McpLoggerService,
+            useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+          },
+          { provide: ProjectRootContextService, useValue: projectRootContext },
+        ],
+      }).compile();
+
+      const tool = module.get(ModuleExplorerTool);
+      moduleRegistry.listModules.mockResolvedValue([]);
+
+      await tool.listModules({ projectRoot: '/custom/path' });
+
+      expect(runMock).toHaveBeenCalledWith(
+        '/custom/path',
+        expect.any(Function),
+      );
+    });
   });
 
   describe('getModuleDetail', () => {
@@ -125,6 +161,58 @@ describe('ModuleExplorerTool', () => {
       expect(result).toContain('GET');
       expect(result).toContain('## Documentation');
       expect(result).toContain('# User docs');
+    });
+
+    it('should return unsupported message for getModuleDetail when non-nestjs', async () => {
+      adapterRegistry.getUnsupportedMessage.mockReturnValue(
+        'Angular: Not supported.',
+      );
+
+      const result = await sut.getModuleDetail({ moduleName: 'user' });
+
+      expect(result).toContain('Angular');
+      expect(moduleRegistry.getModule).not.toHaveBeenCalled();
+    });
+
+    it('should use projectRootContext.run when projectRoot provided', async () => {
+      const runMock = jest.fn((_root: string, fn: () => unknown) => fn());
+      const projectRootContext = {
+        run: runMock,
+      } as unknown as jest.Mocked<ProjectRootContextService>;
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          ModuleExplorerTool,
+          {
+            provide: FrameworkDetectorService,
+            useValue: frameworkDetector,
+          },
+          {
+            provide: FrameworkAdapterRegistryService,
+            useValue: adapterRegistry,
+          },
+          {
+            provide: McpLoggerService,
+            useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+          },
+          { provide: ProjectRootContextService, useValue: projectRootContext },
+        ],
+      }).compile();
+
+      const tool = module.get(ModuleExplorerTool);
+      moduleRegistry.getModule.mockResolvedValue(createModuleInfo());
+      docReader.getFeatureDoc.mockResolvedValue(null);
+      codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([]);
+
+      await tool.getModuleDetail({
+        moduleName: 'user',
+        projectRoot: '/custom/path',
+      });
+
+      expect(runMock).toHaveBeenCalledWith(
+        '/custom/path',
+        expect.any(Function),
+      );
     });
   });
 });

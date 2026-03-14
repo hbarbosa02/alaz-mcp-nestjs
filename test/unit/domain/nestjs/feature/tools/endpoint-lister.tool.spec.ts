@@ -91,4 +91,66 @@ describe('EndpointListerTool', () => {
 
     expect(result).toContain('-');
   });
+
+  it('should return unsupported message for non-nestjs framework', async () => {
+    const { frameworkDetector, adapterRegistry } = createFrameworkAdapterMocks({
+      codebaseAnalyzer,
+    });
+    adapterRegistry.getUnsupportedMessage.mockReturnValue(
+      'Angular: This feature is not supported.',
+    );
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        EndpointListerTool,
+        { provide: FrameworkDetectorService, useValue: frameworkDetector },
+        { provide: FrameworkAdapterRegistryService, useValue: adapterRegistry },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
+        {
+          provide: ProjectRootContextService,
+          useValue: { run: jest.fn((_r: string, fn: () => unknown) => fn()) },
+        },
+      ],
+    }).compile();
+
+    const tool = module.get(EndpointListerTool);
+    const result = await tool.listEndpoints({});
+
+    expect(result).toContain('Angular');
+    expect(codebaseAnalyzer.getEndpoints).not.toHaveBeenCalled();
+  });
+
+  it('should use projectRootContext.run when projectRoot provided', async () => {
+    const runMock = jest.fn((_root: string, fn: () => unknown) => fn());
+    const projectRootContext = {
+      run: runMock,
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
+    const { frameworkDetector, adapterRegistry } = createFrameworkAdapterMocks({
+      codebaseAnalyzer,
+    });
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        EndpointListerTool,
+        { provide: FrameworkDetectorService, useValue: frameworkDetector },
+        { provide: FrameworkAdapterRegistryService, useValue: adapterRegistry },
+        {
+          provide: McpLoggerService,
+          useValue: { logToolInvoked: jest.fn(), logToolResult: jest.fn() },
+        },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
+      ],
+    }).compile();
+
+    const tool = module.get(EndpointListerTool);
+    codebaseAnalyzer.getEndpoints.mockResolvedValue([]);
+
+    await tool.listEndpoints({ projectRoot: '/custom/path' });
+
+    expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
+  });
 });

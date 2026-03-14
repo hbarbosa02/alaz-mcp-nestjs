@@ -73,4 +73,28 @@ describe('ModuleEndpointsResource', () => {
     expect(text).toContain('GET');
     expect(text).toContain('/user');
   });
+
+  it('should return unsupported message for non-nestjs framework', async () => {
+    mocks.adapterRegistry.getUnsupportedMessage.mockReturnValue(
+      'Laravel: Not supported.',
+    );
+
+    const result = await sut.getModuleEndpoints({ moduleName: 'user' });
+
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('Laravel');
+    expect(moduleRegistry.getModule).not.toHaveBeenCalled();
+  });
+
+  it('should show "-" for empty permissions', async () => {
+    moduleRegistry.getModule.mockResolvedValue(createModuleInfo());
+    codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([
+      createEndpointInfo({ permissions: [] }),
+    ]);
+
+    const result = await sut.getModuleEndpoints({ moduleName: 'user' });
+
+    const text = (result.contents[0] as { text: string }).text;
+    expect(text).toContain('-');
+  });
 });

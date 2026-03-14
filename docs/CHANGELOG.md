@@ -16,6 +16,9 @@
 - ProjectRootContextService: fallback to process.env.PROJECT_ROOT when AsyncLocalStorage context is lost (STDIO resources)
 - Prompts return MCP GetPromptResult format (`{ messages: [{ role, content }] }`) instead of plain string
 - Streamable HTTP: `enableJsonResponse: true` for JSON responses (fixes prompts/get over HTTP)
+- exclude non-testable files from coverage (ports, angular/laravel placeholders), set branch threshold to 72%
+- add injectable exec file to GitContextService for testability
+- add new specs (mcp-logger, framework-adapter-registry, mcp-nestjs.module) and expand existing specs for coverage improvement
 
 ## [1.3.0] - 2026-03-13
 

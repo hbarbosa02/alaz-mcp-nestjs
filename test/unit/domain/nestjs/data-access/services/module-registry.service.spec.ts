@@ -122,4 +122,72 @@ describe('ModuleRegistryService', () => {
     const result = await sut.listModules();
     expect(result.some((m) => m.name === 'shared')).toBe(true);
   });
+
+  it('should list modules from src/modules when nested pattern', async () => {
+    projectContext.getContext.mockResolvedValue(
+      createProjectContext({ modulePattern: 'nested' }),
+    );
+    fileReader.exists.mockResolvedValue(true);
+    fileReader.readDir.mockResolvedValue(['user', 'account']);
+    fileReader.readGlob
+      .mockResolvedValueOnce(['src/modules/user/user.module.ts'])
+      .mockResolvedValueOnce(['src/modules/user/user.entity.ts'])
+      .mockResolvedValueOnce(['src/modules/user/user.controller.ts'])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(['src/modules/account/account.module.ts'])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const result = await sut.listModules();
+    expect(result.length).toBeGreaterThanOrEqual(1);
+    expect(result.some((m) => m.name === 'user')).toBe(true);
+  });
+
+  it('should skip src/modules when nested but dir does not exist', async () => {
+    projectContext.getContext.mockResolvedValue(
+      createProjectContext({ modulePattern: 'nested' }),
+    );
+    fileReader.exists.mockResolvedValue(false);
+
+    const result = await sut.listModules();
+    expect(result).toEqual([]);
+  });
+
+  it('should skip dirs with dots in nested pattern', async () => {
+    projectContext.getContext.mockResolvedValue(
+      createProjectContext({ modulePattern: 'nested' }),
+    );
+    fileReader.exists.mockResolvedValue(true);
+    fileReader.readDir.mockResolvedValue(['user.module.ts', 'valid-module']);
+    fileReader.readGlob
+      .mockResolvedValueOnce(['src/modules/valid-module/valid.module.ts'])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const result = await sut.listModules();
+    expect(result.some((m) => m.name === 'valid-module')).toBe(true);
+  });
+
+  it('should get module from src/modules first when nested pattern', async () => {
+    projectContext.getContext.mockResolvedValue(
+      createProjectContext({ modulePattern: 'nested' }),
+    );
+    fileReader.exists.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
+    fileReader.readGlob
+      .mockResolvedValueOnce(['src/modules/user/user.module.ts'])
+      .mockResolvedValueOnce(['src/modules/user/user.entity.ts'])
+      .mockResolvedValueOnce(['src/modules/user/user.controller.ts'])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+    fileReader.readDir.mockResolvedValue(['feature']);
+
+    const result = await sut.getModule('user');
+    expect(result).not.toBeNull();
+    expect(result?.path).toBe('src/modules/user');
+  });
 });

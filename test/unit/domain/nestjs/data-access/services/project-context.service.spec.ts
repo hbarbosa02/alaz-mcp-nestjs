@@ -205,4 +205,201 @@ describe('ProjectContextService', () => {
     expect(context1.name).toBe('cached-project');
     expect(fileReader.readFile).toHaveBeenCalledWith('package.json');
   });
+
+  it('should detect database pg', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { pg: '^8.0.0' },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.stack.database).toBe('PostgreSQL');
+  });
+
+  it('should detect database mysql2', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { mysql2: '^3.0.0' },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.stack.database).toBe('MySQL');
+  });
+
+  it('should detect redis and bullmq', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { ioredis: '^5.0.0', bullmq: '^4.0.0' },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.stack.redis).toBe(true);
+    expect(context.stack.bullmq).toBe(true);
+  });
+
+  it('should detect nestjs-zod validation', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { 'nestjs-zod': '^2.0.0' },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.stack.validation).toBe('nestjs-zod');
+  });
+
+  it('should detect class-validator', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { 'class-validator': '^0.14.0' },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.stack.validation).toBe('class-validator');
+  });
+
+  it('should detect jest test framework', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test-project',
+            devDependencies: { jest: '^29.0.0' },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.stack.testFramework).toBe('jest');
+    expect(context.stack.testFrameworkVersion).toBe('^29.0.0');
+  });
+
+  it('should detect vitest test framework', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(
+          JSON.stringify({
+            name: 'test-project',
+            devDependencies: { vitest: '^1.0.0' },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.stack.testFramework).toBe('vitest');
+  });
+
+  it('should detect docs layout changelog from CHANGELOG.md', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockImplementation((p: string) => {
+      if (p === 'CHANGELOG.md') return Promise.resolve(true);
+      return Promise.resolve(false);
+    });
+
+    const context = await sut.getContext();
+    expect(context.docsLayout.changelog).toBe('CHANGELOG.md');
+  });
+
+  it('should detect docs layout features from docs/features', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockImplementation((p: string) => {
+      if (p === 'docs/features') return Promise.resolve(true);
+      return Promise.resolve(false);
+    });
+
+    const context = await sut.getContext();
+    expect(context.docsLayout.features).toBe('docs/features/');
+  });
+
+  it('should detect path aliases from tsconfig', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'tsconfig.json')
+        return Promise.resolve(
+          JSON.stringify({
+            compilerOptions: {
+              paths: { '@/*': ['src/*'], '@app/*': ['src/app/*'] },
+            },
+          }),
+        );
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.pathAliases).toEqual({
+      '@/*': ['src/*'],
+      '@app/*': ['src/app/*'],
+    });
+  });
+
+  it('should return empty path aliases when tsconfig missing', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json')
+        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      return Promise.resolve(null);
+    });
+    fileReader.readGlob.mockResolvedValue([]);
+    fileReader.exists.mockResolvedValue(false);
+
+    const context = await sut.getContext();
+    expect(context.pathAliases).toEqual({});
+  });
 });

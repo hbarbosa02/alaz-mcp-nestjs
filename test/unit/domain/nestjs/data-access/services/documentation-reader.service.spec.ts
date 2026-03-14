@@ -125,6 +125,14 @@ describe('DocumentationReaderService', () => {
 
       expect(result).toBe('# Custom module');
     });
+
+    it('should return null when no feature doc found', async () => {
+      fileReader.readFile.mockResolvedValue(null);
+
+      const result = await sut.getFeatureDoc('nonexistent');
+
+      expect(result).toBeNull();
+    });
   });
 
   describe('getApiConventions', () => {
@@ -137,6 +145,19 @@ describe('DocumentationReaderService', () => {
       expect(fileReader.readFile).toHaveBeenCalledWith(
         'docs/api/API-CONVENTIONS.md',
       );
+    });
+
+    it('should return null when conventions path not configured', async () => {
+      projectContext.getContext.mockResolvedValue(
+        createProjectContext({
+          docsLayout: { ...defaultDocsLayout, conventions: null },
+        }),
+      );
+
+      const result = await sut.getApiConventions();
+
+      expect(result).toBeNull();
+      expect(fileReader.readFile).not.toHaveBeenCalled();
     });
   });
 
@@ -151,6 +172,18 @@ describe('DocumentationReaderService', () => {
         'docs/tests/README-TESTS.md',
       );
     });
+
+    it('should return null when testing path not configured', async () => {
+      projectContext.getContext.mockResolvedValue(
+        createProjectContext({
+          docsLayout: { ...defaultDocsLayout, testing: null },
+        }),
+      );
+
+      const result = await sut.getTestingDocs();
+
+      expect(result).toBeNull();
+    });
   });
 
   describe('getChangelog', () => {
@@ -163,6 +196,18 @@ describe('DocumentationReaderService', () => {
       expect(fileReader.readFile).toHaveBeenCalledWith(
         'docs/changes/4 - Changelog.md',
       );
+    });
+
+    it('should return null when changelog path not configured', async () => {
+      projectContext.getContext.mockResolvedValue(
+        createProjectContext({
+          docsLayout: { ...defaultDocsLayout, changelog: null },
+        }),
+      );
+
+      const result = await sut.getChangelog();
+
+      expect(result).toBeNull();
     });
   });
 
@@ -197,6 +242,18 @@ describe('DocumentationReaderService', () => {
         'docs/diagrams/DATABASE-ENTITIES.md',
       );
     });
+
+    it('should return null when entities path not configured', async () => {
+      projectContext.getContext.mockResolvedValue(
+        createProjectContext({
+          docsLayout: { ...defaultDocsLayout, entities: null },
+        }),
+      );
+
+      const result = await sut.getDatabaseEntities();
+
+      expect(result).toBeNull();
+    });
   });
 
   describe('getApiOverview', () => {
@@ -209,6 +266,18 @@ describe('DocumentationReaderService', () => {
       expect(fileReader.readFile).toHaveBeenCalledWith(
         'docs/architecture/API-OVERVIEW.md',
       );
+    });
+
+    it('should return null when apiOverview path not configured', async () => {
+      projectContext.getContext.mockResolvedValue(
+        createProjectContext({
+          docsLayout: { ...defaultDocsLayout, apiOverview: null },
+        }),
+      );
+
+      const result = await sut.getApiOverview();
+
+      expect(result).toBeNull();
     });
   });
 

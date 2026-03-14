@@ -80,6 +80,18 @@ describe('FrameworkDetectorService', () => {
     expect(result).toBe('laravel');
   });
 
+  it('should return null for invalid composer.json', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') return Promise.resolve(null);
+      if (path === 'composer.json') return Promise.resolve('invalid json');
+      return Promise.resolve(null);
+    });
+
+    const result = await sut.detect();
+
+    expect(result).toBeNull();
+  });
+
   it('should return null when no framework detected', async () => {
     fileReader.readFile.mockResolvedValue(null);
 
@@ -97,5 +109,31 @@ describe('FrameworkDetectorService', () => {
     const result = await sut.detect();
 
     expect(result).toBeNull();
+  });
+
+  it('should evict cache when max size reached', async () => {
+    let rootIndex = 0;
+    const projectRootContext = {
+      getProjectRoot: jest
+        .fn()
+        .mockImplementation(() => `/root/${rootIndex++}`),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FrameworkDetectorService,
+        { provide: FileReaderService, useValue: fileReader },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
+      ],
+    }).compile();
+
+    const detector = module.get(FrameworkDetectorService);
+    fileReader.readFile.mockResolvedValue(null);
+
+    for (let i = 0; i < 12; i++) {
+      await detector.detect();
+    }
+
+    expect(fileReader.readFile).toHaveBeenCalled();
   });
 });
