@@ -23,6 +23,7 @@ export class GitChangelogService {
   async generateChangelog(): Promise<string | null> {
     try {
       const tags = await this.gitContext.getTags('asc');
+
       const lines: string[] = ['# Changelog', ''];
 
       if (tags.length === 0) {
@@ -39,6 +40,7 @@ export class GitChangelogService {
         tags[tags.length - 1],
         'HEAD',
       );
+
       if (unreleasedCommits.length > 0) {
         lines.push('## [Unreleased]', '');
         lines.push(...this.formatCommits(unreleasedCommits));
@@ -78,7 +80,8 @@ export class GitChangelogService {
         bySection.set(section, []);
       }
       const displayMessage = match ? match[3].trim() : c.message;
-      bySection.get(section)!.push(`- ${displayMessage}`);
+      const arr = bySection.get(section);
+      if (arr) arr.push(`- ${displayMessage}`);
     }
 
     const sectionOrder = [
@@ -92,6 +95,7 @@ export class GitChangelogService {
 
     for (const section of sectionOrder) {
       const items = bySection.get(section);
+
       if (!items || items.length === 0) continue;
 
       if (section !== 'Other' || bySection.size > 1) {
@@ -105,7 +109,9 @@ export class GitChangelogService {
       (s) => !sectionOrder.includes(s),
     );
     for (const section of remaining) {
-      const items = bySection.get(section)!;
+      const items = bySection.get(section);
+
+      if (!items) continue;
       result.push(`### ${section}`, '');
       result.push(...items);
       result.push('');

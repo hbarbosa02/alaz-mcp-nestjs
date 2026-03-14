@@ -125,7 +125,9 @@ describe('McpLoggerService', () => {
   it('should call logger.warn when appendFileSync throws', () => {
     const warnSpy = jest.spyOn(sut['logger'], 'warn').mockImplementation();
     jest.mocked(fs.appendFileSync).mockImplementation(() => {
-      throw new Error('write failed');
+      throw new Error(
+        'Simulated appendFileSync failure for McpLoggerService file write test',
+      );
     });
 
     sut.logPromptReceived('test', {});

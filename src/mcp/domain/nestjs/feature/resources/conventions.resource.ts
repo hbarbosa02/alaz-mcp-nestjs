@@ -3,6 +3,7 @@ import { Resource } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { requireAdapter } from '@/mcp/util/require-adapter.util';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 @Injectable()
@@ -24,6 +25,7 @@ export class ConventionsResource {
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
       this.adapterRegistry.getUnsupportedMessage(framework);
+
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(
         'alaz://conventions/api',
@@ -35,12 +37,17 @@ export class ConventionsResource {
         unsupportedMsg,
       );
     }
-    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const docReader = requireAdapter(
+      this.adapterRegistry.getDocumentationReader(framework),
+      'DocumentationReader',
+      framework,
+    );
     const apiConv = await docReader.getApiConventions();
     const rules = await docReader.getCursorRules();
     const apiRule = rules['api-conventions.mdc'] ?? '';
 
     const parts: string[] = ['# API Conventions', ''];
+
     if (apiConv) parts.push(apiConv, '');
     if (apiRule) parts.push('## Cursor Rule', '', apiRule);
     const result = parts.join('\n') || 'Documentation not found.';
@@ -63,6 +70,7 @@ export class ConventionsResource {
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
       this.adapterRegistry.getUnsupportedMessage(framework);
+
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(
         'alaz://conventions/testing',
@@ -74,12 +82,17 @@ export class ConventionsResource {
         unsupportedMsg,
       );
     }
-    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const docReader = requireAdapter(
+      this.adapterRegistry.getDocumentationReader(framework),
+      'DocumentationReader',
+      framework,
+    );
     const testingDoc = await docReader.getTestingDocs();
     const rules = await docReader.getCursorRules();
     const testingRule = rules['testing-patterns.mdc'] ?? '';
 
     const parts: string[] = ['# Testing Conventions', ''];
+
     if (testingDoc) parts.push(testingDoc, '');
     if (testingRule) parts.push('## Cursor Rule', '', testingRule);
     const result = parts.join('\n') || 'Documentation not found.';
@@ -105,6 +118,7 @@ export class ConventionsResource {
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
       this.adapterRegistry.getUnsupportedMessage(framework);
+
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(
         'alaz://conventions/cqrs',
@@ -116,7 +130,11 @@ export class ConventionsResource {
         unsupportedMsg,
       );
     }
-    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
+    const docReader = requireAdapter(
+      this.adapterRegistry.getDocumentationReader(framework),
+      'DocumentationReader',
+      framework,
+    );
     const cqrsDoc = await docReader.readDoc(
       'docs/architecture/CQRS-AND-JOBS.md',
     );
@@ -124,6 +142,7 @@ export class ConventionsResource {
     const cqrsRule = rules['cqrs-and-jobs.mdc'] ?? '';
 
     const parts: string[] = ['# CQRS and Jobs', ''];
+
     if (cqrsDoc) parts.push(cqrsDoc, '');
     if (cqrsRule) parts.push('## Cursor Rule', '', cqrsRule);
     const result = parts.join('\n') || 'Documentation not found.';

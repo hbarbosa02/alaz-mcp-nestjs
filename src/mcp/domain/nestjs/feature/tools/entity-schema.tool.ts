@@ -5,6 +5,7 @@ import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framew
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
 const projectRootParam = z
   .string()
@@ -45,6 +46,7 @@ export class EntitySchemaTool {
       const framework = await this.frameworkDetector.detect();
       const unsupportedMsg =
         this.adapterRegistry.getUnsupportedMessage(framework);
+
       if (unsupportedMsg) {
         this.mcpLogger.logToolResult(
           'get-entity-schema',
@@ -52,23 +54,32 @@ export class EntitySchemaTool {
         );
         return unsupportedMsg;
       }
-      const entityIntrospector =
-        this.adapterRegistry.getEntityIntrospector(framework)!;
+      const entityIntrospector = requireAdapter(
+        this.adapterRegistry.getEntityIntrospector(framework),
+        'EntityIntrospector',
+        framework,
+      );
       const schema = await entityIntrospector.getEntitySchema(
         params.entityName,
         params.orm,
       );
+
       if (!schema) {
-        const notFoundMsg = `Entity "${params.entityName}" not found.`;
-        this.mcpLogger.logToolResult('get-entity-schema', notFoundMsg.length);
-        return notFoundMsg;
+        const entityNotFoundMessage = `Entity "${params.entityName}" not found.`;
+        this.mcpLogger.logToolResult(
+          'get-entity-schema',
+          entityNotFoundMessage.length,
+        );
+        return entityNotFoundMessage;
       }
 
+      const tableLine = schema.tableName
+        ? [`Table: \`${schema.tableName}\``, '']
+        : [];
       const lines: string[] = [
         `# Entity: ${schema.name}`,
         `File: \`${schema.filePath}\``,
-        schema.tableName ? `Table: \`${schema.tableName}\`` : '',
-        '',
+        ...tableLine,
         '## Properties',
         '| Name | Type | Nullable | Unique |',
         '|------|------|----------|--------|',

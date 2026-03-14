@@ -17,7 +17,6 @@ import { ProjectRootMiddleware } from '@/mcp/core/feature/middleware/project-roo
       version: '1.0.0',
       transport: [McpTransportType.STREAMABLE_HTTP, McpTransportType.SSE],
       streamableHttp: {
-        statelessMode: false,
         enableJsonResponse: true,
       },
     }),

@@ -5,6 +5,7 @@ import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framew
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
 const projectRootParam = z
   .string()
@@ -40,12 +41,16 @@ export class EndpointListerTool {
       const framework = await this.frameworkDetector.detect();
       const unsupportedMsg =
         this.adapterRegistry.getUnsupportedMessage(framework);
+
       if (unsupportedMsg) {
         this.mcpLogger.logToolResult('list-endpoints', unsupportedMsg.length);
         return unsupportedMsg;
       }
-      const codebaseAnalyzer =
-        this.adapterRegistry.getCodebaseAnalyzer(framework)!;
+      const codebaseAnalyzer = requireAdapter(
+        this.adapterRegistry.getCodebaseAnalyzer(framework),
+        'CodebaseAnalyzer',
+        framework,
+      );
       const endpoints = await codebaseAnalyzer.getEndpoints(params.moduleName);
 
       const lines = [

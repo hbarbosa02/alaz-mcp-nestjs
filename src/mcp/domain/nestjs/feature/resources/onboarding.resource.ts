@@ -3,6 +3,7 @@ import { Resource } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { requireAdapter } from '@/mcp/util/require-adapter.util';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 @Injectable()
@@ -24,6 +25,7 @@ export class OnboardingResource {
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
       this.adapterRegistry.getUnsupportedMessage(framework);
+
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(
         'alaz://onboarding',
@@ -35,9 +37,23 @@ export class OnboardingResource {
         unsupportedMsg,
       );
     }
-    const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
-    const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
-    const projectContext = this.adapterRegistry.getProjectContext(framework)!;
+
+    const docReader = requireAdapter(
+      this.adapterRegistry.getDocumentationReader(framework),
+      'DocumentationReader',
+      framework,
+    );
+    const moduleRegistry = requireAdapter(
+      this.adapterRegistry.getModuleRegistry(framework),
+      'ModuleRegistry',
+      framework,
+    );
+    const projectContext = requireAdapter(
+      this.adapterRegistry.getProjectContext(framework),
+      'ProjectContext',
+      framework,
+    );
+
     const context = await projectContext.getContext();
     const readme = await docReader.getReadme();
     const overview = await docReader.getApiOverview();
@@ -68,11 +84,13 @@ export class OnboardingResource {
     sections.push('');
     sections.push('| Module | Controller | Entities |');
     sections.push('|--------|------------|-----------|');
+
     for (const m of modules.slice(0, 20)) {
       sections.push(
         `| ${m.name} | ${m.hasController ? '✓' : '-'} | ${m.entityNames.length} |`,
       );
     }
+
     if (modules.length > 20) {
       sections.push(`| ... and ${modules.length - 20} more |`);
     }
@@ -81,6 +99,11 @@ export class OnboardingResource {
     sections.push('## Executable Prompts (require developer confirmation)');
     sections.push(
       'Prompts `create-module`, `create-endpoint`, `update-documentation`, and `investigate-bug` return executable steps. The agent MUST ask the developer "Should I execute these changes?" and wait for explicit approval before proceeding. The output includes a confirmation header.',
+    );
+    sections.push('');
+    sections.push('## Prompt-as-Tool (Cursor compatibility)');
+    sections.push(
+      'Cursor does not expose prompt invocation — only tools are callable. Use these tools to get the same content: `get-create-module-guide`, `get-create-endpoint-guide`, `get-update-docs-guide`, `get-code-review-checklist`, `get-investigate-bug-guide`.',
     );
     sections.push('');
     sections.push('## Available Resources');

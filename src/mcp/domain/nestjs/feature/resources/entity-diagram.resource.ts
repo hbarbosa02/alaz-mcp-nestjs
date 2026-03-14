@@ -3,6 +3,7 @@ import { ResourceTemplate } from '@rekog/mcp-nest';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { requireAdapter } from '@/mcp/util/require-adapter.util';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 
 @Injectable()
@@ -25,24 +26,31 @@ export class EntityDiagramResource {
     const framework = await this.frameworkDetector.detect();
     const unsupportedMsg =
       this.adapterRegistry.getUnsupportedMessage(framework);
+
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
       return unsupportedMsg;
     }
-    const entityIntrospector =
-      this.adapterRegistry.getEntityIntrospector(framework)!;
+    const entityIntrospector = requireAdapter(
+      this.adapterRegistry.getEntityIntrospector(framework),
+      'EntityIntrospector',
+      framework,
+    );
     const schema = await entityIntrospector.getEntitySchema(params.entityName);
+
     if (!schema) {
-      const notFoundMsg = `Entity "${params.entityName}" not found.`;
-      this.mcpLogger.logResourceResult(uri, notFoundMsg.length);
-      return toReadResourceResult(uri, 'text/markdown', notFoundMsg);
+      const entityNotFoundMessage = `Entity "${params.entityName}" not found.`;
+      this.mcpLogger.logResourceResult(uri, entityNotFoundMessage.length);
+      return toReadResourceResult(uri, 'text/markdown', entityNotFoundMessage);
     }
 
+    const tableLine = schema.tableName
+      ? [`Table: \`${schema.tableName}\``, '']
+      : [];
     const lines: string[] = [
       `# Entity: ${schema.name}`,
       `File: \`${schema.filePath}\``,
-      schema.tableName ? `Table: \`${schema.tableName}\`` : '',
-      '',
+      ...tableLine,
       '## Properties',
       '| Name | Type | Nullable | Unique |',
       '|------|------|----------|--------|',

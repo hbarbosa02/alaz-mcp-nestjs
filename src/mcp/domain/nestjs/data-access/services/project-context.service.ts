@@ -111,6 +111,7 @@ export class ProjectContextService implements IProjectContext {
 
   private async detectProjectName(): Promise<string> {
     const pkg = await this.getPackageJson();
+
     if (!pkg || typeof pkg.name !== 'string') return 'NestJS Project';
     return pkg.name;
   }
@@ -141,12 +142,15 @@ export class ProjectContextService implements IProjectContext {
     );
     const hasTypeORM = Object.keys(deps).includes('typeorm');
     const hasObjection = Object.keys(deps).includes('objection');
+
     let orm: OrmType = null;
+
     if (hasMikroORM) orm = 'mikroorm';
     else if (hasTypeORM) orm = 'typeorm';
     else if (hasObjection) orm = 'objection';
 
     let database: string | null = null;
+
     if (deps['pg']) database = 'PostgreSQL';
     else if (deps['mysql2']) database = 'MySQL';
     else if (deps['mongodb']) database = 'MongoDB';
@@ -158,11 +162,13 @@ export class ProjectContextService implements IProjectContext {
     const bullmq = Object.keys(deps).includes('bullmq');
 
     let validation: ValidationLibrary = null;
+
     if (deps['nestjs-zod']) validation = 'nestjs-zod';
     else if (deps['class-validator']) validation = 'class-validator';
 
     let testFramework: TestFramework = null;
     let testFrameworkVersion: string | null = null;
+
     if (deps['jest']) {
       testFramework = 'jest';
       testFrameworkVersion = deps['jest'] ?? null;
@@ -199,16 +205,18 @@ export class ProjectContextService implements IProjectContext {
   }
 
   private async detectModulePattern(): Promise<ModulePattern> {
-    // Check domain-driven: src/*/feature/*.module.ts
+    // Domain-driven layout: each domain has feature/ with *.module.ts
     const domainDrivenFiles = await this.fileReader.readGlob(
       'src/*/feature/*.module.ts',
     );
+
     if (domainDrivenFiles.length > 0) return 'domain-driven';
 
-    // Check nested: src/modules/*/*.module.ts
+    // Nested layout: modules live under src/modules/
     const nestedFiles = await this.fileReader.readGlob(
       'src/modules/*/*.module.ts',
     );
+
     if (nestedFiles.length > 0) return 'nested';
 
     // Default to flat: src/*/*.module.ts or src/*/**/*.module.ts
@@ -327,6 +335,7 @@ export class ProjectContextService implements IProjectContext {
 
     for (const filePath of allFiles) {
       const content = await this.fileReader.readFile(filePath);
+
       if (!content) continue;
       const match = content.match(
         /export\s+class\s+(\w+)\s+extends\s+(?:.*?)?HttpException/,
@@ -340,12 +349,14 @@ export class ProjectContextService implements IProjectContext {
 
   private async detectPathAliases(): Promise<Record<string, string>> {
     const content = await this.fileReader.readFile('tsconfig.json');
+
     if (!content) return {};
     try {
       const tsconfig = JSON.parse(content) as {
         compilerOptions?: { paths?: Record<string, string> };
       };
       const paths = tsconfig.compilerOptions?.paths;
+
       if (!paths || typeof paths !== 'object') return {};
       return paths;
     } catch {

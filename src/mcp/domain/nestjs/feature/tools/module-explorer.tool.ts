@@ -5,6 +5,7 @@ import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framew
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
 const projectRootParam = z
   .string()
@@ -32,11 +33,16 @@ export class ModuleExplorerTool {
       const framework = await this.frameworkDetector.detect();
       const unsupportedMsg =
         this.adapterRegistry.getUnsupportedMessage(framework);
+
       if (unsupportedMsg) {
         this.mcpLogger.logToolResult('list-modules', unsupportedMsg.length);
         return unsupportedMsg;
       }
-      const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
+      const moduleRegistry = requireAdapter(
+        this.adapterRegistry.getModuleRegistry(framework),
+        'ModuleRegistry',
+        framework,
+      );
       const modules = await moduleRegistry.listModules();
       const lines = [
         '| Module | Controller | Entities | Tests | Docs |',
@@ -84,15 +90,29 @@ export class ModuleExplorerTool {
         );
         return unsupportedMsg;
       }
-      const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
-      const docReader = this.adapterRegistry.getDocumentationReader(framework)!;
-      const codebaseAnalyzer =
-        this.adapterRegistry.getCodebaseAnalyzer(framework)!;
+      const moduleRegistry = requireAdapter(
+        this.adapterRegistry.getModuleRegistry(framework),
+        'ModuleRegistry',
+        framework,
+      );
+      const docReader = requireAdapter(
+        this.adapterRegistry.getDocumentationReader(framework),
+        'DocumentationReader',
+        framework,
+      );
+      const codebaseAnalyzer = requireAdapter(
+        this.adapterRegistry.getCodebaseAnalyzer(framework),
+        'CodebaseAnalyzer',
+        framework,
+      );
       const mod = await moduleRegistry.getModule(params.moduleName);
       if (!mod) {
-        const notFoundMsg = `Module "${params.moduleName}" not found. Use list-modules to see available modules.`;
-        this.mcpLogger.logToolResult('get-module-detail', notFoundMsg.length);
-        return notFoundMsg;
+        const moduleNotFoundMessage = `Module "${params.moduleName}" not found. Use list-modules to see available modules.`;
+        this.mcpLogger.logToolResult(
+          'get-module-detail',
+          moduleNotFoundMessage.length,
+        );
+        return moduleNotFoundMessage;
       }
 
       const doc = await docReader.getFeatureDoc(params.moduleName);

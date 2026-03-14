@@ -6,6 +6,7 @@ import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framew
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
+import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
 const projectRootParam = z
   .string()
@@ -40,17 +41,26 @@ export class TestInfoTool {
       const framework = await this.frameworkDetector.detect();
       const unsupportedMsg =
         this.adapterRegistry.getUnsupportedMessage(framework);
+
       if (unsupportedMsg) {
         this.mcpLogger.logToolResult('get-test-summary', unsupportedMsg.length);
         return unsupportedMsg;
       }
-      const moduleRegistry = this.adapterRegistry.getModuleRegistry(framework)!;
+      const moduleRegistry = requireAdapter(
+        this.adapterRegistry.getModuleRegistry(framework),
+        'ModuleRegistry',
+        framework,
+      );
       if (params.moduleName) {
         const mod = await moduleRegistry.getModule(params.moduleName);
+
         if (!mod) {
-          const notFoundMsg = `Module "${params.moduleName}" not found.`;
-          this.mcpLogger.logToolResult('get-test-summary', notFoundMsg.length);
-          return notFoundMsg;
+          const moduleNotFoundMessage = `Module "${params.moduleName}" not found.`;
+          this.mcpLogger.logToolResult(
+            'get-test-summary',
+            moduleNotFoundMessage.length,
+          );
+          return moduleNotFoundMessage;
         }
         const specFiles = await this.fileReader.readGlob(
           `src/${params.moduleName}/**/*.spec.ts`,
