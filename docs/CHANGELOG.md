@@ -2,8 +2,13 @@
 
 ## [Unreleased]
 
+### Other
+
+- add .cursorignore to exclude agent access to node_modules, env files, and credentials (security, performance)
+
 ### Added
 
+- .cursorignore to exclude node_modules, .env, and credential files from agent access
 - Dockerfile and docker-compose for local execution (HTTP and STDIO modes)
 - Docker usage documentation in README, MCP-SERVER.md, and MCP-SETUP.md
 - E2E tests for `prompts/get`: HTTP (MCP SDK Client) and STDIO

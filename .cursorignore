@@ -1,0 +1,16 @@
+# Exclude from agent access (security, performance)
+node_modules/
+**/node_modules/
+# Environment and secrets
+.env
+.env.*
+.env_example
+.env.example
+.env.local
+.env.development
+.env.test
+.env.production
+*.key
+*.pem
+**/credentials.json
+**/secrets.json
