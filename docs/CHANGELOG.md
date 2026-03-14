@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Added
+
+- Dockerfile and docker-compose for local execution (HTTP and STDIO modes)
+- Docker usage documentation in README, MCP-SERVER.md, and MCP-SETUP.md
+- E2E tests for `prompts/get`: HTTP (MCP SDK Client) and STDIO
+- `toPromptResult()` helper for MCP GetPromptResult format compliance
+
+### Changed
+
+- migrate test folder to DDD-aligned structure: unit tests mirror src (core, domain/nestjs, domain/shared, util, feature), E2E tests grouped by transport under e2e/transports/, add @test/* path alias
+- FrameworkDetectorService: per-project-root caching to avoid repeated file I/O (package.json, composer.json)
+- ProjectRootContextService: fallback to process.env.PROJECT_ROOT when AsyncLocalStorage context is lost (STDIO resources)
+- Prompts return MCP GetPromptResult format (`{ messages: [{ role, content }] }`) instead of plain string
+- Streamable HTTP: `enableJsonResponse: true` for JSON responses (fixes prompts/get over HTTP)
+
 ## [1.3.0] - 2026-03-13
 
 ### Added

@@ -3,6 +3,7 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
+      "@test/*": ["test/*"],
       "@mcp/core/*": ["src/mcp/core/*"],
       "@mcp/domain/nestjs/*": ["src/mcp/domain/nestjs/*"],
       "@mcp/domain/angular/*": ["src/mcp/domain/angular/*"],

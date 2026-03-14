@@ -7,6 +7,55 @@ Step-by-step guide to configure the Alaz MCP Server with Cursor, Claude Desktop,
 - Node.js 18+
 - Target NestJS project to analyze (or use the current workspace)
 
+## 0. Docker (optional)
+
+You can run the server with Docker instead of installing dependencies locally.
+
+### HTTP mode with Docker
+
+```bash
+cd /path/to/alaz-mcp-nestjs
+docker compose up --build
+```
+
+The server runs at `http://localhost:3100`. Use the same mcp.json configuration as Option A below (HTTP).
+
+### STDIO mode with Docker
+
+Run the container with the project to analyze mounted:
+
+```bash
+cd /path/to/alaz-mcp-nestjs
+docker compose run --rm -e PROJECT_ROOT=/workspace -v /path/to/your/nestjs-project:/workspace:ro app-stdio
+```
+
+For Cursor, configure mcp.json to spawn the Docker process:
+
+```json
+{
+  "mcpServers": {
+    "alaz-nestjs-stdio": {
+      "command": "docker",
+      "args": [
+        "compose",
+        "run",
+        "--rm",
+        "-e",
+        "PROJECT_ROOT=/workspace",
+        "-v",
+        "${workspaceFolder}:/workspace:ro",
+        "app-stdio"
+      ],
+      "cwd": "/path/to/alaz-mcp-nestjs"
+    }
+  }
+}
+```
+
+Replace `/path/to/alaz-mcp-nestjs` with the absolute path to the Alaz MCP project.
+
+---
+
 ## 1. Install and run the server
 
 ```bash
@@ -233,9 +282,12 @@ All transports are covered by E2E tests (`npm run test:e2e`):
 
 | Transport | Test file | Validated |
 |-----------|-----------|-----------|
-| Streamable HTTP | `test/e2e/http/mcp-http.e2e-spec.ts` | Connection, tools/list, resources/list, prompts/list, all 7 tools |
-| SSE | `test/e2e/sse/mcp-sse.e2e-spec.ts` | Endpoint availability, X-Project-Root requirement |
-| STDIO | `test/e2e/stdio/mcp-stdio.e2e-spec.ts` | Initialize, tools/list, all 7 tools/call |
+| Streamable HTTP | `test/e2e/transports/http/mcp-http.e2e-spec.ts` | Connection, tools/list, resources/list, resource templates, prompts/list, prompts/get (create-module via SDK Client), all 7 tools, resources (onboarding, changelog, architecture, conventions/api, modules/user, modules/user/endpoints, entities/User) |
+| HTTP simple | `test/e2e/transports/http/mcp-http-simple.e2e-spec.ts` | Bootstrap, initialize session, reject without X-Project-Root |
+| SSE | `test/e2e/transports/sse/mcp-sse.e2e-spec.ts` | Endpoint at /sse, X-Project-Root requirement |
+| STDIO | `test/e2e/transports/stdio/mcp-stdio.e2e-spec.ts` | Initialize, tools/list, all 7 tools/call, resources/list, resources/read (alaz://onboarding), prompts/get (create-module) |
+
+**Note:** `prompts/get` is E2E-tested via HTTP (MCP SDK Client) and STDIO. Prompts return MCP GetPromptResult format (`{ messages: [...] }`).
 
 ---
 
