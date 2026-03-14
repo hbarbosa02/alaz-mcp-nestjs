@@ -89,6 +89,13 @@ See [MCP-SETUP.md](./MCP-SETUP.md) for mcp.json configuration with Docker.
 | `check-conventions` | `moduleName`, `projectRoot?` | Validates project conventions |
 | `get-recent-changes` | `days?`, `projectRoot?` | Recent commits (default 7 days) |
 | `get-test-summary` | `moduleName?`, `projectRoot?` | Test summary |
+| `get-create-module-guide` | `moduleName`, `hasController`, `hasEntity`, `projectRoot?` | Step-by-step guide to create a module (tool equivalent of `create-module` prompt) |
+| `get-create-endpoint-guide` | `moduleName`, `httpMethod`, `description`, `projectRoot?` | Step-by-step guide to add an endpoint (tool equivalent of `create-endpoint` prompt) |
+| `get-update-docs-guide` | `moduleName`, `projectRoot?` | Guide to update module documentation (tool equivalent of `update-documentation` prompt) |
+| `get-code-review-checklist` | `moduleName`, `projectRoot?` | Code review checklist (tool equivalent of `code-review-checklist` prompt) |
+| `get-investigate-bug-guide` | `moduleName`, `bugDescription`, `projectRoot?` | Guide to investigate a bug (tool equivalent of `investigate-bug` prompt) |
+
+**Note:** The `get-*-guide` and `get-code-review-checklist` tools return the same content as the corresponding prompts. Use these tools when the MCP client (e.g. Cursor) does not support prompt invocation — only tools are callable via `call_mcp_tool`.
 
 ## Resources
 
@@ -121,6 +128,8 @@ See [MCP-SETUP.md](./MCP-SETUP.md) for mcp.json configuration with Docker.
 | `update-documentation` | `moduleName` | Guide to update docs. Output includes executable steps — agent MUST ask developer for confirmation before executing. |
 | `code-review-checklist` | `moduleName` | Review checklist |
 | `investigate-bug` | `moduleName`, `bugDescription` | Guide to investigate a bug. Output includes executable steps — agent MUST ask developer for confirmation before executing. |
+
+**Cursor compatibility:** Cursor does not expose prompt invocation to the agent — only tools are callable. Use the corresponding `get-*-guide` / `get-code-review-checklist` tools instead (see Tools table above).
 
 ## Project root
 

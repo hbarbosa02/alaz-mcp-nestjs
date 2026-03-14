@@ -22,7 +22,7 @@ flowchart TB
 
     subgraph MCP["Alaz MCP Server"]
         subgraph Feature["MCP Feature Layer"]
-            Tools["Tools (7)"]
+            Tools["Tools (12)"]
             Resources["Resources (8)"]
             Prompts["Prompts (5)"]
         end
@@ -265,7 +265,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-    subgraph Tools
+    subgraph Tools["Context Tools"]
         T1[list-modules]
         T2[get-module-detail]
         T3[get-entity-schema]
@@ -275,12 +275,21 @@ flowchart LR
         T7[get-test-summary]
     end
 
+    subgraph GuideTools["Prompt-as-Tool (Cursor-compatible)"]
+        T8[get-create-module-guide]
+        T9[get-create-endpoint-guide]
+        T10[get-update-docs-guide]
+        T11[get-code-review-checklist]
+        T12[get-investigate-bug-guide]
+    end
+
     subgraph Services
         MR[ModuleRegistryService]
         EI[EntityIntrospectorService]
         CA[CodebaseAnalyzerService]
         DR[DocumentationReaderService]
         GC[GitContextService]
+        Prompts[Prompts]
     end
 
     T1 --> MR
@@ -292,6 +301,11 @@ flowchart LR
     T5 --> CA
     T6 --> GC
     T7 --> CA
+    T8 --> Prompts
+    T9 --> Prompts
+    T10 --> Prompts
+    T11 --> Prompts
+    T12 --> Prompts
 ```
 
 ## 10. Resources & Prompts Overview
@@ -335,14 +349,14 @@ flowchart TB
 | Use Case | Tools/Resources | Description |
 |----------|-----------------|-------------|
 | **Onboarding** | `alaz://onboarding` | Aggregated guide: stack, modules, resources |
-| **Module creation** | `create-module` prompt | Template for new NestJS modules |
-| **Endpoint creation** | `create-endpoint` prompt | Template for new HTTP endpoints |
-| **Documentation** | `update-documentation` prompt, `alaz://modules/{name}` | Guide doc updates |
+| **Module creation** | `create-module` prompt, `get-create-module-guide` tool | Template for new NestJS modules. Use the tool when Cursor does not support prompt invocation |
+| **Endpoint creation** | `create-endpoint` prompt, `get-create-endpoint-guide` tool | Template for new HTTP endpoints. Use the tool when Cursor does not support prompt invocation |
+| **Documentation** | `update-documentation` prompt, `get-update-docs-guide` tool, `alaz://modules/{name}` | Guide doc updates. Use the tool when Cursor does not support prompt invocation |
 | **Entity inspection** | `get-entity-schema`, `alaz://entities/{name}` | ORM schema (MikroORM, TypeORM, Objection) |
 | **Convention check** | `check-conventions` | Validate project conventions |
 | **Recent changes** | `get-recent-changes`, `alaz://changelog` | Commits and versioned changelog |
-| **Bug investigation** | `investigate-bug` prompt | Debugging steps |
-| **Code review** | `code-review-checklist` prompt | Review criteria |
+| **Bug investigation** | `investigate-bug` prompt, `get-investigate-bug-guide` tool | Debugging steps. Use the tool when Cursor does not support prompt invocation |
+| **Code review** | `code-review-checklist` prompt, `get-code-review-checklist` tool | Review criteria. Use the tool when Cursor does not support prompt invocation |
 
 ## 12. File Structure
 

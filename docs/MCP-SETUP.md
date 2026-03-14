@@ -274,6 +274,14 @@ Use these prompts in Cursor, Claude, or Copilot to request information directly 
 - *"Use code-review-checklist with moduleName=user."*
 - *"Run investigate-bug with moduleName=user, bugDescription=Login fails with 500."*
 
+### Prompt-as-tool (Cursor — use when prompts are not available)
+
+- *"Use get-create-module-guide with moduleName=billing, hasController=true, hasEntity=true."*
+- *"Use get-create-endpoint-guide for moduleName=user, httpMethod=POST, description=Create user."*
+- *"Use get-update-docs-guide for moduleName=account."*
+- *"Use get-code-review-checklist with moduleName=user."*
+- *"Use get-investigate-bug-guide with moduleName=user, bugDescription=Login fails with 500."*
+
 ---
 
 ## 6. Transport validation
@@ -282,10 +290,10 @@ All transports are covered by E2E tests (`npm run test:e2e`):
 
 | Transport | Test file | Validated |
 |-----------|-----------|-----------|
-| Streamable HTTP | `test/e2e/transports/http/mcp-http.e2e-spec.ts` | Connection, tools/list, resources/list, resource templates, prompts/list, prompts/get (create-module via SDK Client), all 7 tools, resources (onboarding, changelog, architecture, conventions/api, modules/user, modules/user/endpoints, entities/User) |
+| Streamable HTTP | `test/e2e/transports/http/mcp-http.e2e-spec.ts` | Connection, tools/list (12 tools), tools/call (8 tools), resources/list, resource templates, prompts/list, prompts/get (create-module via SDK Client), resources (onboarding, changelog, architecture, conventions/api, modules/user, modules/user/endpoints, entities/User) |
 | HTTP simple | `test/e2e/transports/http/mcp-http-simple.e2e-spec.ts` | Bootstrap, initialize session, reject without X-Project-Root |
 | SSE | `test/e2e/transports/sse/mcp-sse.e2e-spec.ts` | Endpoint at /sse, X-Project-Root requirement |
-| STDIO | `test/e2e/transports/stdio/mcp-stdio.e2e-spec.ts` | Initialize, tools/list, all 7 tools/call, resources/list, resources/read (alaz://onboarding), prompts/get (create-module) |
+| STDIO | `test/e2e/transports/stdio/mcp-stdio.e2e-spec.ts` | Initialize, tools/list, tools/call (7 context tools), resources/list, resources/read (alaz://onboarding), prompts/get (create-module) |
 
 **Note:** `prompts/get` is E2E-tested via HTTP (MCP SDK Client) and STDIO. Prompts return MCP GetPromptResult format (`{ messages: [...] }`).
 
