@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
+import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
@@ -20,22 +21,14 @@ export class ArchitectureResource {
     description: 'Project architecture overview',
     mimeType: 'text/markdown',
   })
-  async getArchitecture() {
+  async getArchitecture(): Promise<ReadResourceResult> {
     this.mcpLogger.logResourceRead('alaz://architecture', {});
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
-      this.mcpLogger.logResourceResult(
-        'alaz://architecture',
-        unsupportedMsg.length,
-      );
-      return toReadResourceResult(
-        'alaz://architecture',
-        'text/markdown',
-        unsupportedMsg,
-      );
+      this.mcpLogger.logResourceResult('alaz://architecture', unsupportedMsg.length);
+      return toReadResourceResult('alaz://architecture', 'text/markdown', unsupportedMsg);
     }
     const docReader = requireAdapter(
       this.adapterRegistry.getDocumentationReader(framework),
@@ -49,10 +42,8 @@ export class ArchitectureResource {
     );
     const content = await docReader.getApiOverview();
     const context = await projectContext.getContext();
-    const fallbackPath =
-      context.docsLayout.apiOverview ?? 'docs/architecture/API-OVERVIEW.md';
-    const result =
-      content ?? `# Architecture\n\nDocumentation not found at ${fallbackPath}`;
+    const fallbackPath = context.docsLayout.apiOverview ?? 'docs/architecture/API-OVERVIEW.md';
+    const result = content ?? `# Architecture\n\nDocumentation not found at ${fallbackPath}`;
     this.mcpLogger.logResourceResult('alaz://architecture', result.length);
     return toReadResourceResult('alaz://architecture', 'text/markdown', result);
   }

@@ -5,10 +5,7 @@ import { GitContextService } from '@/mcp/core/data-access/services/git-context.s
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
-const projectRootParam = z
-  .string()
-  .optional()
-  .describe('Path to NestJS project root. Overrides MCP config.');
+const projectRootParam = z.string().optional().describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class RecentChangesTool {
@@ -26,11 +23,8 @@ export class RecentChangesTool {
       projectRoot: projectRootParam,
     }),
   })
-  async getRecentChanges(params: {
-    days: number;
-    projectRoot?: string;
-  }): Promise<string> {
-    const doWork = async () => {
+  getRecentChanges(params: { days: number; projectRoot?: string }): Promise<string> {
+    const doWork = async (): Promise<string> => {
       this.mcpLogger.logToolInvoked('get-recent-changes', params);
       const commits = await this.gitContext.getRecentCommits(params.days);
 
@@ -46,9 +40,7 @@ export class RecentChangesTool {
         lines.push(`- Author: ${c.author}`);
         lines.push(`- Date: ${c.date}`);
         if (c.files.length > 0) {
-          lines.push(
-            `- Files: ${c.files.slice(0, 5).join(', ')}${c.files.length > 5 ? '...' : ''}`,
-          );
+          lines.push(`- Files: ${c.files.slice(0, 5).join(', ')}${c.files.length > 5 ? '...' : ''}`);
         }
         lines.push('');
       }

@@ -6,10 +6,7 @@ import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framew
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import {
-  createEntitySchema,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createEntitySchema, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('EntitySchemaTool', () => {
   let sut: EntitySchemaTool;
@@ -72,16 +69,11 @@ describe('EntitySchemaTool', () => {
   });
 
   it('should pass orm override when provided', async () => {
-    entityIntrospector.getEntitySchema.mockResolvedValue(
-      createEntitySchema({ filePath: 'src/user/user.entity.ts' }),
-    );
+    entityIntrospector.getEntitySchema.mockResolvedValue(createEntitySchema({ filePath: 'src/user/user.entity.ts' }));
 
     await sut.getEntitySchema({ entityName: 'User', orm: 'typeorm' });
 
-    expect(entityIntrospector.getEntitySchema).toHaveBeenCalledWith(
-      'User',
-      'typeorm',
-    );
+    expect(entityIntrospector.getEntitySchema).toHaveBeenCalledWith('User', 'typeorm');
   });
 
   it('should handle entity without tableName', async () => {

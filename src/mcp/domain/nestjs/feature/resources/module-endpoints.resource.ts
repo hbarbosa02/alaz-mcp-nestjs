@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
+import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
@@ -20,12 +21,11 @@ export class ModuleEndpointsResource {
     description: 'Module endpoints',
     mimeType: 'text/markdown',
   })
-  async getModuleEndpoints(params: { moduleName: string }) {
+  async getModuleEndpoints(params: { moduleName: string }): Promise<ReadResourceResult> {
     const uri = `alaz://modules/${params.moduleName}/endpoints`;
     this.mcpLogger.logResourceRead(uri, params);
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
@@ -49,9 +49,7 @@ export class ModuleEndpointsResource {
       return toReadResourceResult(uri, 'text/markdown', moduleNotFoundMessage);
     }
 
-    const endpoints = await codebaseAnalyzer.getModuleEndpoints(
-      params.moduleName,
-    );
+    const endpoints = await codebaseAnalyzer.getModuleEndpoints(params.moduleName);
 
     const lines = [
       `# Endpoints: ${params.moduleName}`,
@@ -60,9 +58,7 @@ export class ModuleEndpointsResource {
       '|--------|------|-------------|------|',
     ];
     for (const ep of endpoints) {
-      lines.push(
-        `| ${ep.method} | ${ep.path} | ${ep.permissions.join(', ') || '-'} | ${ep.authType} |`,
-      );
+      lines.push(`| ${ep.method} | ${ep.path} | ${ep.permissions.join(', ') || '-'} | ${ep.authType} |`);
     }
     const result = lines.join('\n');
     this.mcpLogger.logResourceResult(uri, result.length);

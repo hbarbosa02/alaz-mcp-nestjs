@@ -12,9 +12,7 @@ describe('GitContextService', () => {
   let sut: GitContextService;
   const projectRoot = path.resolve(__dirname, '../../../../../..');
 
-  async function createModule(
-    execFileOverride?: ExecFileAsyncFn,
-  ): Promise<TestingModule> {
+  async function createModule(execFileOverride?: ExecFileAsyncFn): Promise<TestingModule> {
     const projectRootContext = {
       getProjectRoot: jest.fn().mockReturnValue(projectRoot),
     } as unknown as jest.Mocked<ProjectRootContextService>;
@@ -22,9 +20,7 @@ describe('GitContextService', () => {
     const providers = [
       GitContextService,
       { provide: ProjectRootContextService, useValue: projectRootContext },
-      ...(execFileOverride
-        ? [{ provide: EXEC_FILE_ASYNC, useValue: execFileOverride }]
-        : []),
+      ...(execFileOverride ? [{ provide: EXEC_FILE_ASYNC, useValue: execFileOverride }] : []),
     ];
 
     return Test.createTestingModule({ providers }).compile();
@@ -64,9 +60,7 @@ describe('GitContextService', () => {
     });
 
     it('should return empty array when execFile fails', async () => {
-      const execMock: ExecFileAsyncFn = jest
-        .fn()
-        .mockRejectedValue(new Error('git failed'));
+      const execMock: ExecFileAsyncFn = jest.fn().mockRejectedValue(new Error('git failed'));
 
       const module = await createModule(execMock);
       sut = module.get(GitContextService);
@@ -79,8 +73,7 @@ describe('GitContextService', () => {
 
   describe('getModuleChanges', () => {
     it('should parse module-specific commits', async () => {
-      const stdout =
-        'abc123def456789012345678901234567890abcd|||Author|||2024-01-15|||chore: mcp\nsrc/mcp/foo.ts\n';
+      const stdout = 'abc123def456789012345678901234567890abcd|||Author|||2024-01-15|||chore: mcp\nsrc/mcp/foo.ts\n';
 
       const execMock: ExecFileAsyncFn = jest.fn().mockResolvedValue({
         stdout,
@@ -95,17 +88,11 @@ describe('GitContextService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].hash).toBe('abc123def456789012345678901234567890abcd');
       expect(result[0].files).toEqual(['src/mcp/foo.ts']);
-      expect(execMock).toHaveBeenCalledWith(
-        'git',
-        expect.arrayContaining(['src/mcp/']),
-        expect.any(Object),
-      );
+      expect(execMock).toHaveBeenCalledWith('git', expect.arrayContaining(['src/mcp/']), expect.any(Object));
     });
 
     it('should return empty array when execFile fails', async () => {
-      const execMock: ExecFileAsyncFn = jest
-        .fn()
-        .mockRejectedValue(new Error('git failed'));
+      const execMock: ExecFileAsyncFn = jest.fn().mockRejectedValue(new Error('git failed'));
 
       const module = await createModule(execMock);
       sut = module.get(GitContextService);
@@ -143,17 +130,11 @@ describe('GitContextService', () => {
       const result = await sut.getDiff('HEAD~1');
 
       expect(result).toBe('diff output');
-      expect(execMock).toHaveBeenCalledWith(
-        'git',
-        ['diff', 'HEAD~1'],
-        expect.any(Object),
-      );
+      expect(execMock).toHaveBeenCalledWith('git', ['diff', 'HEAD~1'], expect.any(Object));
     });
 
     it('should return empty string when execFile fails', async () => {
-      const execMock: ExecFileAsyncFn = jest
-        .fn()
-        .mockRejectedValue(new Error('git failed'));
+      const execMock: ExecFileAsyncFn = jest.fn().mockRejectedValue(new Error('git failed'));
 
       const module = await createModule(execMock);
       sut = module.get(GitContextService);
@@ -216,9 +197,7 @@ describe('GitContextService', () => {
     });
 
     it('should return empty array when execFile fails', async () => {
-      const execMock: ExecFileAsyncFn = jest
-        .fn()
-        .mockRejectedValue(new Error('git failed'));
+      const execMock: ExecFileAsyncFn = jest.fn().mockRejectedValue(new Error('git failed'));
 
       const module = await createModule(execMock);
       sut = module.get(GitContextService);
@@ -232,8 +211,7 @@ describe('GitContextService', () => {
   describe('getCommitsBetween', () => {
     it('should use fromRef..toRef when both provided', async () => {
       const execMock: ExecFileAsyncFn = jest.fn().mockResolvedValue({
-        stdout:
-          'abc123def456789012345678901234567890abcd|||A|||2024-01-15|||msg\n',
+        stdout: 'abc123def456789012345678901234567890abcd|||A|||2024-01-15|||msg\n',
         stderr: '',
       });
 
@@ -244,17 +222,12 @@ describe('GitContextService', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].hash).toBe('abc123def456789012345678901234567890abcd');
-      expect(execMock).toHaveBeenCalledWith(
-        'git',
-        expect.arrayContaining(['v1.0..v2.0']),
-        expect.any(Object),
-      );
+      expect(execMock).toHaveBeenCalledWith('git', expect.arrayContaining(['v1.0..v2.0']), expect.any(Object));
     });
 
     it('should use toRef only when fromRef undefined', async () => {
       const execMock = jest.fn().mockResolvedValue({
-        stdout:
-          'abc123def456789012345678901234567890abcd|||A|||2024-01-15|||msg\n',
+        stdout: 'abc123def456789012345678901234567890abcd|||A|||2024-01-15|||msg\n',
         stderr: '',
       });
 
@@ -263,17 +236,12 @@ describe('GitContextService', () => {
 
       await sut.getCommitsBetween(undefined, 'v2.0');
 
-      expect(execMock).toHaveBeenCalledWith(
-        'git',
-        expect.arrayContaining(['v2.0']),
-        expect.any(Object),
-      );
+      expect(execMock).toHaveBeenCalledWith('git', expect.arrayContaining(['v2.0']), expect.any(Object));
     });
 
     it('should use fromRef..HEAD when toRef undefined', async () => {
       const execMock: ExecFileAsyncFn = jest.fn().mockResolvedValue({
-        stdout:
-          'abc123def456789012345678901234567890abcd|||A|||2024-01-15|||msg\n',
+        stdout: 'abc123def456789012345678901234567890abcd|||A|||2024-01-15|||msg\n',
         stderr: '',
       });
 
@@ -282,17 +250,11 @@ describe('GitContextService', () => {
 
       await sut.getCommitsBetween('v1.0');
 
-      expect(execMock).toHaveBeenCalledWith(
-        'git',
-        expect.arrayContaining(['v1.0..HEAD']),
-        expect.any(Object),
-      );
+      expect(execMock).toHaveBeenCalledWith('git', expect.arrayContaining(['v1.0..HEAD']), expect.any(Object));
     });
 
     it('should return empty array when execFile fails', async () => {
-      const execMock: ExecFileAsyncFn = jest
-        .fn()
-        .mockRejectedValue(new Error('git failed'));
+      const execMock: ExecFileAsyncFn = jest.fn().mockRejectedValue(new Error('git failed'));
 
       const module = await createModule(execMock);
       sut = module.get(GitContextService);
@@ -333,9 +295,7 @@ describe('GitContextService', () => {
     });
 
     it('should return null when execFile fails', async () => {
-      const execMock: ExecFileAsyncFn = jest
-        .fn()
-        .mockRejectedValue(new Error('git failed'));
+      const execMock: ExecFileAsyncFn = jest.fn().mockRejectedValue(new Error('git failed'));
 
       const module = await createModule(execMock);
       sut = module.get(GitContextService);
@@ -348,8 +308,7 @@ describe('GitContextService', () => {
 
   describe('parseGitLog edge cases', () => {
     it('should handle commit with empty files', async () => {
-      const stdout =
-        'abc123def456789012345678901234567890abcd|||Author|||2024-01-15|||msg\n';
+      const stdout = 'abc123def456789012345678901234567890abcd|||Author|||2024-01-15|||msg\n';
 
       const execMock: ExecFileAsyncFn = jest.fn().mockResolvedValue({
         stdout,
@@ -417,9 +376,7 @@ describe('GitContextService', () => {
         getProjectRoot: jest.fn().mockReturnValue('/nonexistent/path/12345'),
       } as unknown as jest.Mocked<ProjectRootContextService>;
 
-      const execMock: ExecFileAsyncFn = jest
-        .fn()
-        .mockRejectedValue(new Error('not a git repo'));
+      const execMock: ExecFileAsyncFn = jest.fn().mockRejectedValue(new Error('not a git repo'));
 
       const module = await Test.createTestingModule({
         providers: [

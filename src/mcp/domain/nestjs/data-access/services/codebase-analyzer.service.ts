@@ -10,9 +10,7 @@ export class CodebaseAnalyzerService implements ICodebaseAnalyzer {
   constructor(private readonly fileReader: FileReaderService) {}
 
   async getEndpoints(moduleName?: string): Promise<EndpointInfo[]> {
-    const pattern = moduleName
-      ? `src/${moduleName}/**/*.controller.ts`
-      : 'src/**/*.controller.ts';
+    const pattern = moduleName ? `src/${moduleName}/**/*.controller.ts` : 'src/**/*.controller.ts';
     const files = await this.fileReader.readGlob(pattern);
     const endpoints: EndpointInfo[] = [];
 
@@ -25,15 +23,12 @@ export class CodebaseAnalyzerService implements ICodebaseAnalyzer {
       const controllerTag = this.extractApiTags(content);
       const authType = this.extractAuthType(content);
 
-      const methodRegex =
-        /@(Get|Post|Patch|Delete|Put)\s*(?:\(\s*['"]([^'"]*)['"]\s*\))?/g;
+      const methodRegex = /@(Get|Post|Patch|Delete|Put)\s*(?:\(\s*['"]([^'"]*)['"]\s*\))?/g;
       let m: RegExpExecArray | null;
       while ((m = methodRegex.exec(content)) !== null) {
         const method = m[1].toUpperCase();
         const methodPath = (m[2] ?? '').trim();
-        const fullPath =
-          controllerPath +
-          (methodPath ? `/${methodPath}`.replace(/\/+/g, '/') : '');
+        const fullPath = controllerPath + (methodPath ? `/${methodPath}`.replace(/\/+/g, '/') : '');
         const permissions = this.extractPermissionsForMethod(content, m.index);
 
         endpoints.push({
@@ -51,7 +46,7 @@ export class CodebaseAnalyzerService implements ICodebaseAnalyzer {
     return endpoints;
   }
 
-  async getModuleEndpoints(moduleName: string): Promise<EndpointInfo[]> {
+  getModuleEndpoints(moduleName: string): Promise<EndpointInfo[]> {
     return this.getEndpoints(moduleName);
   }
 
@@ -83,10 +78,7 @@ export class CodebaseAnalyzerService implements ICodebaseAnalyzer {
     return m ? m[1] : 'UnknownController';
   }
 
-  private extractPermissionsForMethod(
-    content: string,
-    methodIndex: number,
-  ): string[] {
+  private extractPermissionsForMethod(content: string, methodIndex: number): string[] {
     const beforeMethod = content.substring(0, methodIndex);
     const permMatches = beforeMethod.match(/@Permissions\s*\(\s*([^)]+)\s*\)/g);
     if (!permMatches) return [];

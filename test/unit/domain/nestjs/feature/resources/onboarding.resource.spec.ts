@@ -4,11 +4,7 @@ import { OnboardingResource } from '@/mcp/domain/nestjs/feature/resources/onboar
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import {
-  createModuleInfo,
-  createProjectContext,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createModuleInfo, createProjectContext, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('OnboardingResource', () => {
   let sut: OnboardingResource;
@@ -118,8 +114,6 @@ describe('OnboardingResource', () => {
 
     const result = await sut.getOnboarding();
 
-    expect((result.contents[0] as { text: string }).text).toContain(
-      '... and 5 more',
-    );
+    expect((result.contents[0] as { text: string }).text).toContain('... and 5 more');
   });
 });

@@ -55,9 +55,7 @@ export class Person extends Model {
 }
 `;
     const { relations } = sut.parse(content);
-    expect(
-      relations.some((r) => r.name === 'animals' && r.type === 'OneToMany'),
-    ).toBe(true);
+    expect(relations.some((r) => r.name === 'animals' && r.type === 'OneToMany')).toBe(true);
     expect(relations.some((r) => r.targetEntity === 'Animal')).toBe(true);
   });
 
@@ -100,9 +98,7 @@ export class Post extends Model {
 }
 `;
     const { relations } = sut.parse(content);
-    expect(
-      relations.some((r) => r.name === 'author' && r.type === 'ManyToOne'),
-    ).toBe(true);
+    expect(relations.some((r) => r.name === 'author' && r.type === 'ManyToOne')).toBe(true);
   });
 
   it('should parse ManyToManyRelation', () => {
@@ -118,9 +114,7 @@ export class User extends Model {
 }
 `;
     const { relations } = sut.parse(content);
-    expect(
-      relations.some((r) => r.name === 'roles' && r.type === 'ManyToMany'),
-    ).toBe(true);
+    expect(relations.some((r) => r.name === 'roles' && r.type === 'ManyToMany')).toBe(true);
   });
 
   it('should parse HasOneRelation', () => {
@@ -136,9 +130,7 @@ export class User extends Model {
 }
 `;
     const { relations } = sut.parse(content);
-    expect(
-      relations.some((r) => r.name === 'profile' && r.type === 'OneToOne'),
-    ).toBe(true);
+    expect(relations.some((r) => r.name === 'profile' && r.type === 'OneToOne')).toBe(true);
   });
 
   it('should parse relation with modelClass from require', () => {

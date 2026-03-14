@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import type { CommitInfo } from './git-context.service';
-import { GitContextService } from './git-context.service';
+import type { CommitInfo } from '@mcp/core/data-access/services/git-context.service';
+import { GitContextService } from '@mcp/core/data-access/services/git-context.service';
 
-const CONVENTIONAL_COMMIT_REGEX =
-  /^(feat|fix|docs|chore|refactor|style|test|perf)(\(.+\))?:\s*(.+)$/i;
+const CONVENTIONAL_COMMIT_REGEX = /^(feat|fix|docs|chore|refactor|style|test|perf)(\(.+\))?:\s*(.+)$/i;
 
 const TYPE_TO_SECTION: Record<string, string> = {
   feat: 'Added',
@@ -27,19 +26,13 @@ export class GitChangelogService {
       const lines: string[] = ['# Changelog', ''];
 
       if (tags.length === 0) {
-        const commits = await this.gitContext.getCommitsBetween(
-          undefined,
-          'HEAD',
-        );
+        const commits = await this.gitContext.getCommitsBetween(undefined, 'HEAD');
         lines.push('## [Unreleased]', '');
         lines.push(...this.formatCommits(commits));
         return lines.join('\n').trim() || null;
       }
 
-      const unreleasedCommits = await this.gitContext.getCommitsBetween(
-        tags[tags.length - 1],
-        'HEAD',
-      );
+      const unreleasedCommits = await this.gitContext.getCommitsBetween(tags[tags.length - 1], 'HEAD');
 
       if (unreleasedCommits.length > 0) {
         lines.push('## [Unreleased]', '');
@@ -72,9 +65,7 @@ export class GitChangelogService {
 
     for (const c of commits) {
       const match = c.message.match(CONVENTIONAL_COMMIT_REGEX);
-      const section = match
-        ? (TYPE_TO_SECTION[match[1].toLowerCase()] ?? 'Other')
-        : 'Other';
+      const section = match ? (TYPE_TO_SECTION[match[1].toLowerCase()] ?? 'Other') : 'Other';
 
       if (!bySection.has(section)) {
         bySection.set(section, []);
@@ -84,13 +75,7 @@ export class GitChangelogService {
       if (arr) arr.push(`- ${displayMessage}`);
     }
 
-    const sectionOrder = [
-      'Added',
-      'Changed',
-      'Fixed',
-      'Documentation',
-      'Other',
-    ];
+    const sectionOrder = ['Added', 'Changed', 'Fixed', 'Documentation', 'Other'];
     const result: string[] = [];
 
     for (const section of sectionOrder) {
@@ -105,9 +90,7 @@ export class GitChangelogService {
       result.push('');
     }
 
-    const remaining = [...bySection.keys()].filter(
-      (s) => !sectionOrder.includes(s),
-    );
+    const remaining = [...bySection.keys()].filter((s) => !sectionOrder.includes(s));
     for (const section of remaining) {
       const items = bySection.get(section);
 

@@ -17,10 +17,7 @@ export class InvestigateBugPrompt {
       bugDescription: z.string().describe('Bug description'),
     }),
   })
-  getPrompt(params: {
-    moduleName: string;
-    bugDescription: string;
-  }): Promise<string> {
+  getPrompt(params: { moduleName: string; bugDescription: string }): Promise<string> {
     this.mcpLogger.logPromptReceived('investigate-bug', params);
     const { moduleName, bugDescription } = params;
     const content = [

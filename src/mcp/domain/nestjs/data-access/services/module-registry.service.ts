@@ -39,10 +39,7 @@ export class ModuleRegistryService implements IModuleRegistry {
       for (const dir of srcDirs) {
         if (dir === 'shared' || dir === 'common') continue;
         const modulePath = `src/${dir}`;
-        const hasModule = await this.hasModuleFile(
-          modulePath,
-          context.modulePattern,
-        );
+        const hasModule = await this.hasModuleFile(modulePath, context.modulePattern);
         if (!hasModule) continue;
 
         const info = await this.getModuleInfo(dir, modulePath);
@@ -56,25 +53,16 @@ export class ModuleRegistryService implements IModuleRegistry {
     return modules.sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  private async hasModuleFile(
-    modulePath: string,
-    pattern: ModulePattern,
-  ): Promise<boolean> {
+  private async hasModuleFile(modulePath: string, pattern: ModulePattern): Promise<boolean> {
     if (pattern === 'domain-driven') {
-      const files = await this.fileReader.readGlob(
-        `${modulePath}/feature/*.module.ts`,
-      );
+      const files = await this.fileReader.readGlob(`${modulePath}/feature/*.module.ts`);
       if (files.length > 0) return true;
     }
 
-    const flatFiles = await this.fileReader.readGlob(
-      `${modulePath}/*.module.ts`,
-    );
+    const flatFiles = await this.fileReader.readGlob(`${modulePath}/*.module.ts`);
     if (flatFiles.length > 0) return true;
 
-    const nestedFiles = await this.fileReader.readGlob(
-      `${modulePath}/**/*.module.ts`,
-    );
+    const nestedFiles = await this.fileReader.readGlob(`${modulePath}/**/*.module.ts`);
     return nestedFiles.length > 0;
   }
 
@@ -82,9 +70,7 @@ export class ModuleRegistryService implements IModuleRegistry {
     const normalized = name.replace(/_/g, '-');
     const context = await this.projectContext.getContext();
 
-    const candidates: { path: string; name: string }[] = [
-      { path: `src/${normalized}`, name: normalized },
-    ];
+    const candidates: { path: string; name: string }[] = [{ path: `src/${normalized}`, name: normalized }];
 
     if (context.modulePattern === 'nested') {
       candidates.unshift({
@@ -97,10 +83,7 @@ export class ModuleRegistryService implements IModuleRegistry {
       const exists = await this.fileReader.exists(modulePath);
       if (!exists) continue;
 
-      const hasModule = await this.hasModuleFile(
-        modulePath,
-        context.modulePattern,
-      );
+      const hasModule = await this.hasModuleFile(modulePath, context.modulePattern);
       if (hasModule) {
         return this.getModuleInfo(normalized, modulePath);
       }
@@ -109,13 +92,8 @@ export class ModuleRegistryService implements IModuleRegistry {
     return null;
   }
 
-  private async getModuleInfo(
-    name: string,
-    modulePath: string,
-  ): Promise<ModuleInfo> {
-    const entityFiles = await this.fileReader.readGlob(
-      `${modulePath}/**/*.entity.ts`,
-    );
+  private async getModuleInfo(name: string, modulePath: string): Promise<ModuleInfo> {
+    const entityFiles = await this.fileReader.readGlob(`${modulePath}/**/*.entity.ts`);
     const entityNames = entityFiles
       .map((f) => {
         const match = f.match(/([^/]+)\.entity\.ts$/);
@@ -123,22 +101,14 @@ export class ModuleRegistryService implements IModuleRegistry {
       })
       .filter(Boolean);
 
-    const controllerFiles = await this.fileReader.readGlob(
-      `${modulePath}/**/*.controller.ts`,
-    );
+    const controllerFiles = await this.fileReader.readGlob(`${modulePath}/**/*.controller.ts`);
     const hasController = controllerFiles.length > 0;
 
-    const specFiles = await this.fileReader.readGlob(
-      `${modulePath}/**/*.spec.ts`,
-    );
-    const e2eFiles = await this.fileReader.readGlob(
-      `${modulePath}/**/*.e2e-spec.ts`,
-    );
+    const specFiles = await this.fileReader.readGlob(`${modulePath}/**/*.spec.ts`);
+    const e2eFiles = await this.fileReader.readGlob(`${modulePath}/**/*.e2e-spec.ts`);
 
     const docPath = await this.findDocPath(name);
-    const hasDocumentation = docPath
-      ? await this.fileReader.exists(docPath)
-      : false;
+    const hasDocumentation = docPath ? await this.fileReader.exists(docPath) : false;
 
     const subDirs = await this.fileReader.readDir(modulePath);
     const subModules = subDirs.filter((d) => !d.includes('.'));

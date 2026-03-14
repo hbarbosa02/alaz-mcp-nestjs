@@ -8,11 +8,7 @@ import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framew
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import {
-  createModuleInfo,
-  createEndpointInfo,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createModuleInfo, createEndpointInfo, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('ModuleExplorerTool', () => {
   let sut: ModuleExplorerTool;
@@ -85,15 +81,11 @@ describe('ModuleExplorerTool', () => {
     });
 
     it('should return markdown table with modules', async () => {
-      moduleRegistry.listModules.mockResolvedValue([
-        createModuleInfo({ subModules: [] }),
-      ]);
+      moduleRegistry.listModules.mockResolvedValue([createModuleInfo({ subModules: [] })]);
 
       const result = await sut.listModules();
 
-      expect(result).toContain(
-        '| Module | Controller | Entities | Tests | Docs |',
-      );
+      expect(result).toContain('| Module | Controller | Entities | Tests | Docs |');
       expect(result).toContain('user');
       expect(result).toContain('✓');
     });
@@ -128,10 +120,7 @@ describe('ModuleExplorerTool', () => {
 
       await tool.listModules({ projectRoot: '/custom/path' });
 
-      expect(runMock).toHaveBeenCalledWith(
-        '/custom/path',
-        expect.any(Function),
-      );
+      expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
     });
   });
 
@@ -141,17 +130,13 @@ describe('ModuleExplorerTool', () => {
 
       const result = await sut.getModuleDetail({ moduleName: 'unknown' });
 
-      expect(result).toBe(
-        'Module "unknown" not found. Use list-modules to see available modules.',
-      );
+      expect(result).toBe('Module "unknown" not found. Use list-modules to see available modules.');
     });
 
     it('should return full module details with endpoints and doc', async () => {
       moduleRegistry.getModule.mockResolvedValue(createModuleInfo());
       docReader.getFeatureDoc.mockResolvedValue('# User docs');
-      codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([
-        createEndpointInfo(),
-      ]);
+      codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([createEndpointInfo()]);
 
       const result = await sut.getModuleDetail({ moduleName: 'user' });
 
@@ -164,9 +149,7 @@ describe('ModuleExplorerTool', () => {
     });
 
     it('should return unsupported message for getModuleDetail when non-nestjs', async () => {
-      adapterRegistry.getUnsupportedMessage.mockReturnValue(
-        'Angular: Not supported.',
-      );
+      adapterRegistry.getUnsupportedMessage.mockReturnValue('Angular: Not supported.');
 
       const result = await sut.getModuleDetail({ moduleName: 'user' });
 
@@ -209,10 +192,7 @@ describe('ModuleExplorerTool', () => {
         projectRoot: '/custom/path',
       });
 
-      expect(runMock).toHaveBeenCalledWith(
-        '/custom/path',
-        expect.any(Function),
-      );
+      expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
     });
   });
 });

@@ -1,10 +1,7 @@
 import type { ModuleInfo } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
 import type { EndpointInfo } from '@/mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
 import type { EntitySchema } from '@/mcp/domain/nestjs/data-access/services/entity-introspector.service';
-import type {
-  ProjectContext,
-  ProjectStack,
-} from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import type { ProjectContext, ProjectStack } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 
 const defaultStack: ProjectStack = {
   nestVersion: null,
@@ -18,9 +15,7 @@ const defaultStack: ProjectStack = {
   packageScripts: {},
 };
 
-export function createProjectContext(
-  overrides: Partial<ProjectContext> = {},
-): ProjectContext {
+export function createProjectContext(overrides: Partial<ProjectContext> = {}): ProjectContext {
   const base = {
     name: 'test-project',
     modulePattern: 'domain-driven' as const,
@@ -54,9 +49,7 @@ export function createProjectContext(
   return merged;
 }
 
-export function createModuleInfo(
-  overrides: Partial<ModuleInfo> = {},
-): ModuleInfo {
+export function createModuleInfo(overrides: Partial<ModuleInfo> = {}): ModuleInfo {
   return {
     name: 'user',
     path: 'src/user',
@@ -72,9 +65,7 @@ export function createModuleInfo(
   };
 }
 
-export function createEndpointInfo(
-  overrides: Partial<EndpointInfo> = {},
-): EndpointInfo {
+export function createEndpointInfo(overrides: Partial<EndpointInfo> = {}): EndpointInfo {
   return {
     method: 'GET',
     path: '/user',
@@ -99,28 +90,16 @@ export function createFrameworkAdapterMocks(adapters: {
   };
   const adapterRegistry = {
     getUnsupportedMessage: jest.fn().mockReturnValue(null),
-    getModuleRegistry: jest
-      .fn()
-      .mockReturnValue(adapters.moduleRegistry ?? null),
-    getEntityIntrospector: jest
-      .fn()
-      .mockReturnValue(adapters.entityIntrospector ?? null),
-    getCodebaseAnalyzer: jest
-      .fn()
-      .mockReturnValue(adapters.codebaseAnalyzer ?? null),
-    getDocumentationReader: jest
-      .fn()
-      .mockReturnValue(adapters.documentationReader ?? null),
-    getProjectContext: jest
-      .fn()
-      .mockReturnValue(adapters.projectContext ?? null),
+    getModuleRegistry: jest.fn().mockReturnValue(adapters.moduleRegistry ?? null),
+    getEntityIntrospector: jest.fn().mockReturnValue(adapters.entityIntrospector ?? null),
+    getCodebaseAnalyzer: jest.fn().mockReturnValue(adapters.codebaseAnalyzer ?? null),
+    getDocumentationReader: jest.fn().mockReturnValue(adapters.documentationReader ?? null),
+    getProjectContext: jest.fn().mockReturnValue(adapters.projectContext ?? null),
   };
   return { frameworkDetector, adapterRegistry };
 }
 
-export function createEntitySchema(
-  overrides: Partial<EntitySchema> = {},
-): EntitySchema {
+export function createEntitySchema(overrides: Partial<EntitySchema> = {}): EntitySchema {
   return {
     name: 'User',
     filePath: 'src/user/user.entity.ts',

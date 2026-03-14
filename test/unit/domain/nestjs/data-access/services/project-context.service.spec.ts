@@ -16,10 +16,7 @@ describe('ProjectContextService', () => {
     } as unknown as jest.Mocked<FileReaderService>;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ProjectContextService,
-        { provide: FileReaderService, useValue: fileReader },
-      ],
+      providers: [ProjectContextService, { provide: FileReaderService, useValue: fileReader }],
     }).compile();
 
     sut = module.get(ProjectContextService);
@@ -37,9 +34,7 @@ describe('ProjectContextService', () => {
   });
 
   it('should return package name from package.json', async () => {
-    fileReader.readFile.mockResolvedValue(
-      JSON.stringify({ name: 'my-nestjs-app' }),
-    );
+    fileReader.readFile.mockResolvedValue(JSON.stringify({ name: 'my-nestjs-app' }));
     fileReader.readGlob.mockResolvedValue([]);
     fileReader.exists.mockResolvedValue(false);
 
@@ -50,13 +45,11 @@ describe('ProjectContextService', () => {
 
   it('should detect domain-driven pattern when feature/*.module.ts exists', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockImplementation((pattern: string) => {
-      if (pattern === 'src/*/feature/*.module.ts')
-        return Promise.resolve(['src/user/feature/user.module.ts']);
+      if (pattern === 'src/*/feature/*.module.ts') return Promise.resolve(['src/user/feature/user.module.ts']);
       return Promise.resolve([]);
     });
     fileReader.exists.mockResolvedValue(false);
@@ -68,14 +61,12 @@ describe('ProjectContextService', () => {
 
   it('should detect nested pattern when src/modules/* exists', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockImplementation((pattern: string) => {
       if (pattern === 'src/*/feature/*.module.ts') return Promise.resolve([]);
-      if (pattern === 'src/modules/*/*.module.ts')
-        return Promise.resolve(['src/modules/user/user.module.ts']);
+      if (pattern === 'src/modules/*/*.module.ts') return Promise.resolve(['src/modules/user/user.module.ts']);
       return Promise.resolve([]);
     });
     fileReader.exists.mockResolvedValue(false);
@@ -87,8 +78,7 @@ describe('ProjectContextService', () => {
 
   it('should detect flat pattern when no domain-driven or nested', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockResolvedValue([]);
@@ -177,8 +167,7 @@ describe('ProjectContextService', () => {
 
   it('should return null orm when no ORM in package.json', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockResolvedValue([]);
@@ -191,8 +180,7 @@ describe('ProjectContextService', () => {
 
   it('should cache context on subsequent calls', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'cached-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'cached-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockResolvedValue([]);
@@ -336,8 +324,7 @@ describe('ProjectContextService', () => {
 
   it('should detect docs layout changelog from CHANGELOG.md', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockResolvedValue([]);
@@ -352,8 +339,7 @@ describe('ProjectContextService', () => {
 
   it('should detect docs layout features from docs/features', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockResolvedValue([]);
@@ -368,8 +354,7 @@ describe('ProjectContextService', () => {
 
   it('should detect path aliases from tsconfig', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       if (path === 'tsconfig.json')
         return Promise.resolve(
           JSON.stringify({
@@ -392,8 +377,7 @@ describe('ProjectContextService', () => {
 
   it('should return empty path aliases when tsconfig missing', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
-      if (path === 'package.json')
-        return Promise.resolve(JSON.stringify({ name: 'test-project' }));
+      if (path === 'package.json') return Promise.resolve(JSON.stringify({ name: 'test-project' }));
       return Promise.resolve(null);
     });
     fileReader.readGlob.mockResolvedValue([]);

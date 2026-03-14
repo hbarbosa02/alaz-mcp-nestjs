@@ -78,9 +78,7 @@ describe('FrameworkAdapterRegistryService', () => {
 
   describe('getDocumentationReader', () => {
     it('should return documentationReader for nestjs', () => {
-      expect(sut.getDocumentationReader('nestjs')).toBe(
-        mockDocumentationReader,
-      );
+      expect(sut.getDocumentationReader('nestjs')).toBe(mockDocumentationReader);
     });
     it('should return null for angular', () => {
       expect(sut.getDocumentationReader('angular')).toBeNull();
@@ -98,9 +96,7 @@ describe('FrameworkAdapterRegistryService', () => {
 
   describe('getUnsupportedMessage', () => {
     it('should return UNSUPPORTED_FRAMEWORK_MESSAGE for null', () => {
-      expect(sut.getUnsupportedMessage(null)).toBe(
-        UNSUPPORTED_FRAMEWORK_MESSAGE,
-      );
+      expect(sut.getUnsupportedMessage(null)).toBe(UNSUPPORTED_FRAMEWORK_MESSAGE);
     });
     it('should return Angular message for angular', () => {
       const msg = sut.getUnsupportedMessage('angular');

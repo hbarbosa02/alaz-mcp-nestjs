@@ -44,9 +44,7 @@ describe('NewModulePrompt', () => {
 
     expect(result.messages).toHaveLength(1);
     expect(result.messages[0].content.type).toBe('text');
-    expect(result.messages[0].content.text).toContain(
-      EXECUTION_CONFIRMATION_HEADER,
-    );
+    expect(result.messages[0].content.text).toContain(EXECUTION_CONFIRMATION_HEADER);
   });
 
   it('should include entity section when hasEntity is true', async () => {

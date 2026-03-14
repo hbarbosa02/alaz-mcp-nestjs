@@ -8,11 +8,7 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import {
-  createModuleInfo,
-  createProjectContext,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createModuleInfo, createProjectContext, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('ConventionCheckerTool', () => {
   let sut: ConventionCheckerTool;
@@ -74,9 +70,7 @@ describe('ConventionCheckerTool', () => {
   });
 
   it('should return pass when module follows conventions', async () => {
-    moduleRegistry.getModule.mockResolvedValue(
-      createModuleInfo({ subModules: [] }),
-    );
+    moduleRegistry.getModule.mockResolvedValue(createModuleInfo({ subModules: [] }));
     fileReader.exists.mockResolvedValue(true);
     fileReader.readGlob
       .mockResolvedValueOnce(['src/user/feature/user.module.ts'])
@@ -90,9 +84,7 @@ describe('ConventionCheckerTool', () => {
   });
 
   it('should return fail when data-access is missing', async () => {
-    moduleRegistry.getModule.mockResolvedValue(
-      createModuleInfo({ entityNames: [], subModules: [] }),
-    );
+    moduleRegistry.getModule.mockResolvedValue(createModuleInfo({ entityNames: [], subModules: [] }));
     fileReader.exists
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(false)
@@ -100,9 +92,7 @@ describe('ConventionCheckerTool', () => {
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(true);
-    fileReader.readGlob
-      .mockResolvedValueOnce(['src/user/feature/user.module.ts'])
-      .mockResolvedValueOnce([]);
+    fileReader.readGlob.mockResolvedValueOnce(['src/user/feature/user.module.ts']).mockResolvedValueOnce([]);
 
     const result = await sut.checkConventions({ moduleName: 'user' });
 

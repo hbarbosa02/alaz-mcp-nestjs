@@ -74,9 +74,7 @@ describe('ConventionsResource', () => {
 
       const result = await sut.getApiConventions();
 
-      expect((result.contents[0] as { text: string }).text).toContain(
-        '# API Conventions',
-      );
+      expect((result.contents[0] as { text: string }).text).toContain('# API Conventions');
     });
   });
 
@@ -107,9 +105,7 @@ describe('ConventionsResource', () => {
       const text = (result.contents[0] as { text: string }).text;
       expect(text).toContain('# CQRS and Jobs');
       expect(text).toContain('# CQRS');
-      expect(docReader.readDoc).toHaveBeenCalledWith(
-        'docs/architecture/CQRS-AND-JOBS.md',
-      );
+      expect(docReader.readDoc).toHaveBeenCalledWith('docs/architecture/CQRS-AND-JOBS.md');
     });
   });
 });

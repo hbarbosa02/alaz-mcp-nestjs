@@ -30,17 +30,12 @@ describe('FileReaderService', () => {
     jest.clearAllMocks();
 
     const pathResolver = {
-      resolve: jest.fn((...segments: string[]) =>
-        `${projectRoot}/${segments.join('/')}`.replace(/\/+/g, '/'),
-      ),
+      resolve: jest.fn((...segments: string[]) => `${projectRoot}/${segments.join('/')}`.replace(/\/+/g, '/')),
       root: projectRoot,
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        FileReaderService,
-        { provide: PathResolverService, useValue: pathResolver },
-      ],
+      providers: [FileReaderService, { provide: PathResolverService, useValue: pathResolver }],
     }).compile();
 
     sut = module.get(FileReaderService);
@@ -52,10 +47,7 @@ describe('FileReaderService', () => {
     const result = await sut.readFile('docs/README.md');
 
     expect(result).toBe('file content');
-    expect(mockReadFile).toHaveBeenCalledWith(
-      expect.stringContaining('docs/README.md'),
-      'utf-8',
-    );
+    expect(mockReadFile).toHaveBeenCalledWith(expect.stringContaining('docs/README.md'), 'utf-8');
   });
 
   it('should return null when file does not exist', async () => {
@@ -75,10 +67,7 @@ describe('FileReaderService', () => {
     const result = await sut.readDir('src/user');
 
     expect(result).toEqual(['file1.ts', 'file2.ts']);
-    expect(mockReaddir).toHaveBeenCalledWith(
-      expect.stringContaining('src/user'),
-      { withFileTypes: true },
-    );
+    expect(mockReaddir).toHaveBeenCalledWith(expect.stringContaining('src/user'), { withFileTypes: true });
   });
 
   it('should return empty array when directory does not exist', async () => {
@@ -95,9 +84,7 @@ describe('FileReaderService', () => {
     const result = await sut.exists('src/main.ts');
 
     expect(result).toBe(true);
-    expect(mockAccess).toHaveBeenCalledWith(
-      expect.stringContaining('src/main.ts'),
-    );
+    expect(mockAccess).toHaveBeenCalledWith(expect.stringContaining('src/main.ts'));
   });
 
   it('should return false when path does not exist', async () => {
@@ -118,10 +105,7 @@ describe('FileReaderService', () => {
 
     expect(result.length).toBe(2);
     expect(result[0]).toContain('user.entity.ts');
-    expect(mockGlob).toHaveBeenCalledWith(
-      expect.stringContaining('src/**/*.entity.ts'),
-      { nodir: true },
-    );
+    expect(mockGlob).toHaveBeenCalledWith(expect.stringContaining('src/**/*.entity.ts'), { nodir: true });
   });
 
   it('should return empty array when glob fails', async () => {

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
+import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
@@ -20,12 +21,11 @@ export class ModuleDocsResource {
     description: 'Module documentation and structure',
     mimeType: 'text/markdown',
   })
-  async getModuleDocs(params: { moduleName: string }) {
+  async getModuleDocs(params: { moduleName: string }): Promise<ReadResourceResult> {
     const uri = `alaz://modules/${params.moduleName}`;
     this.mcpLogger.logResourceRead(uri, params);
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
@@ -55,9 +55,7 @@ export class ModuleDocsResource {
     }
 
     const doc = await docReader.getFeatureDoc(params.moduleName);
-    const endpoints = await codebaseAnalyzer.getModuleEndpoints(
-      params.moduleName,
-    );
+    const endpoints = await codebaseAnalyzer.getModuleEndpoints(params.moduleName);
 
     const sections: string[] = [
       `# Module: ${mod.name}`,

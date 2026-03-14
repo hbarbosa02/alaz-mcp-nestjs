@@ -61,8 +61,6 @@ export class User {
     expect(properties.length).toBeGreaterThanOrEqual(2);
     expect(properties.some((p) => p.name === 'uuid')).toBe(true);
     expect(relations.length).toBeGreaterThanOrEqual(1);
-    expect(
-      relations.some((r) => r.name === 'tenant' && r.targetEntity === 'Tenant'),
-    ).toBe(true);
+    expect(relations.some((r) => r.name === 'tenant' && r.targetEntity === 'Tenant')).toBe(true);
   });
 });

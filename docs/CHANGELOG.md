@@ -14,6 +14,7 @@
 
 ### Changed
 
+- migrate imports to @/ and @mcp/* path aliases; add Jest moduleNameMapper for @mcp/*; lint:fix and format
 - code-convention fixes: add requireAdapter util, contextual error messages, entityNotFoundMessage/moduleNotFoundMessage, fix empty-string-in-array (entity-schema, entity-diagram), replace non-null assertions in E2E tests, improve project-context comments
 - migrate test folder to DDD-aligned structure: unit tests mirror src (core, domain/nestjs, domain/shared, util, feature), E2E tests grouped by transport under e2e/transports/, add @test/* path alias
 - FrameworkDetectorService: per-project-root caching to avoid repeated file I/O (package.json, composer.json)

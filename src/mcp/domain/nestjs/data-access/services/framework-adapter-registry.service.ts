@@ -5,17 +5,16 @@ import type { IEntityIntrospector } from '@/mcp/core/ports/entity-introspector.p
 import type { ICodebaseAnalyzer } from '@/mcp/core/ports/codebase-analyzer.port';
 import type { IDocumentationReader } from '@/mcp/core/ports/documentation-reader.port';
 import type { IProjectContext } from '@/mcp/core/ports/project-context.port';
-import { ModuleRegistryService } from './module-registry.service';
-import { EntityIntrospectorService } from './entity-introspector.service';
-import { CodebaseAnalyzerService } from './codebase-analyzer.service';
-import { DocumentationReaderService } from './documentation-reader.service';
-import { ProjectContextService } from './project-context.service';
+import { ModuleRegistryService } from '@mcp/domain/nestjs/data-access/services/module-registry.service';
+import { EntityIntrospectorService } from '@mcp/domain/nestjs/data-access/services/entity-introspector.service';
+import { CodebaseAnalyzerService } from '@mcp/domain/nestjs/data-access/services/codebase-analyzer.service';
+import { DocumentationReaderService } from '@mcp/domain/nestjs/data-access/services/documentation-reader.service';
+import { ProjectContextService } from '@mcp/domain/nestjs/data-access/services/project-context.service';
 
 export const UNSUPPORTED_FRAMEWORK_MESSAGE =
   'Projeto não parece ser NestJS, Angular ou Laravel. Frameworks suportados: NestJS (implementado), Angular e Laravel (em breve).';
 
-export const FRAMEWORK_COMING_SOON_MESSAGE =
-  'Suporte para este framework estará disponível em breve.';
+export const FRAMEWORK_COMING_SOON_MESSAGE = 'Suporte para este framework estará disponível em breve.';
 
 @Injectable()
 export class FrameworkAdapterRegistryService {
@@ -42,9 +41,7 @@ export class FrameworkAdapterRegistryService {
     return null;
   }
 
-  getDocumentationReader(
-    _framework: FrameworkType,
-  ): IDocumentationReader | null {
+  getDocumentationReader(_framework: FrameworkType): IDocumentationReader | null {
     if (_framework === 'nestjs') return this.documentationReader;
     return null;
   }

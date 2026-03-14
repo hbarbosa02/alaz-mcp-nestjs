@@ -4,10 +4,7 @@ import { ArchitectureResource } from '@/mcp/domain/nestjs/feature/resources/arch
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import {
-  createProjectContext,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createProjectContext, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('ArchitectureResource', () => {
   let sut: ArchitectureResource;
@@ -72,9 +69,7 @@ describe('ArchitectureResource', () => {
     expect(result).toMatchObject({
       contents: [{ uri: 'alaz://architecture', mimeType: 'text/markdown' }],
     });
-    expect((result.contents[0] as { text: string }).text).toBe(
-      '# API Overview',
-    );
+    expect((result.contents[0] as { text: string }).text).toBe('# API Overview');
   });
 
   it('should return fallback when documentation not found', async () => {
@@ -89,14 +84,10 @@ describe('ArchitectureResource', () => {
 
   it('should return unsupported message when framework not detected', async () => {
     mocks.frameworkDetector.detect.mockResolvedValue(null);
-    mocks.adapterRegistry.getUnsupportedMessage.mockReturnValue(
-      'Framework not supported.',
-    );
+    mocks.adapterRegistry.getUnsupportedMessage.mockReturnValue('Framework not supported.');
 
     const result = await sut.getArchitecture();
 
-    expect((result.contents[0] as { text: string }).text).toBe(
-      'Framework not supported.',
-    );
+    expect((result.contents[0] as { text: string }).text).toBe('Framework not supported.');
   });
 });

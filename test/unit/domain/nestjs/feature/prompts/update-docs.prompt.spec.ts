@@ -4,10 +4,7 @@ import { UpdateDocsPrompt } from '@/mcp/domain/nestjs/feature/prompts/update-doc
 import { ModuleRegistryService } from '@/mcp/domain/nestjs/data-access/services/module-registry.service';
 import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import {
-  createModuleInfo,
-  createProjectContext,
-} from '@test/helpers/mock-data';
+import { createModuleInfo, createProjectContext } from '@test/helpers/mock-data';
 import { EXECUTION_CONFIRMATION_HEADER } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 describe('UpdateDocsPrompt', () => {

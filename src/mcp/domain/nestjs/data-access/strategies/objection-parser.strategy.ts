@@ -5,7 +5,7 @@ import type {
   OrmType,
   ParsedProperty,
   ParsedRelation,
-} from './entity-parser.strategy';
+} from '@mcp/domain/nestjs/data-access/strategies/entity-parser.strategy';
 
 const OBJECTION_RELATION_MAP: Record<string, string> = {
   HasManyRelation: 'OneToMany',
@@ -24,15 +24,11 @@ export class ObjectionParserStrategy implements EntityParserStrategy {
 
   extractTableName(content: string): string | null {
     // static tableName = 'users'
-    const staticMatch = content.match(
-      /static\s+tableName\s*=\s*["']([^"']+)["']/,
-    );
+    const staticMatch = content.match(/static\s+tableName\s*=\s*["']([^"']+)["']/);
     if (staticMatch) return staticMatch[1];
 
     // static get tableName() { return 'users'; }
-    const getterMatch = content.match(
-      /static\s+get\s+tableName\s*\(\s*\)\s*\{\s*return\s*["']([^"']+)["']/,
-    );
+    const getterMatch = content.match(/static\s+get\s+tableName\s*\(\s*\)\s*\{\s*return\s*["']([^"']+)["']/);
     if (getterMatch) return getterMatch[1];
 
     return null;
@@ -40,10 +36,7 @@ export class ObjectionParserStrategy implements EntityParserStrategy {
 
   extractEntityClass(content: string): string | null {
     const classNames = extractClassNames(content);
-    const modelClass = classNames.find(
-      (c) =>
-        content.includes(`class ${c}`) && content.includes('extends Model'),
-    );
+    const modelClass = classNames.find((c) => content.includes(`class ${c}`) && content.includes('extends Model'));
     return modelClass ?? classNames[0] ?? null;
   }
 
@@ -63,8 +56,7 @@ export class ObjectionParserStrategy implements EntityParserStrategy {
     const declareRegex = /declare\s+(\w+)\s*[?:]?\s*:\s*([\w<>[\]|]+)/g;
     let m: RegExpExecArray | null;
     while ((m = declareRegex.exec(content)) !== null) {
-      if (['relationMappings', 'tableName', 'idColumn'].includes(m[1]))
-        continue;
+      if (['relationMappings', 'tableName', 'idColumn'].includes(m[1])) continue;
       properties.push({
         name: m[1],
         type: m[2].replace(/\[\]$/, ''),
@@ -75,9 +67,7 @@ export class ObjectionParserStrategy implements EntityParserStrategy {
     }
 
     // jsonSchema.properties
-    const jsonSchemaMatch = content.match(
-      /jsonSchema\s*[=:]\s*\{[^}]*properties\s*[=:]\s*\{([^}]+)\}/s,
-    );
+    const jsonSchemaMatch = content.match(/jsonSchema\s*[=:]\s*\{[^}]*properties\s*[=:]\s*\{([^}]+)\}/s);
     if (jsonSchemaMatch) {
       const propsBlock = jsonSchemaMatch[1];
       const propMatches = propsBlock.matchAll(/(\w+)\s*[=:]\s*\{([^}]+)\}/g);
@@ -119,8 +109,7 @@ export class ObjectionParserStrategy implements EntityParserStrategy {
       const requireExport = match[5];
       const joinTo = match[7];
 
-      const normalizedType =
-        OBJECTION_RELATION_MAP[objectionRelationType] ?? objectionRelationType;
+      const normalizedType = OBJECTION_RELATION_MAP[objectionRelationType] ?? objectionRelationType;
 
       let targetEntity: string;
       if (directModelClass) {

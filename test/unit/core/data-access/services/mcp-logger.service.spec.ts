@@ -33,9 +33,7 @@ describe('McpLoggerService', () => {
   it('should log prompt received', () => {
     sut.logPromptReceived('create-module', { moduleName: 'billing' });
 
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Prompt received: create-module'),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Prompt received: create-module'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('moduleName'));
     expect(fs.appendFileSync).toHaveBeenCalledWith(
       expect.any(String),
@@ -46,25 +44,17 @@ describe('McpLoggerService', () => {
   it('should log prompt result', () => {
     sut.logPromptResult('create-module', 150);
 
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Prompt completed: create-module (150 characters)',
-      ),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Prompt completed: create-module (150 characters)'));
     expect(fs.appendFileSync).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining(
-        'PROMPT COMPLETED: create-module (150 characters)',
-      ),
+      expect.stringContaining('PROMPT COMPLETED: create-module (150 characters)'),
     );
   });
 
   it('should log tool invoked', () => {
     sut.logToolInvoked('list-modules', { projectRoot: '/path' });
 
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Tool invoked: list-modules'),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Tool invoked: list-modules'));
     expect(fs.appendFileSync).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining('TOOL INVOKED: list-modules'),
@@ -74,9 +64,7 @@ describe('McpLoggerService', () => {
   it('should log tool result', () => {
     sut.logToolResult('list-modules', 200);
 
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Tool completed: list-modules (200 characters)'),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Tool completed: list-modules (200 characters)'));
     expect(fs.appendFileSync).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining('TOOL COMPLETED: list-modules (200 characters)'),
@@ -86,9 +74,7 @@ describe('McpLoggerService', () => {
   it('should log resource read', () => {
     sut.logResourceRead('alaz://onboarding', { projectRoot: '/path' });
 
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Resource read: alaz://onboarding'),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Resource read: alaz://onboarding'));
     expect(fs.appendFileSync).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining('RESOURCE READ: alaz://onboarding'),
@@ -99,15 +85,11 @@ describe('McpLoggerService', () => {
     sut.logResourceResult('alaz://onboarding', 300);
 
     expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Resource completed: alaz://onboarding (300 characters)',
-      ),
+      expect.stringContaining('Resource completed: alaz://onboarding (300 characters)'),
     );
     expect(fs.appendFileSync).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining(
-        'RESOURCE COMPLETED: alaz://onboarding (300 characters)',
-      ),
+      expect.stringContaining('RESOURCE COMPLETED: alaz://onboarding (300 characters)'),
     );
   });
 
@@ -116,25 +98,17 @@ describe('McpLoggerService', () => {
 
     sut.logPromptReceived('test', {});
 
-    expect(fs.mkdirSync).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({ recursive: true }),
-    );
+    expect(fs.mkdirSync).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ recursive: true }));
   });
 
   it('should call logger.warn when appendFileSync throws', () => {
     const warnSpy = jest.spyOn(sut['logger'], 'warn').mockImplementation();
     jest.mocked(fs.appendFileSync).mockImplementation(() => {
-      throw new Error(
-        'Simulated appendFileSync failure for McpLoggerService file write test',
-      );
+      throw new Error('Simulated appendFileSync failure for McpLoggerService file write test');
     });
 
     sut.logPromptReceived('test', {});
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to write log to file',
-      expect.any(Error),
-    );
+    expect(warnSpy).toHaveBeenCalledWith('Failed to write log to file', expect.any(Error));
   });
 });

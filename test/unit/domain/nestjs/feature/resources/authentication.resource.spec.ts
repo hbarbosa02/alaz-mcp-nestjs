@@ -48,9 +48,7 @@ describe('AuthenticationResource', () => {
     const result = await sut.getAuthentication();
 
     expect((result.contents[0] as { text: string }).text).toBe('# Auth docs');
-    expect(docReader.readDoc).toHaveBeenCalledWith(
-      'docs/architecture/AUTHENTICATION.md',
-    );
+    expect(docReader.readDoc).toHaveBeenCalledWith('docs/architecture/AUTHENTICATION.md');
   });
 
   it('should return fallback when documentation not found', async () => {

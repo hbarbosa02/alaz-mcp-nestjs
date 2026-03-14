@@ -48,8 +48,7 @@ export interface ProjectContext {
 @Injectable()
 export class ProjectContextService implements IProjectContext {
   private context: ProjectContext | null = null;
-  private packageJsonPromise: Promise<Record<string, unknown> | null> | null =
-    null;
+  private packageJsonPromise: Promise<Record<string, unknown> | null> | null = null;
 
   constructor(private readonly fileReader: FileReaderService) {}
 
@@ -62,30 +61,20 @@ export class ProjectContextService implements IProjectContext {
 
   private getPackageJson(): Promise<Record<string, unknown> | null> {
     if (!this.packageJsonPromise) {
-      this.packageJsonPromise = this.fileReader
-        .readFile('package.json')
-        .then((content) => {
-          if (!content) return null;
-          try {
-            return JSON.parse(content) as Record<string, unknown>;
-          } catch {
-            return null;
-          }
-        });
+      this.packageJsonPromise = this.fileReader.readFile('package.json').then((content) => {
+        if (!content) return null;
+        try {
+          return JSON.parse(content) as Record<string, unknown>;
+        } catch {
+          return null;
+        }
+      });
     }
     return this.packageJsonPromise;
   }
 
   private async detectContext(): Promise<ProjectContext> {
-    const [
-      name,
-      modulePattern,
-      hasDocsDir,
-      docsLayout,
-      customExceptionClass,
-      pathAliases,
-      stack,
-    ] = await Promise.all([
+    const [name, modulePattern, hasDocsDir, docsLayout, customExceptionClass, pathAliases, stack] = await Promise.all([
       this.detectProjectName(),
       this.detectModulePattern(),
       this.detectHasDocsDir(),
@@ -137,9 +126,7 @@ export class ProjectContextService implements IProjectContext {
           .split('.')[0]
       : null;
 
-    const hasMikroORM = Object.keys(deps).some(
-      (k) => k === 'mikro-orm' || k.startsWith('@mikro-orm/'),
-    );
+    const hasMikroORM = Object.keys(deps).some((k) => k === 'mikro-orm' || k.startsWith('@mikro-orm/'));
     const hasTypeORM = Object.keys(deps).includes('typeorm');
     const hasObjection = Object.keys(deps).includes('objection');
 
@@ -156,9 +143,7 @@ export class ProjectContextService implements IProjectContext {
     else if (deps['mongodb']) database = 'MongoDB';
     else if (deps['better-sqlite3']) database = 'SQLite';
 
-    const redis = Object.keys(deps).some(
-      (k) => k === 'redis' || k === 'ioredis',
-    );
+    const redis = Object.keys(deps).some((k) => k === 'redis' || k === 'ioredis');
     const bullmq = Object.keys(deps).includes('bullmq');
 
     let validation: ValidationLibrary = null;
@@ -206,16 +191,12 @@ export class ProjectContextService implements IProjectContext {
 
   private async detectModulePattern(): Promise<ModulePattern> {
     // Domain-driven layout: each domain has feature/ with *.module.ts
-    const domainDrivenFiles = await this.fileReader.readGlob(
-      'src/*/feature/*.module.ts',
-    );
+    const domainDrivenFiles = await this.fileReader.readGlob('src/*/feature/*.module.ts');
 
     if (domainDrivenFiles.length > 0) return 'domain-driven';
 
     // Nested layout: modules live under src/modules/
-    const nestedFiles = await this.fileReader.readGlob(
-      'src/modules/*/*.module.ts',
-    );
+    const nestedFiles = await this.fileReader.readGlob('src/modules/*/*.module.ts');
 
     if (nestedFiles.length > 0) return 'nested';
 
@@ -223,7 +204,7 @@ export class ProjectContextService implements IProjectContext {
     return 'flat';
   }
 
-  private async detectHasDocsDir(): Promise<boolean> {
+  private detectHasDocsDir(): Promise<boolean> {
     return this.fileReader.exists('docs');
   }
 
@@ -239,11 +220,7 @@ export class ProjectContextService implements IProjectContext {
     };
 
     // Changelog candidates
-    const changelogCandidates = [
-      'CHANGELOG.md',
-      'docs/CHANGELOG.md',
-      'docs/changes/4 - Changelog.md',
-    ];
+    const changelogCandidates = ['CHANGELOG.md', 'docs/CHANGELOG.md', 'docs/changes/4 - Changelog.md'];
     const changelogFiles = await this.fileReader.readGlob('docs/changes/*.md');
     for (const c of changelogCandidates) {
       if (await this.fileReader.exists(c)) {
@@ -337,9 +314,7 @@ export class ProjectContextService implements IProjectContext {
       const content = await this.fileReader.readFile(filePath);
 
       if (!content) continue;
-      const match = content.match(
-        /export\s+class\s+(\w+)\s+extends\s+(?:.*?)?HttpException/,
-      );
+      const match = content.match(/export\s+class\s+(\w+)\s+extends\s+(?:.*?)?HttpException/);
       if (match && match[1] !== 'HttpException') {
         return match[1];
       }

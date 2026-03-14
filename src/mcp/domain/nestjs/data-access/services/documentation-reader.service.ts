@@ -10,7 +10,7 @@ export class DocumentationReaderService implements IDocumentationReader {
     private readonly projectContext: ProjectContextService,
   ) {}
 
-  async readDoc(relativePath: string): Promise<string | null> {
+  readDoc(relativePath: string): Promise<string | null> {
     return this.fileReader.readFile(relativePath);
   }
 
@@ -119,7 +119,7 @@ export class DocumentationReaderService implements IDocumentationReader {
     return this.fileReader.readFile(path);
   }
 
-  async getReadme(): Promise<string | null> {
+  getReadme(): Promise<string | null> {
     return this.fileReader.readFile('README.md');
   }
 }

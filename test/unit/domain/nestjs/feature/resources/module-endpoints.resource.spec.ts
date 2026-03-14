@@ -4,11 +4,7 @@ import { ModuleEndpointsResource } from '@/mcp/domain/nestjs/feature/resources/m
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import {
-  createModuleInfo,
-  createEndpointInfo,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createModuleInfo, createEndpointInfo, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('ModuleEndpointsResource', () => {
   let sut: ModuleEndpointsResource;
@@ -54,16 +50,12 @@ describe('ModuleEndpointsResource', () => {
 
     const result = await sut.getModuleEndpoints({ moduleName: 'unknown' });
 
-    expect((result.contents[0] as { text: string }).text).toBe(
-      'Module "unknown" not found.',
-    );
+    expect((result.contents[0] as { text: string }).text).toBe('Module "unknown" not found.');
   });
 
   it('should return endpoints table', async () => {
     moduleRegistry.getModule.mockResolvedValue(createModuleInfo());
-    codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([
-      createEndpointInfo(),
-    ]);
+    codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([createEndpointInfo()]);
 
     const result = await sut.getModuleEndpoints({ moduleName: 'user' });
 
@@ -75,9 +67,7 @@ describe('ModuleEndpointsResource', () => {
   });
 
   it('should return unsupported message for non-nestjs framework', async () => {
-    mocks.adapterRegistry.getUnsupportedMessage.mockReturnValue(
-      'Laravel: Not supported.',
-    );
+    mocks.adapterRegistry.getUnsupportedMessage.mockReturnValue('Laravel: Not supported.');
 
     const result = await sut.getModuleEndpoints({ moduleName: 'user' });
 
@@ -88,9 +78,7 @@ describe('ModuleEndpointsResource', () => {
 
   it('should show "-" for empty permissions', async () => {
     moduleRegistry.getModule.mockResolvedValue(createModuleInfo());
-    codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([
-      createEndpointInfo({ permissions: [] }),
-    ]);
+    codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([createEndpointInfo({ permissions: [] })]);
 
     const result = await sut.getModuleEndpoints({ moduleName: 'user' });
 

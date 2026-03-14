@@ -27,11 +27,7 @@ describe('DocumentationReaderService', () => {
     } as unknown as jest.Mocked<FileReaderService>;
 
     projectContext = {
-      getContext: jest
-        .fn()
-        .mockResolvedValue(
-          createProjectContext({ docsLayout: defaultDocsLayout }),
-        ),
+      getContext: jest.fn().mockResolvedValue(createProjectContext({ docsLayout: defaultDocsLayout })),
     } as unknown as jest.Mocked<ProjectContextService>;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -75,14 +71,8 @@ describe('DocumentationReaderService', () => {
           },
         }),
       );
-      fileReader.readDir.mockResolvedValue([
-        'API-OVERVIEW.md',
-        'AUTH.md',
-        'other.txt',
-      ]);
-      fileReader.readFile
-        .mockResolvedValueOnce('# API Overview')
-        .mockResolvedValueOnce('# Auth');
+      fileReader.readDir.mockResolvedValue(['API-OVERVIEW.md', 'AUTH.md', 'other.txt']);
+      fileReader.readFile.mockResolvedValueOnce('# API Overview').mockResolvedValueOnce('# Auth');
 
       const result = await sut.getArchitectureDocs();
 
@@ -95,9 +85,7 @@ describe('DocumentationReaderService', () => {
 
     it('should skip files with null content', async () => {
       fileReader.readDir.mockResolvedValue(['a.md', 'b.md']);
-      fileReader.readFile
-        .mockResolvedValueOnce('# Content')
-        .mockResolvedValueOnce(null);
+      fileReader.readFile.mockResolvedValueOnce('# Content').mockResolvedValueOnce(null);
 
       const result = await sut.getArchitectureDocs();
 
@@ -142,9 +130,7 @@ describe('DocumentationReaderService', () => {
       const result = await sut.getApiConventions();
 
       expect(result).toBe('# Conventions');
-      expect(fileReader.readFile).toHaveBeenCalledWith(
-        'docs/api/API-CONVENTIONS.md',
-      );
+      expect(fileReader.readFile).toHaveBeenCalledWith('docs/api/API-CONVENTIONS.md');
     });
 
     it('should return null when conventions path not configured', async () => {
@@ -168,9 +154,7 @@ describe('DocumentationReaderService', () => {
       const result = await sut.getTestingDocs();
 
       expect(result).toBe('# Testing');
-      expect(fileReader.readFile).toHaveBeenCalledWith(
-        'docs/tests/README-TESTS.md',
-      );
+      expect(fileReader.readFile).toHaveBeenCalledWith('docs/tests/README-TESTS.md');
     });
 
     it('should return null when testing path not configured', async () => {
@@ -193,9 +177,7 @@ describe('DocumentationReaderService', () => {
       const result = await sut.getChangelog();
 
       expect(result).toBe('# Changelog');
-      expect(fileReader.readFile).toHaveBeenCalledWith(
-        'docs/changes/4 - Changelog.md',
-      );
+      expect(fileReader.readFile).toHaveBeenCalledWith('docs/changes/4 - Changelog.md');
     });
 
     it('should return null when changelog path not configured', async () => {
@@ -213,14 +195,8 @@ describe('DocumentationReaderService', () => {
 
   describe('getCursorRules', () => {
     it('should return only .mdc files from .cursor/rules', async () => {
-      fileReader.readDir.mockResolvedValue([
-        'rule1.mdc',
-        'rule2.mdc',
-        'other.txt',
-      ]);
-      fileReader.readFile
-        .mockResolvedValueOnce('# Rule 1')
-        .mockResolvedValueOnce('# Rule 2');
+      fileReader.readDir.mockResolvedValue(['rule1.mdc', 'rule2.mdc', 'other.txt']);
+      fileReader.readFile.mockResolvedValueOnce('# Rule 1').mockResolvedValueOnce('# Rule 2');
 
       const result = await sut.getCursorRules();
 
@@ -238,9 +214,7 @@ describe('DocumentationReaderService', () => {
       const result = await sut.getDatabaseEntities();
 
       expect(result).toBe('# Entities');
-      expect(fileReader.readFile).toHaveBeenCalledWith(
-        'docs/diagrams/DATABASE-ENTITIES.md',
-      );
+      expect(fileReader.readFile).toHaveBeenCalledWith('docs/diagrams/DATABASE-ENTITIES.md');
     });
 
     it('should return null when entities path not configured', async () => {
@@ -263,9 +237,7 @@ describe('DocumentationReaderService', () => {
       const result = await sut.getApiOverview();
 
       expect(result).toBe('# API Overview');
-      expect(fileReader.readFile).toHaveBeenCalledWith(
-        'docs/architecture/API-OVERVIEW.md',
-      );
+      expect(fileReader.readFile).toHaveBeenCalledWith('docs/architecture/API-OVERVIEW.md');
     });
 
     it('should return null when apiOverview path not configured', async () => {

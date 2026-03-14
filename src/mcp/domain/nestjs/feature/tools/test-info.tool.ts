@@ -8,10 +8,7 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
-const projectRootParam = z
-  .string()
-  .optional()
-  .describe('Path to NestJS project root. Overrides MCP config.');
+const projectRootParam = z.string().optional().describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class TestInfoTool {
@@ -25,22 +22,17 @@ export class TestInfoTool {
 
   @Tool({
     name: 'get-test-summary',
-    description:
-      'Test summary for project or module: unit, e2e, factories, in-memory repos',
+    description: 'Test summary for project or module: unit, e2e, factories, in-memory repos',
     parameters: z.object({
       moduleName: z.string().optional().describe('Filter by module'),
       projectRoot: projectRootParam,
     }),
   })
-  async getTestSummary(params: {
-    moduleName?: string;
-    projectRoot?: string;
-  }): Promise<string> {
-    const doWork = async () => {
+  getTestSummary(params: { moduleName?: string; projectRoot?: string }): Promise<string> {
+    const doWork = async (): Promise<string> => {
       this.mcpLogger.logToolInvoked('get-test-summary', params);
       const framework = await this.frameworkDetector.detect();
-      const unsupportedMsg =
-        this.adapterRegistry.getUnsupportedMessage(framework);
+      const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
       if (unsupportedMsg) {
         this.mcpLogger.logToolResult('get-test-summary', unsupportedMsg.length);
@@ -56,21 +48,13 @@ export class TestInfoTool {
 
         if (!mod) {
           const moduleNotFoundMessage = `Module "${params.moduleName}" not found.`;
-          this.mcpLogger.logToolResult(
-            'get-test-summary',
-            moduleNotFoundMessage.length,
-          );
+          this.mcpLogger.logToolResult('get-test-summary', moduleNotFoundMessage.length);
           return moduleNotFoundMessage;
         }
-        const specFiles = await this.fileReader.readGlob(
-          `src/${params.moduleName}/**/*.spec.ts`,
-        );
-        const e2eFiles = await this.fileReader.readGlob(
-          `src/${params.moduleName}/**/*.e2e-spec.ts`,
-        );
+        const specFiles = await this.fileReader.readGlob(`src/${params.moduleName}/**/*.spec.ts`);
+        const e2eFiles = await this.fileReader.readGlob(`src/${params.moduleName}/**/*.e2e-spec.ts`);
         const hasFactories = await this.fileReader.exists('test/factories');
-        const hasInMemoryRepos =
-          await this.fileReader.exists('test/repositories');
+        const hasInMemoryRepos = await this.fileReader.exists('test/repositories');
 
         const result = [
           `# Testes: ${params.moduleName}`,
@@ -92,18 +76,13 @@ export class TestInfoTool {
       let totalSpec = 0;
       let totalE2e = 0;
       for (const m of modules) {
-        const spec = await this.fileReader.readGlob(
-          `src/${m.name}/**/*.spec.ts`,
-        );
-        const e2e = await this.fileReader.readGlob(
-          `src/${m.name}/**/*.e2e-spec.ts`,
-        );
+        const spec = await this.fileReader.readGlob(`src/${m.name}/**/*.spec.ts`);
+        const e2e = await this.fileReader.readGlob(`src/${m.name}/**/*.e2e-spec.ts`);
         totalSpec += spec.length;
         totalE2e += e2e.length;
       }
       const hasFactories = await this.fileReader.exists('test/factories');
-      const hasInMemoryRepos =
-        await this.fileReader.exists('test/repositories');
+      const hasInMemoryRepos = await this.fileReader.exists('test/repositories');
 
       const result = [
         '# Test Summary (project)',

@@ -15,7 +15,7 @@ export class FrameworkDetectorService {
     private readonly projectRootContext: ProjectRootContextService,
   ) {}
 
-  async detect(): Promise<FrameworkType> {
+  detect(): Promise<FrameworkType> {
     const root = this.projectRootContext.getProjectRoot();
     let cached = this.cache.get(root);
     if (!cached) {

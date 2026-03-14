@@ -37,16 +37,10 @@ describe('EntityIntrospectorService', () => {
     } as unknown as jest.Mocked<FileReaderService>;
 
     projectContext = {
-      getContext: jest
-        .fn()
-        .mockResolvedValue(createProjectContext({ orm: 'mikroorm' })),
+      getContext: jest.fn().mockResolvedValue(createProjectContext({ orm: 'mikroorm' })),
     } as unknown as jest.Mocked<ProjectContextService>;
 
-    const strategies = [
-      new MikroORMParserStrategy(),
-      new TypeORMParserStrategy(),
-      new ObjectionParserStrategy(),
-    ];
+    const strategies = [new MikroORMParserStrategy(), new TypeORMParserStrategy(), new ObjectionParserStrategy()];
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -78,13 +72,8 @@ describe('EntityIntrospectorService', () => {
   });
 
   it('should skip files with empty content in getEntitySchema', async () => {
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/user.entity.ts',
-      'src/tenant/tenant.entity.ts',
-    ]);
-    fileReader.readFile
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(sampleEntityContent);
+    fileReader.readGlob.mockResolvedValue(['src/user/user.entity.ts', 'src/tenant/tenant.entity.ts']);
+    fileReader.readFile.mockResolvedValueOnce(null).mockResolvedValueOnce(sampleEntityContent);
 
     const result = await sut.getEntitySchema('User');
     expect(result).not.toBeNull();
@@ -99,13 +88,8 @@ export class Tenant {
   uuid!: string;
 }
 `;
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/user.entity.ts',
-      'src/tenant/tenant.entity.ts',
-    ]);
-    fileReader.readFile
-      .mockResolvedValueOnce(otherEntityContent)
-      .mockResolvedValueOnce(sampleEntityContent);
+    fileReader.readGlob.mockResolvedValue(['src/user/user.entity.ts', 'src/tenant/tenant.entity.ts']);
+    fileReader.readFile.mockResolvedValueOnce(otherEntityContent).mockResolvedValueOnce(sampleEntityContent);
 
     const result = await sut.getEntitySchema('User');
     expect(result).not.toBeNull();
@@ -120,13 +104,8 @@ export class Tenant {
   uuid!: string;
 }
 `;
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/user.entity.ts',
-      'src/tenant/tenant.entity.ts',
-    ]);
-    fileReader.readFile
-      .mockResolvedValueOnce(sampleEntityContent)
-      .mockResolvedValueOnce(tenantContent);
+    fileReader.readGlob.mockResolvedValue(['src/user/user.entity.ts', 'src/tenant/tenant.entity.ts']);
+    fileReader.readFile.mockResolvedValueOnce(sampleEntityContent).mockResolvedValueOnce(tenantContent);
 
     const result = await sut.listEntities();
     expect(result.length).toBe(2);
@@ -135,13 +114,8 @@ export class Tenant {
   });
 
   it('should skip files with empty content in listEntities', async () => {
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/user.entity.ts',
-      'src/tenant/tenant.entity.ts',
-    ]);
-    fileReader.readFile
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(sampleEntityContent);
+    fileReader.readGlob.mockResolvedValue(['src/user/user.entity.ts', 'src/tenant/tenant.entity.ts']);
+    fileReader.readFile.mockResolvedValueOnce(null).mockResolvedValueOnce(sampleEntityContent);
 
     const result = await sut.listEntities();
     expect(result.length).toBe(1);

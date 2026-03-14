@@ -3,10 +3,7 @@ import * as path from 'path';
 
 const PROJECT_ROOT = path.resolve(__dirname, '../../fixtures/sample-project');
 const PROJECT_CWD = process.cwd();
-const STDIO_ENTRY = path.join(
-  PROJECT_CWD,
-  'src/mcp/feature/mcp-stdio.entry.ts',
-);
+const STDIO_ENTRY = path.join(PROJECT_CWD, 'src/mcp/feature/mcp-stdio.entry.ts');
 
 interface AnyResponse {
   result?: unknown;
@@ -17,15 +14,11 @@ interface AnyResponse {
 
 function runMcpStdio(request: object): Promise<AnyResponse> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(
-      'npx',
-      ['ts-node', '-r', 'tsconfig-paths/register', STDIO_ENTRY],
-      {
-        cwd: PROJECT_CWD,
-        env: { ...process.env, PROJECT_ROOT },
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
-    );
+    const proc = spawn('npx', ['ts-node', '-r', 'tsconfig-paths/register', STDIO_ENTRY], {
+      cwd: PROJECT_CWD,
+      env: { ...process.env, PROJECT_ROOT },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
 
     let stdout = '';
     proc.stdout.on('data', (chunk) => {
@@ -71,15 +64,11 @@ async function runMcpStdioWithRequests(
     const results: { result?: unknown; error?: { message: string } }[] = [];
     let buffer = '';
 
-    const proc = spawn(
-      'npx',
-      ['ts-node', '-r', 'tsconfig-paths/register', STDIO_ENTRY],
-      {
-        cwd: PROJECT_CWD,
-        env: { ...process.env, PROJECT_ROOT },
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
-    );
+    const proc = spawn('npx', ['ts-node', '-r', 'tsconfig-paths/register', STDIO_ENTRY], {
+      cwd: PROJECT_CWD,
+      env: { ...process.env, PROJECT_ROOT },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
 
     proc.stdout.on('data', (chunk) => {
       buffer += (chunk as unknown as string).toString();
@@ -92,9 +81,7 @@ async function runMcpStdioWithRequests(
             const data = JSON.parse(trimmed) as unknown as AnyResponse;
             results.push({
               result: data.result,
-              error: data.error
-                ? { message: data.error.message ?? '' }
-                : undefined,
+              error: data.error ? { message: data.error.message ?? '' } : undefined,
             });
           } catch {
             results.push({
@@ -135,9 +122,7 @@ describe('MCP STDIO (E2E)', () => {
     };
     const response = await runMcpStdio(initRequest);
     expect(response.result).toBeDefined();
-    expect(
-      (response.result as { serverInfo?: unknown }).serverInfo,
-    ).toBeDefined();
+    expect((response.result as { serverInfo?: unknown }).serverInfo).toBeDefined();
   }, 15000);
 
   it('should list tools via stdio', async () => {
@@ -165,9 +150,7 @@ describe('MCP STDIO (E2E)', () => {
     expect(tools).toBeDefined();
 
     if (!tools) {
-      throw new Error(
-        'tools/list response missing tools array. Check MCP STDIO transport.',
-      );
+      throw new Error('tools/list response missing tools array. Check MCP STDIO transport.');
     }
     expect(tools.length).toBeGreaterThan(0);
     expect(tools.map((t) => t.name)).toContain('list-modules');
@@ -198,15 +181,11 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    const content = (
-      result[1].result as { content?: { type: string; text?: string }[] }
-    )?.content;
+    const content = (result[1].result as { content?: { type: string; text?: string }[] })?.content;
     expect(content).toBeDefined();
 
     if (!content) {
-      throw new Error(
-        'list-modules tool call response missing content. Check MCP STDIO transport.',
-      );
+      throw new Error('list-modules tool call response missing content. Check MCP STDIO transport.');
     }
     expect(content.some((c) => c.type === 'text')).toBe(true);
   }, 15000);
@@ -225,15 +204,11 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    const content = (
-      result[1].result as { content?: { type: string; text?: string }[] }
-    )?.content;
+    const content = (result[1].result as { content?: { type: string; text?: string }[] })?.content;
     expect(content).toBeDefined();
 
     if (!content) {
-      throw new Error(
-        'get-module-detail tool call response missing content. Check MCP STDIO transport.',
-      );
+      throw new Error('get-module-detail tool call response missing content. Check MCP STDIO transport.');
     }
     expect(content.length).toBeGreaterThan(0);
     const textContent = content.find((c) => c.type === 'text');
@@ -256,9 +231,7 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    expect(
-      (result[1].result as { content?: unknown[] })?.content,
-    ).toBeDefined();
+    expect((result[1].result as { content?: unknown[] })?.content).toBeDefined();
   }, 15000);
 
   it('should call list-endpoints via stdio', async () => {
@@ -275,9 +248,7 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    expect(
-      (result[1].result as { content?: unknown[] })?.content,
-    ).toBeDefined();
+    expect((result[1].result as { content?: unknown[] })?.content).toBeDefined();
   }, 15000);
 
   it('should call check-conventions via stdio', async () => {
@@ -294,9 +265,7 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    expect(
-      (result[1].result as { content?: unknown[] })?.content,
-    ).toBeDefined();
+    expect((result[1].result as { content?: unknown[] })?.content).toBeDefined();
   }, 15000);
 
   it('should call get-recent-changes via stdio', async () => {
@@ -313,9 +282,7 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    expect(
-      (result[1].result as { content?: unknown[] })?.content,
-    ).toBeDefined();
+    expect((result[1].result as { content?: unknown[] })?.content).toBeDefined();
   }, 15000);
 
   it('should call get-test-summary via stdio', async () => {
@@ -332,9 +299,7 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    expect(
-      (result[1].result as { content?: unknown[] })?.content,
-    ).toBeDefined();
+    expect((result[1].result as { content?: unknown[] })?.content).toBeDefined();
   }, 15000);
 
   it('should call get-create-module-guide via stdio', async () => {
@@ -356,15 +321,11 @@ describe('MCP STDIO (E2E)', () => {
       },
     ]);
     expect(result[1].error).toBeUndefined();
-    const content = (
-      result[1].result as { content?: { type: string; text?: string }[] }
-    )?.content;
+    const content = (result[1].result as { content?: { type: string; text?: string }[] })?.content;
     expect(content).toBeDefined();
 
     if (!content) {
-      throw new Error(
-        'get-create-module-guide tool call response missing content. Check MCP STDIO transport.',
-      );
+      throw new Error('get-create-module-guide tool call response missing content. Check MCP STDIO transport.');
     }
     expect(content.length).toBeGreaterThan(0);
     const textContent = content.find((c) => c.type === 'text');
@@ -384,14 +345,11 @@ describe('MCP STDIO (E2E)', () => {
         },
       ]);
       expect(result[1].error).toBeUndefined();
-      const resources = (result[1].result as { resources?: { uri: string }[] })
-        ?.resources;
+      const resources = (result[1].result as { resources?: { uri: string }[] })?.resources;
       expect(resources).toBeDefined();
 
       if (!resources) {
-        throw new Error(
-          'resources/list response missing resources array. Check MCP STDIO transport.',
-        );
+        throw new Error('resources/list response missing resources array. Check MCP STDIO transport.');
       }
       expect(resources.length).toBeGreaterThan(0);
       expect(resources.map((r) => r.uri)).toContain('alaz://onboarding');
@@ -412,9 +370,7 @@ describe('MCP STDIO (E2E)', () => {
       expect(contents).toBeDefined();
 
       if (!contents) {
-        throw new Error(
-          'resources/read alaz://onboarding response missing contents. Check MCP STDIO transport.',
-        );
+        throw new Error('resources/read alaz://onboarding response missing contents. Check MCP STDIO transport.');
       }
       expect(contents.length).toBeGreaterThan(0);
     }, 15000);
@@ -446,15 +402,11 @@ describe('MCP STDIO (E2E)', () => {
       expect(promptResult.messages).toBeDefined();
 
       if (!promptResult.messages) {
-        throw new Error(
-          'prompts/get create-module response missing messages. Check MCP STDIO transport.',
-        );
+        throw new Error('prompts/get create-module response missing messages. Check MCP STDIO transport.');
       }
       expect(promptResult.messages.length).toBeGreaterThan(0);
       const textContent = promptResult.messages
-        .map((m) =>
-          m.content?.type === 'text' ? m.content.text : '',
-        )
+        .map((m) => (m.content?.type === 'text' ? m.content.text : ''))
         .join(' ');
       expect(textContent).toContain('billing');
     }, 15000);

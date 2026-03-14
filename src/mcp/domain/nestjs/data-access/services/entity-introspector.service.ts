@@ -2,14 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.service';
 import type { IEntityIntrospector } from '@/mcp/core/ports/entity-introspector.port';
 import type { EntitySchema } from '@/mcp/core/ports/types';
-import {
-  ProjectContextService,
-  type OrmType,
-} from '@/mcp/domain/nestjs/data-access/services/project-context.service';
+import { ProjectContextService, type OrmType } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 import {
   ENTITY_PARSER_STRATEGIES,
   type EntityParserStrategies,
-} from '../strategies/entity-parser-strategies.token';
+} from '@mcp/domain/nestjs/data-access/strategies/entity-parser-strategies.token';
 import { extractClassNames } from '@/mcp/util/util/parser';
 
 export type { EntitySchema };
@@ -40,10 +37,7 @@ export class EntityIntrospectorService implements IEntityIntrospector {
     return schemas;
   }
 
-  async getEntitySchema(
-    entityName: string,
-    ormOverride?: OrmType,
-  ): Promise<EntitySchema | null> {
+  async getEntitySchema(entityName: string, ormOverride?: OrmType): Promise<EntitySchema | null> {
     const files = await this.fileReader.readGlob(ENTITY_FILE_PATTERN);
 
     for (const filePath of files) {
@@ -59,10 +53,7 @@ export class EntityIntrospectorService implements IEntityIntrospector {
     return null;
   }
 
-  private async selectStrategy(
-    content: string,
-    ormOverride?: OrmType,
-  ): Promise<EntityParserStrategies[number] | null> {
+  private async selectStrategy(content: string, ormOverride?: OrmType): Promise<EntityParserStrategies[number] | null> {
     if (ormOverride) {
       const strategy = this.strategies.find((s) => s.orm === ormOverride);
       return strategy ?? null;

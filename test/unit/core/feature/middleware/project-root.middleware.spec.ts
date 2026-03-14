@@ -30,10 +30,7 @@ describe('ProjectRootMiddleware', () => {
 
     middleware.use(mockReq as Request, mockRes as Response, nextFn);
 
-    expect(projectRootContext.run).toHaveBeenCalledWith(
-      '/path/to/project',
-      expect.any(Function),
-    );
+    expect(projectRootContext.run).toHaveBeenCalledWith('/path/to/project', expect.any(Function));
     expect(nextFn).toHaveBeenCalled();
     expect(mockRes.status).not.toHaveBeenCalled();
   });
@@ -43,10 +40,7 @@ describe('ProjectRootMiddleware', () => {
 
     middleware.use(mockReq as Request, mockRes as Response, nextFn);
 
-    expect(projectRootContext.run).toHaveBeenCalledWith(
-      '/path/to/project',
-      expect.any(Function),
-    );
+    expect(projectRootContext.run).toHaveBeenCalledWith('/path/to/project', expect.any(Function));
     expect(nextFn).toHaveBeenCalled();
   });
 

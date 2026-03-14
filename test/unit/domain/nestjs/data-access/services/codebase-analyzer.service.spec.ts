@@ -42,10 +42,7 @@ describe('CodebaseAnalyzerService', () => {
     } as unknown as jest.Mocked<FileReaderService>;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CodebaseAnalyzerService,
-        { provide: FileReaderService, useValue: fileReader },
-      ],
+      providers: [CodebaseAnalyzerService, { provide: FileReaderService, useValue: fileReader }],
     }).compile();
 
     sut = module.get(CodebaseAnalyzerService);
@@ -58,9 +55,7 @@ describe('CodebaseAnalyzerService', () => {
   });
 
   it('should extract endpoints from controller content', async () => {
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/feature/user.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/user/feature/user.controller.ts']);
     fileReader.readFile.mockResolvedValue(sampleControllerContent);
 
     const result = await sut.getEndpoints();
@@ -77,23 +72,17 @@ describe('CodebaseAnalyzerService', () => {
   });
 
   it('should filter by moduleName when provided', async () => {
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/feature/user.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/user/feature/user.controller.ts']);
     fileReader.readFile.mockResolvedValue(sampleControllerContent);
 
     const result = await sut.getEndpoints('user');
 
-    expect(fileReader.readGlob).toHaveBeenCalledWith(
-      'src/user/**/*.controller.ts',
-    );
+    expect(fileReader.readGlob).toHaveBeenCalledWith('src/user/**/*.controller.ts');
     expect(result.length).toBe(3);
   });
 
   it('should detect AuthType.None when present', async () => {
-    fileReader.readGlob.mockResolvedValue([
-      'src/authentication/feature/auth.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/authentication/feature/auth.controller.ts']);
     fileReader.readFile.mockResolvedValue(sampleControllerWithAuthNone);
 
     const result = await sut.getEndpoints();
@@ -103,9 +92,7 @@ describe('CodebaseAnalyzerService', () => {
   });
 
   it('should return same result for getModuleEndpoints as getEndpoints with module', async () => {
-    fileReader.readGlob.mockResolvedValue([
-      'src/tenant/feature/tenant.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/tenant/feature/tenant.controller.ts']);
     fileReader.readFile.mockResolvedValue(sampleControllerContent);
 
     const [endpoints, moduleEndpoints] = await Promise.all([
@@ -126,9 +113,7 @@ export class UserController {
   list() {}
 }
 `;
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/feature/user.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/user/feature/user.controller.ts']);
     fileReader.readFile.mockResolvedValue(content);
 
     const result = await sut.getEndpoints();
@@ -146,9 +131,7 @@ export class UserController {
   list() {}
 }
 `;
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/feature/user.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/user/feature/user.controller.ts']);
     fileReader.readFile.mockResolvedValue(content);
 
     const result = await sut.getEndpoints();
@@ -165,9 +148,7 @@ export class UserController {
   list() {}
 }
 `;
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/feature/user.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/user/feature/user.controller.ts']);
     fileReader.readFile.mockResolvedValue(content);
 
     const result = await sut.getEndpoints();
@@ -184,9 +165,7 @@ export class UserController {
   getProfile() {}
 }
 `;
-    fileReader.readGlob.mockResolvedValue([
-      'src/user/feature/user.controller.ts',
-    ]);
+    fileReader.readGlob.mockResolvedValue(['src/user/feature/user.controller.ts']);
     fileReader.readFile.mockResolvedValue(content);
 
     const result = await sut.getEndpoints();
@@ -199,9 +178,7 @@ export class UserController {
       'src/user/feature/user.controller.ts',
       'src/tenant/feature/tenant.controller.ts',
     ]);
-    fileReader.readFile
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(sampleControllerContent);
+    fileReader.readFile.mockResolvedValueOnce(null).mockResolvedValueOnce(sampleControllerContent);
 
     const result = await sut.getEndpoints();
 

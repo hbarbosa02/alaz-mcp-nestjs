@@ -46,9 +46,7 @@ async function initMcpSession(baseUrl: string): Promise<string> {
   const sessionId = res.headers.get('mcp-session-id');
 
   if (!sessionId) {
-    throw new Error(
-      'MCP initialize response missing mcp-session-id header. Check server session handling.',
-    );
+    throw new Error('MCP initialize response missing mcp-session-id header. Check server session handling.');
   }
   return sessionId;
 }
@@ -90,9 +88,7 @@ async function mcpRequest(
     const data = JSON.parse(text) as unknown as AnyResponse;
 
     if (data.error) {
-      throw new Error(
-        `MCP JSON-RPC error in response: ${JSON.stringify(data.error)}`,
-      );
+      throw new Error(`MCP JSON-RPC error in response: ${JSON.stringify(data.error)}`);
     }
 
     return data.result;
@@ -104,32 +100,24 @@ async function mcpRequest(
     const data = JSON.parse(dataMatch[1]) as unknown as AnyResponse;
 
     if (data.error) {
-      throw new Error(
-        `MCP JSON-RPC error in SSE data: ${JSON.stringify(data.error)}`,
-      );
+      throw new Error(`MCP JSON-RPC error in SSE data: ${JSON.stringify(data.error)}`);
     }
 
     return data.result;
   }
 
-  const anyJson = text.match(
-    /\{"jsonrpc"\s*:\s*"2\.0"[^}]*"result"\s*:\s*(\{[^]*?\})\s*\}\s*$/m,
-  );
+  const anyJson = text.match(/\{"jsonrpc"\s*:\s*"2\.0"[^}]*"result"\s*:\s*(\{[^]*?\})\s*\}\s*$/m);
 
   if (anyJson) {
     const parsed = JSON.parse(anyJson[0]) as unknown as AnyResponse;
 
     if (parsed.error) {
-      throw new Error(
-        `MCP JSON-RPC error in parsed response: ${JSON.stringify(parsed.error)}`,
-      );
+      throw new Error(`MCP JSON-RPC error in parsed response: ${JSON.stringify(parsed.error)}`);
     }
     return parsed.result;
   }
 
-  throw new Error(
-    `MCP HTTP response body did not contain valid JSON. First 300 chars: ${text.slice(0, 300)}`,
-  );
+  throw new Error(`MCP HTTP response body did not contain valid JSON. First 300 chars: ${text.slice(0, 300)}`);
 }
 
 describe('MCP Streamable HTTP (E2E)', () => {
@@ -167,11 +155,7 @@ describe('MCP Streamable HTTP (E2E)', () => {
     });
 
     it('should list resources', async () => {
-      const result = (await mcpRequest(
-        baseUrl,
-        sessionId,
-        'resources/list',
-      )) as {
+      const result = (await mcpRequest(baseUrl, sessionId, 'resources/list')) as {
         resources: { uri: string }[];
       };
       const uris = result.resources.map((r) => r.uri);
@@ -181,11 +165,7 @@ describe('MCP Streamable HTTP (E2E)', () => {
     });
 
     it('should list resource templates', async () => {
-      const result = (await mcpRequest(
-        baseUrl,
-        sessionId,
-        'resources/templates/list',
-      )) as {
+      const result = (await mcpRequest(baseUrl, sessionId, 'resources/templates/list')) as {
         resourceTemplates: { uriTemplate: string }[];
       };
       const templates = result.resourceTemplates.map((t) => t.uriTemplate);
@@ -341,18 +321,15 @@ describe('MCP Streamable HTTP (E2E)', () => {
   describe('prompts', () => {
     it('should get create-module prompt via SDK Client', async () => {
       const client = new Client({ name: 'e2e-test', version: '1.0.0' });
-      const transport = new StreamableHTTPClientTransport(
-        new URL(`${baseUrl}/mcp`),
-        {
-          requestInit: {
-            headers: {
-              'X-Project-Root': PROJECT_ROOT,
-              'Content-Type': 'application/json',
-              Accept: 'application/json, text/event-stream',
-            },
+      const transport = new StreamableHTTPClientTransport(new URL(`${baseUrl}/mcp`), {
+        requestInit: {
+          headers: {
+            'X-Project-Root': PROJECT_ROOT,
+            'Content-Type': 'application/json',
+            Accept: 'application/json, text/event-stream',
           },
         },
-      );
+      });
       try {
         await client.connect(transport);
         const result = await client.getPrompt({
@@ -365,9 +342,7 @@ describe('MCP Streamable HTTP (E2E)', () => {
         });
         expect(result.messages).toBeDefined();
         expect(result.messages.length).toBeGreaterThan(0);
-        const textContent = result.messages
-          .map((m) => (m.content?.type === 'text' ? m.content.text : ''))
-          .join(' ');
+        const textContent = result.messages.map((m) => (m.content?.type === 'text' ? m.content.text : '')).join(' ');
         expect(textContent).toContain('billing');
       } finally {
         await transport.close();

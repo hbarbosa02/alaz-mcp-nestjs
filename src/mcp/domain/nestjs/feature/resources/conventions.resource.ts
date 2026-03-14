@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
+import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
@@ -20,22 +21,14 @@ export class ConventionsResource {
     description: 'API conventions: validation, pagination, errors, identifiers',
     mimeType: 'text/markdown',
   })
-  async getApiConventions() {
+  async getApiConventions(): Promise<ReadResourceResult> {
     this.mcpLogger.logResourceRead('alaz://conventions/api', {});
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
-      this.mcpLogger.logResourceResult(
-        'alaz://conventions/api',
-        unsupportedMsg.length,
-      );
-      return toReadResourceResult(
-        'alaz://conventions/api',
-        'text/markdown',
-        unsupportedMsg,
-      );
+      this.mcpLogger.logResourceResult('alaz://conventions/api', unsupportedMsg.length);
+      return toReadResourceResult('alaz://conventions/api', 'text/markdown', unsupportedMsg);
     }
     const docReader = requireAdapter(
       this.adapterRegistry.getDocumentationReader(framework),
@@ -52,11 +45,7 @@ export class ConventionsResource {
     if (apiRule) parts.push('## Cursor Rule', '', apiRule);
     const result = parts.join('\n') || 'Documentation not found.';
     this.mcpLogger.logResourceResult('alaz://conventions/api', result.length);
-    return toReadResourceResult(
-      'alaz://conventions/api',
-      'text/markdown',
-      result,
-    );
+    return toReadResourceResult('alaz://conventions/api', 'text/markdown', result);
   }
 
   @Resource({
@@ -65,22 +54,14 @@ export class ConventionsResource {
     description: 'Testing patterns: AAA, sut, factories, in-memory repos',
     mimeType: 'text/markdown',
   })
-  async getTestingConventions() {
+  async getTestingConventions(): Promise<ReadResourceResult> {
     this.mcpLogger.logResourceRead('alaz://conventions/testing', {});
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
-      this.mcpLogger.logResourceResult(
-        'alaz://conventions/testing',
-        unsupportedMsg.length,
-      );
-      return toReadResourceResult(
-        'alaz://conventions/testing',
-        'text/markdown',
-        unsupportedMsg,
-      );
+      this.mcpLogger.logResourceResult('alaz://conventions/testing', unsupportedMsg.length);
+      return toReadResourceResult('alaz://conventions/testing', 'text/markdown', unsupportedMsg);
     }
     const docReader = requireAdapter(
       this.adapterRegistry.getDocumentationReader(framework),
@@ -96,15 +77,8 @@ export class ConventionsResource {
     if (testingDoc) parts.push(testingDoc, '');
     if (testingRule) parts.push('## Cursor Rule', '', testingRule);
     const result = parts.join('\n') || 'Documentation not found.';
-    this.mcpLogger.logResourceResult(
-      'alaz://conventions/testing',
-      result.length,
-    );
-    return toReadResourceResult(
-      'alaz://conventions/testing',
-      'text/markdown',
-      result,
-    );
+    this.mcpLogger.logResourceResult('alaz://conventions/testing', result.length);
+    return toReadResourceResult('alaz://conventions/testing', 'text/markdown', result);
   }
 
   @Resource({
@@ -113,31 +87,21 @@ export class ConventionsResource {
     description: 'CQRS and Jobs: commands, events, BullMQ',
     mimeType: 'text/markdown',
   })
-  async getCqrsConventions() {
+  async getCqrsConventions(): Promise<ReadResourceResult> {
     this.mcpLogger.logResourceRead('alaz://conventions/cqrs', {});
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
-      this.mcpLogger.logResourceResult(
-        'alaz://conventions/cqrs',
-        unsupportedMsg.length,
-      );
-      return toReadResourceResult(
-        'alaz://conventions/cqrs',
-        'text/markdown',
-        unsupportedMsg,
-      );
+      this.mcpLogger.logResourceResult('alaz://conventions/cqrs', unsupportedMsg.length);
+      return toReadResourceResult('alaz://conventions/cqrs', 'text/markdown', unsupportedMsg);
     }
     const docReader = requireAdapter(
       this.adapterRegistry.getDocumentationReader(framework),
       'DocumentationReader',
       framework,
     );
-    const cqrsDoc = await docReader.readDoc(
-      'docs/architecture/CQRS-AND-JOBS.md',
-    );
+    const cqrsDoc = await docReader.readDoc('docs/architecture/CQRS-AND-JOBS.md');
     const rules = await docReader.getCursorRules();
     const cqrsRule = rules['cqrs-and-jobs.mdc'] ?? '';
 
@@ -147,10 +111,6 @@ export class ConventionsResource {
     if (cqrsRule) parts.push('## Cursor Rule', '', cqrsRule);
     const result = parts.join('\n') || 'Documentation not found.';
     this.mcpLogger.logResourceResult('alaz://conventions/cqrs', result.length);
-    return toReadResourceResult(
-      'alaz://conventions/cqrs',
-      'text/markdown',
-      result,
-    );
+    return toReadResourceResult('alaz://conventions/cqrs', 'text/markdown', result);
   }
 }

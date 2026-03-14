@@ -72,4 +72,16 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['src/main.ts', 'src/mcp/feature/mcp-stdio.entry.ts'],
+    rules: { 'no-console': 'off' },
+  },
+  {
+    files: ['test/e2e/fixtures/**/*.ts', 'test/helpers/**/*.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
+  },
 );

@@ -125,10 +125,7 @@ describe('PromptGuideTools', () => {
         projectRoot: '/custom/path',
       });
 
-      expect(runMock).toHaveBeenCalledWith(
-        '/custom/path',
-        expect.any(Function),
-      );
+      expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
     });
   });
 
@@ -182,10 +179,7 @@ describe('PromptGuideTools', () => {
         projectRoot: '/custom/path',
       });
 
-      expect(runMock).toHaveBeenCalledWith(
-        '/custom/path',
-        expect.any(Function),
-      );
+      expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
     });
   });
 
@@ -233,10 +227,7 @@ describe('PromptGuideTools', () => {
         projectRoot: '/custom/path',
       });
 
-      expect(runMock).toHaveBeenCalledWith(
-        '/custom/path',
-        expect.any(Function),
-      );
+      expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
     });
   });
 
@@ -284,10 +275,7 @@ describe('PromptGuideTools', () => {
         projectRoot: '/custom/path',
       });
 
-      expect(runMock).toHaveBeenCalledWith(
-        '/custom/path',
-        expect.any(Function),
-      );
+      expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
     });
   });
 
@@ -338,10 +326,7 @@ describe('PromptGuideTools', () => {
         projectRoot: '/custom/path',
       });
 
-      expect(runMock).toHaveBeenCalledWith(
-        '/custom/path',
-        expect.any(Function),
-      );
+      expect(runMock).toHaveBeenCalledWith('/custom/path', expect.any(Function));
     });
   });
 });

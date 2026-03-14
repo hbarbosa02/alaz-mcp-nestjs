@@ -29,5 +29,11 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
+    '^@mcp/core/(.*)$': '<rootDir>/src/mcp/core/$1',
+    '^@mcp/domain/nestjs/(.*)$': '<rootDir>/src/mcp/domain/nestjs/$1',
+    '^@mcp/domain/angular/(.*)$': '<rootDir>/src/mcp/domain/angular/$1',
+    '^@mcp/domain/laravel/(.*)$': '<rootDir>/src/mcp/domain/laravel/$1',
+    '^@mcp/domain/shared/(.*)$': '<rootDir>/src/mcp/domain/shared/$1',
+    '^@mcp/util/(.*)$': '<rootDir>/src/mcp/util/$1',
   },
 };

@@ -73,9 +73,7 @@ describe('ModuleRegistryService', () => {
 
     const result = await sut.listModules();
     expect(result.some((m) => m.name === 'user')).toBe(true);
-    expect(
-      result.filter((m) => m.name === 'shared').length,
-    ).toBeLessThanOrEqual(1);
+    expect(result.filter((m) => m.name === 'shared').length).toBeLessThanOrEqual(1);
   });
 
   it('should return null when module path does not exist', async () => {
@@ -107,8 +105,7 @@ describe('ModuleRegistryService', () => {
   it('should include shared module when src/shared exists', async () => {
     fileReader.readDir.mockImplementation((path: string) => {
       if (path === 'src') return Promise.resolve(['user']);
-      if (path === 'src/user' || path === 'src/shared')
-        return Promise.resolve(['data-access', 'feature']);
+      if (path === 'src/user' || path === 'src/shared') return Promise.resolve(['data-access', 'feature']);
       return Promise.resolve([]);
     });
     fileReader.readGlob
@@ -124,9 +121,7 @@ describe('ModuleRegistryService', () => {
   });
 
   it('should list modules from src/modules when nested pattern', async () => {
-    projectContext.getContext.mockResolvedValue(
-      createProjectContext({ modulePattern: 'nested' }),
-    );
+    projectContext.getContext.mockResolvedValue(createProjectContext({ modulePattern: 'nested' }));
     fileReader.exists.mockResolvedValue(true);
     fileReader.readDir.mockResolvedValue(['user', 'account']);
     fileReader.readGlob
@@ -147,9 +142,7 @@ describe('ModuleRegistryService', () => {
   });
 
   it('should skip src/modules when nested but dir does not exist', async () => {
-    projectContext.getContext.mockResolvedValue(
-      createProjectContext({ modulePattern: 'nested' }),
-    );
+    projectContext.getContext.mockResolvedValue(createProjectContext({ modulePattern: 'nested' }));
     fileReader.exists.mockResolvedValue(false);
 
     const result = await sut.listModules();
@@ -157,9 +150,7 @@ describe('ModuleRegistryService', () => {
   });
 
   it('should skip dirs with dots in nested pattern', async () => {
-    projectContext.getContext.mockResolvedValue(
-      createProjectContext({ modulePattern: 'nested' }),
-    );
+    projectContext.getContext.mockResolvedValue(createProjectContext({ modulePattern: 'nested' }));
     fileReader.exists.mockResolvedValue(true);
     fileReader.readDir.mockResolvedValue(['user.module.ts', 'valid-module']);
     fileReader.readGlob
@@ -174,9 +165,7 @@ describe('ModuleRegistryService', () => {
   });
 
   it('should get module from src/modules first when nested pattern', async () => {
-    projectContext.getContext.mockResolvedValue(
-      createProjectContext({ modulePattern: 'nested' }),
-    );
+    projectContext.getContext.mockResolvedValue(createProjectContext({ modulePattern: 'nested' }));
     fileReader.exists.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
     fileReader.readGlob
       .mockResolvedValueOnce(['src/modules/user/user.module.ts'])

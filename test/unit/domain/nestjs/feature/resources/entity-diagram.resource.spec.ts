@@ -4,10 +4,7 @@ import { EntityDiagramResource } from '@/mcp/domain/nestjs/feature/resources/ent
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import {
-  createEntitySchema,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createEntitySchema, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('EntityDiagramResource', () => {
   let sut: EntityDiagramResource;
@@ -94,9 +91,7 @@ describe('EntityDiagramResource', () => {
   });
 
   it('should handle entity without relations', async () => {
-    entityIntrospector.getEntitySchema.mockResolvedValue(
-      createEntitySchema({ relations: [] }),
-    );
+    entityIntrospector.getEntitySchema.mockResolvedValue(createEntitySchema({ relations: [] }));
 
     const result = (await sut.getEntityDiagram({
       entityName: 'User',

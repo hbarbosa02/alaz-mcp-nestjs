@@ -4,11 +4,7 @@ import { ModuleDocsResource } from '@/mcp/domain/nestjs/feature/resources/module
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import {
-  createModuleInfo,
-  createEndpointInfo,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createModuleInfo, createEndpointInfo, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('ModuleDocsResource', () => {
   let sut: ModuleDocsResource;
@@ -57,17 +53,13 @@ describe('ModuleDocsResource', () => {
 
     const result = await sut.getModuleDocs({ moduleName: 'unknown' });
 
-    expect((result.contents[0] as { text: string }).text).toBe(
-      'Module "unknown" not found.',
-    );
+    expect((result.contents[0] as { text: string }).text).toBe('Module "unknown" not found.');
   });
 
   it('should return module docs with endpoints and documentation', async () => {
     moduleRegistry.getModule.mockResolvedValue(createModuleInfo());
     docReader.getFeatureDoc.mockResolvedValue('# User docs');
-    codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([
-      createEndpointInfo({ permissions: [] }),
-    ]);
+    codebaseAnalyzer.getModuleEndpoints.mockResolvedValue([createEndpointInfo({ permissions: [] })]);
 
     const result = await sut.getModuleDocs({ moduleName: 'user' });
 

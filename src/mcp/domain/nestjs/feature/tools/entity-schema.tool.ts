@@ -7,10 +7,7 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
-const projectRootParam = z
-  .string()
-  .optional()
-  .describe('Path to NestJS project root. Overrides MCP config.');
+const projectRootParam = z.string().optional().describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class EntitySchemaTool {
@@ -26,9 +23,7 @@ export class EntitySchemaTool {
     description:
       'Returns entity schema (MikroORM, TypeORM, or Objection): properties, types, relations. ORM is auto-detected from project if omitted.',
     parameters: z.object({
-      entityName: z
-        .string()
-        .describe('Entity name (e.g. User, Tenant, Account)'),
+      entityName: z.string().describe('Entity name (e.g. User, Tenant, Account)'),
       orm: z
         .enum(['mikroorm', 'typeorm', 'objection'])
         .optional()
@@ -36,22 +31,18 @@ export class EntitySchemaTool {
       projectRoot: projectRootParam,
     }),
   })
-  async getEntitySchema(params: {
+  getEntitySchema(params: {
     entityName: string;
     orm?: 'mikroorm' | 'typeorm' | 'objection';
     projectRoot?: string;
   }): Promise<string> {
-    const doWork = async () => {
+    const doWork = async (): Promise<string> => {
       this.mcpLogger.logToolInvoked('get-entity-schema', params);
       const framework = await this.frameworkDetector.detect();
-      const unsupportedMsg =
-        this.adapterRegistry.getUnsupportedMessage(framework);
+      const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
       if (unsupportedMsg) {
-        this.mcpLogger.logToolResult(
-          'get-entity-schema',
-          unsupportedMsg.length,
-        );
+        this.mcpLogger.logToolResult('get-entity-schema', unsupportedMsg.length);
         return unsupportedMsg;
       }
       const entityIntrospector = requireAdapter(
@@ -59,23 +50,15 @@ export class EntitySchemaTool {
         'EntityIntrospector',
         framework,
       );
-      const schema = await entityIntrospector.getEntitySchema(
-        params.entityName,
-        params.orm,
-      );
+      const schema = await entityIntrospector.getEntitySchema(params.entityName, params.orm);
 
       if (!schema) {
         const entityNotFoundMessage = `Entity "${params.entityName}" not found.`;
-        this.mcpLogger.logToolResult(
-          'get-entity-schema',
-          entityNotFoundMessage.length,
-        );
+        this.mcpLogger.logToolResult('get-entity-schema', entityNotFoundMessage.length);
         return entityNotFoundMessage;
       }
 
-      const tableLine = schema.tableName
-        ? [`Table: \`${schema.tableName}\``, '']
-        : [];
+      const tableLine = schema.tableName ? [`Table: \`${schema.tableName}\``, ''] : [];
       const lines: string[] = [
         `# Entity: ${schema.name}`,
         `File: \`${schema.filePath}\``,
@@ -94,9 +77,7 @@ export class EntitySchemaTool {
         lines.push('| Name | Type | Target | inversedBy | mappedBy |');
         lines.push('|------|------|--------|------------|----------|');
         for (const r of schema.relations) {
-          lines.push(
-            `| ${r.name} | ${r.type} | ${r.targetEntity} | ${r.inversedBy ?? '-'} | ${r.mappedBy ?? '-'} |`,
-          );
+          lines.push(`| ${r.name} | ${r.type} | ${r.targetEntity} | ${r.inversedBy ?? '-'} | ${r.mappedBy ?? '-'} |`);
         }
       }
 

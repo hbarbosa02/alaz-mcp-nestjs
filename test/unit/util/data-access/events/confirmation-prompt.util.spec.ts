@@ -6,12 +6,8 @@ import {
 describe('confirmation-prompt.util', () => {
   describe('EXECUTION_CONFIRMATION_HEADER', () => {
     it('should contain the confirmation warning text', () => {
-      expect(EXECUTION_CONFIRMATION_HEADER).toContain(
-        'EXECUTION REQUIRES DEVELOPER CONFIRMATION',
-      );
-      expect(EXECUTION_CONFIRMATION_HEADER).toContain(
-        'Should I execute these changes?',
-      );
+      expect(EXECUTION_CONFIRMATION_HEADER).toContain('EXECUTION REQUIRES DEVELOPER CONFIRMATION');
+      expect(EXECUTION_CONFIRMATION_HEADER).toContain('Should I execute these changes?');
     });
   });
 

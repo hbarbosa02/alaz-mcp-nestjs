@@ -13,10 +13,7 @@ describe('PathResolverService', () => {
     } as unknown as jest.Mocked<ProjectRootContextService>;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PathResolverService,
-        { provide: ProjectRootContextService, useValue: projectRootContext },
-      ],
+      providers: [PathResolverService, { provide: ProjectRootContextService, useValue: projectRootContext }],
     }).compile();
 
     sut = module.get(PathResolverService);

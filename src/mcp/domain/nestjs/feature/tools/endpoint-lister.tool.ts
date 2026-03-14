@@ -7,10 +7,7 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
-const projectRootParam = z
-  .string()
-  .optional()
-  .describe('Path to NestJS project root. Overrides MCP config.');
+const projectRootParam = z.string().optional().describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class EndpointListerTool {
@@ -25,22 +22,15 @@ export class EndpointListerTool {
     name: 'list-endpoints',
     description: 'Lists API endpoints. Optionally filters by module.',
     parameters: z.object({
-      moduleName: z
-        .string()
-        .optional()
-        .describe('Filter by module (e.g. user, account)'),
+      moduleName: z.string().optional().describe('Filter by module (e.g. user, account)'),
       projectRoot: projectRootParam,
     }),
   })
-  async listEndpoints(params: {
-    moduleName?: string;
-    projectRoot?: string;
-  }): Promise<string> {
-    const doWork = async () => {
+  listEndpoints(params: { moduleName?: string; projectRoot?: string }): Promise<string> {
+    const doWork = async (): Promise<string> => {
       this.mcpLogger.logToolInvoked('list-endpoints', params);
       const framework = await this.frameworkDetector.detect();
-      const unsupportedMsg =
-        this.adapterRegistry.getUnsupportedMessage(framework);
+      const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
       if (unsupportedMsg) {
         this.mcpLogger.logToolResult('list-endpoints', unsupportedMsg.length);

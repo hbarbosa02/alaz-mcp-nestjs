@@ -18,17 +18,11 @@ export class NewEndpointPrompt {
       'Template to add endpoint with Swagger, Zod DTO, permissions. Output includes executable steps — agent MUST ask developer for confirmation before executing.',
     parameters: z.object({
       moduleName: z.string().describe('Module name'),
-      httpMethod: z
-        .enum(['GET', 'POST', 'PATCH', 'DELETE'])
-        .describe('HTTP method'),
+      httpMethod: z.enum(['GET', 'POST', 'PATCH', 'DELETE']).describe('HTTP method'),
       description: z.string().describe('Endpoint description'),
     }),
   })
-  async getPrompt(params: {
-    moduleName: string;
-    httpMethod: string;
-    description: string;
-  }): Promise<string> {
+  async getPrompt(params: { moduleName: string; httpMethod: string; description: string }): Promise<string> {
     this.mcpLogger.logPromptReceived('create-endpoint', params);
     const { moduleName, httpMethod, description } = params;
     const context = await this.projectContext.getContext();

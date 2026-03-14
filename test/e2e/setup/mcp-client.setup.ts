@@ -41,9 +41,7 @@ export const EXPECTED_PROMPTS = [
   'investigate-bug',
 ];
 
-export function projectRootHeaders(
-  projectRoot: string,
-): Record<string, string> {
+export function projectRootHeaders(projectRoot: string): Record<string, string> {
   return {
     'X-Project-Root': projectRoot,
     'Content-Type': 'application/json',

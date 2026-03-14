@@ -5,7 +5,7 @@ import type {
   OrmType,
   ParsedProperty,
   ParsedRelation,
-} from './entity-parser.strategy';
+} from '@mcp/domain/nestjs/data-access/strategies/entity-parser.strategy';
 
 @Injectable()
 export class TypeORMParserStrategy implements EntityParserStrategy {
@@ -21,9 +21,7 @@ export class TypeORMParserStrategy implements EntityParserStrategy {
     if (stringArg) return stringArg[1];
 
     // @Entity({ name: "table_name" })
-    const objectArg = content.match(
-      /@Entity\s*\(\s*\{\s*name\s*:\s*["']([^"']+)["']/,
-    );
+    const objectArg = content.match(/@Entity\s*\(\s*\{\s*name\s*:\s*["']([^"']+)["']/);
     if (objectArg) return objectArg[1];
 
     return null;
@@ -31,9 +29,7 @@ export class TypeORMParserStrategy implements EntityParserStrategy {
 
   extractEntityClass(content: string): string | null {
     const classNames = extractClassNames(content);
-    const entityClass = classNames.find(
-      (c) => content.includes(`class ${c}`) && content.includes('@Entity'),
-    );
+    const entityClass = classNames.find((c) => content.includes(`class ${c}`) && content.includes('@Entity'));
     return entityClass ?? classNames[0] ?? null;
   }
 
@@ -50,16 +46,10 @@ export class TypeORMParserStrategy implements EntityParserStrategy {
     const properties: ParsedProperty[] = [];
 
     // @Column(), @Column({ ... }), @PrimaryColumn(), @PrimaryGeneratedColumn()
-    const columnDecorators = [
-      '@Column',
-      '@PrimaryColumn',
-      '@PrimaryGeneratedColumn',
-    ] as const;
+    const columnDecorators = ['@Column', '@PrimaryColumn', '@PrimaryGeneratedColumn'] as const;
 
     for (const decorator of columnDecorators) {
-      const decoratorName = decorator.startsWith('@')
-        ? decorator
-        : `@${decorator}`;
+      const decoratorName = decorator.startsWith('@') ? decorator : `@${decorator}`;
       const regex = new RegExp(
         `${decoratorName}\\s*(?:\\(([^)]*)\\))?\\s*(?:@\\w+[^@]*)*\\s*(?:readonly\\s+)?(\\w+)\\s*[?:!]?\\s*:\\s*([\\w<>\\[\\]|]+)`,
         'g',

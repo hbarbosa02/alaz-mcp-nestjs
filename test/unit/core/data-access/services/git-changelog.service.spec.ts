@@ -15,10 +15,7 @@ describe('GitChangelogService', () => {
     } as unknown as jest.Mocked<GitContextService>;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        GitChangelogService,
-        { provide: GitContextService, useValue: gitContext },
-      ],
+      providers: [GitChangelogService, { provide: GitContextService, useValue: gitContext }],
     }).compile();
 
     sut = module.get(GitChangelogService);
@@ -133,17 +130,15 @@ describe('GitChangelogService', () => {
 
   it('should skip Unreleased section when no commits since last tag', async () => {
     gitContext.getTags.mockResolvedValue(['v1.0.0']);
-    gitContext.getCommitsBetween
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([
-        {
-          hash: 'c0',
-          author: 'Dev',
-          date: '2025-01-01',
-          message: 'Initial commit',
-          files: [],
-        },
-      ]);
+    gitContext.getCommitsBetween.mockResolvedValueOnce([]).mockResolvedValueOnce([
+      {
+        hash: 'c0',
+        author: 'Dev',
+        date: '2025-01-01',
+        message: 'Initial commit',
+        files: [],
+      },
+    ]);
     gitContext.getTagDate.mockResolvedValue('2025-01-01');
 
     const result = await sut.generateChangelog();

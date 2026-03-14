@@ -7,10 +7,7 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
 import { requireAdapter } from '@/mcp/util/require-adapter.util';
 
-const projectRootParam = z
-  .string()
-  .optional()
-  .describe('Path to NestJS project root. Overrides MCP config.');
+const projectRootParam = z.string().optional().describe('Path to NestJS project root. Overrides MCP config.');
 
 @Injectable()
 export class ModuleExplorerTool {
@@ -23,16 +20,14 @@ export class ModuleExplorerTool {
 
   @Tool({
     name: 'list-modules',
-    description:
-      'Lists all project modules with paths, controllers, entities and documentation',
+    description: 'Lists all project modules with paths, controllers, entities and documentation',
     parameters: z.object({ projectRoot: projectRootParam }),
   })
-  async listModules(params: { projectRoot?: string } = {}): Promise<string> {
-    const doWork = async () => {
+  listModules(params: { projectRoot?: string } = {}): Promise<string> {
+    const doWork = async (): Promise<string> => {
       this.mcpLogger.logToolInvoked('list-modules', params);
       const framework = await this.frameworkDetector.detect();
-      const unsupportedMsg =
-        this.adapterRegistry.getUnsupportedMessage(framework);
+      const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
       if (unsupportedMsg) {
         this.mcpLogger.logToolResult('list-modules', unsupportedMsg.length);
@@ -65,29 +60,19 @@ export class ModuleExplorerTool {
 
   @Tool({
     name: 'get-module-detail',
-    description:
-      'Returns full module details: structure, entities, endpoints, tests',
+    description: 'Returns full module details: structure, entities, endpoints, tests',
     parameters: z.object({
-      moduleName: z
-        .string()
-        .describe('Module name (e.g. user, account, tenant)'),
+      moduleName: z.string().describe('Module name (e.g. user, account, tenant)'),
       projectRoot: projectRootParam,
     }),
   })
-  async getModuleDetail(params: {
-    moduleName: string;
-    projectRoot?: string;
-  }): Promise<string> {
-    const doWork = async () => {
+  getModuleDetail(params: { moduleName: string; projectRoot?: string }): Promise<string> {
+    const doWork = async (): Promise<string> => {
       this.mcpLogger.logToolInvoked('get-module-detail', params);
       const framework = await this.frameworkDetector.detect();
-      const unsupportedMsg =
-        this.adapterRegistry.getUnsupportedMessage(framework);
+      const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
       if (unsupportedMsg) {
-        this.mcpLogger.logToolResult(
-          'get-module-detail',
-          unsupportedMsg.length,
-        );
+        this.mcpLogger.logToolResult('get-module-detail', unsupportedMsg.length);
         return unsupportedMsg;
       }
       const moduleRegistry = requireAdapter(
@@ -108,17 +93,12 @@ export class ModuleExplorerTool {
       const mod = await moduleRegistry.getModule(params.moduleName);
       if (!mod) {
         const moduleNotFoundMessage = `Module "${params.moduleName}" not found. Use list-modules to see available modules.`;
-        this.mcpLogger.logToolResult(
-          'get-module-detail',
-          moduleNotFoundMessage.length,
-        );
+        this.mcpLogger.logToolResult('get-module-detail', moduleNotFoundMessage.length);
         return moduleNotFoundMessage;
       }
 
       const doc = await docReader.getFeatureDoc(params.moduleName);
-      const endpoints = await codebaseAnalyzer.getModuleEndpoints(
-        params.moduleName,
-      );
+      const endpoints = await codebaseAnalyzer.getModuleEndpoints(params.moduleName);
 
       const sections: string[] = [
         `# Module: ${mod.name}`,
@@ -128,21 +108,15 @@ export class ModuleExplorerTool {
         `- Subfolders: ${mod.subModules.join(', ') || '-'}`,
         `- Controller: ${mod.hasController ? 'Yes' : 'No'}`,
         `- Entities: ${mod.entityNames.join(', ') || 'None'}`,
-        `- Tests: ${mod.hasTests ? 'Unit' : ''} ${mod.hasE2eTests ? 'E2E' : ''}`.trim() ||
-          'None',
+        `- Tests: ${mod.hasTests ? 'Unit' : ''} ${mod.hasE2eTests ? 'E2E' : ''}`.trim() || 'None',
         '',
       ];
 
       if (endpoints.length > 0) {
         sections.push('## Endpoints');
-        sections.push(
-          '| Method | Path | Permissions |',
-          '|--------|------|-------------|',
-        );
+        sections.push('| Method | Path | Permissions |', '|--------|------|-------------|');
         for (const ep of endpoints) {
-          sections.push(
-            `| ${ep.method} | ${ep.path} | ${ep.permissions.join(', ') || '-'} |`,
-          );
+          sections.push(`| ${ep.method} | ${ep.path} | ${ep.permissions.join(', ') || '-'} |`);
         }
         sections.push('');
       }

@@ -24,8 +24,6 @@ describe('envSchema', () => {
 
   it('should accept valid NODE_ENV values', () => {
     expect(envSchema.parse({ NODE_ENV: 'staging' }).NODE_ENV).toBe('staging');
-    expect(envSchema.parse({ NODE_ENV: 'production' }).NODE_ENV).toBe(
-      'production',
-    );
+    expect(envSchema.parse({ NODE_ENV: 'production' }).NODE_ENV).toBe('production');
   });
 });

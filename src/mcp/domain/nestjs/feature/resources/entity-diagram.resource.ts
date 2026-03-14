@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceTemplate } from '@rekog/mcp-nest';
+import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
@@ -20,16 +21,15 @@ export class EntityDiagramResource {
     description: 'Entity schema and relationships',
     mimeType: 'text/markdown',
   })
-  async getEntityDiagram(params: { entityName: string }) {
+  async getEntityDiagram(params: { entityName: string }): Promise<ReadResourceResult> {
     const uri = `alaz://entities/${params.entityName}`;
     this.mcpLogger.logResourceRead(uri, params);
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
       this.mcpLogger.logResourceResult(uri, unsupportedMsg.length);
-      return unsupportedMsg;
+      return toReadResourceResult(uri, 'text/markdown', unsupportedMsg);
     }
     const entityIntrospector = requireAdapter(
       this.adapterRegistry.getEntityIntrospector(framework),
@@ -44,9 +44,7 @@ export class EntityDiagramResource {
       return toReadResourceResult(uri, 'text/markdown', entityNotFoundMessage);
     }
 
-    const tableLine = schema.tableName
-      ? [`Table: \`${schema.tableName}\``, '']
-      : [];
+    const tableLine = schema.tableName ? [`Table: \`${schema.tableName}\``, ''] : [];
     const lines: string[] = [
       `# Entity: ${schema.name}`,
       `File: \`${schema.filePath}\``,
@@ -76,14 +74,13 @@ export class EntityDiagramResource {
         lines.push(`    ${p.type} ${p.name}`);
       }
       lines.push('  }');
+      const relationSymbol = (t: string): string => {
+        if (t === 'ManyToOne') return '}o||';
+        if (t === 'OneToMany') return '||o{';
+        return '}o{';
+      };
       for (const r of schema.relations) {
-        const rel =
-          r.type === 'ManyToOne'
-            ? '}o||'
-            : r.type === 'OneToMany'
-              ? '||o{'
-              : '}o{';
-        lines.push(`  ${schema.name} ${rel} ${r.targetEntity} : "${r.name}"`);
+        lines.push(`  ${schema.name} ${relationSymbol(r.type)} ${r.targetEntity} : "${r.name}"`);
       }
       lines.push('```');
     }

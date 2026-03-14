@@ -7,10 +7,7 @@ import { FileReaderService } from '@/mcp/core/data-access/services/file-reader.s
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
-import {
-  createModuleInfo,
-  createFrameworkAdapterMocks,
-} from '@test/helpers/mock-data';
+import { createModuleInfo, createFrameworkAdapterMocks } from '@test/helpers/mock-data';
 
 describe('TestInfoTool', () => {
   let sut: TestInfoTool;
@@ -100,9 +97,7 @@ describe('TestInfoTool', () => {
     const { frameworkDetector, adapterRegistry } = createFrameworkAdapterMocks({
       moduleRegistry,
     });
-    adapterRegistry.getUnsupportedMessage.mockReturnValue(
-      'Angular: Not supported.',
-    );
+    adapterRegistry.getUnsupportedMessage.mockReturnValue('Angular: Not supported.');
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

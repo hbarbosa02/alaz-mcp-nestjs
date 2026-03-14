@@ -28,8 +28,7 @@ export class GitContextService {
     private readonly projectRootContext: ProjectRootContextService,
     @Optional() @Inject(EXEC_FILE_ASYNC) execFileOverride?: ExecFileAsyncFn,
   ) {
-    this.execFileAsync =
-      execFileOverride ?? (promisify(execFile) as ExecFileAsyncFn);
+    this.execFileAsync = execFileOverride ?? (promisify(execFile) as ExecFileAsyncFn);
   }
 
   async getRecentCommits(days = 7): Promise<CommitInfo[]> {
@@ -37,13 +36,7 @@ export class GitContextService {
       const projectRoot = this.projectRootContext.getProjectRoot();
       const { stdout } = await this.execFileAsync(
         'git',
-        [
-          'log',
-          `--since=${days} days ago`,
-          '--pretty=format:%H|||%an|||%ad|||%s',
-          '--name-only',
-          '--date=short',
-        ],
+        ['log', `--since=${days} days ago`, '--pretty=format:%H|||%an|||%ad|||%s', '--name-only', '--date=short'],
         { cwd: projectRoot, timeout: this.timeout },
       );
 
@@ -93,16 +86,11 @@ export class GitContextService {
 
   async getTags(sortOrder: 'asc' | 'desc' = 'desc'): Promise<string[]> {
     try {
-      const sortFlag =
-        sortOrder === 'asc' ? 'version:refname' : '-version:refname';
-      const { stdout } = await this.execFileAsync(
-        'git',
-        ['tag', '--sort=' + sortFlag],
-        {
-          cwd: this.projectRootContext.getProjectRoot(),
-          timeout: this.timeout,
-        },
-      );
+      const sortFlag = sortOrder === 'asc' ? 'version:refname' : '-version:refname';
+      const { stdout } = await this.execFileAsync('git', ['tag', `--sort=${sortFlag}`], {
+        cwd: this.projectRootContext.getProjectRoot(),
+        timeout: this.timeout,
+      });
       return stdout
         .split('\n')
         .map((t) => t.trim())
@@ -112,17 +100,9 @@ export class GitContextService {
     }
   }
 
-  async getCommitsBetween(
-    fromRef?: string,
-    toRef?: string,
-  ): Promise<CommitInfo[]> {
+  async getCommitsBetween(fromRef?: string, toRef?: string): Promise<CommitInfo[]> {
     try {
-      const args = [
-        'log',
-        '--pretty=format:%H|||%an|||%ad|||%s',
-        '--name-only',
-        '--date=short',
-      ];
+      const args = ['log', '--pretty=format:%H|||%an|||%ad|||%s', '--name-only', '--date=short'];
 
       if (fromRef !== undefined && toRef !== undefined) {
         args.push(`${fromRef}..${toRef}`);
@@ -145,14 +125,10 @@ export class GitContextService {
 
   async getTagDate(tag: string): Promise<string | null> {
     try {
-      const { stdout } = await this.execFileAsync(
-        'git',
-        ['log', '-1', '--format=%ad', '--date=short', tag],
-        {
-          cwd: this.projectRootContext.getProjectRoot(),
-          timeout: this.timeout,
-        },
-      );
+      const { stdout } = await this.execFileAsync('git', ['log', '-1', '--format=%ad', '--date=short', tag], {
+        cwd: this.projectRootContext.getProjectRoot(),
+        timeout: this.timeout,
+      });
       const date = stdout.trim();
       return date.length > 0 ? date : null;
     } catch {

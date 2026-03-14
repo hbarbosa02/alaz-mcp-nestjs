@@ -114,9 +114,7 @@ describe('FrameworkDetectorService', () => {
   it('should evict cache when max size reached', async () => {
     let rootIndex = 0;
     const projectRootContext = {
-      getProjectRoot: jest
-        .fn()
-        .mockImplementation(() => `/root/${rootIndex++}`),
+      getProjectRoot: jest.fn().mockImplementation(() => `/root/${rootIndex++}`),
     } as unknown as jest.Mocked<ProjectRootContextService>;
 
     const module: TestingModule = await Test.createTestingModule({

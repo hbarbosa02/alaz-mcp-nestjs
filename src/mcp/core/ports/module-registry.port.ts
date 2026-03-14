@@ -1,4 +1,4 @@
-import type { ModuleInfo } from './types';
+import type { ModuleInfo } from '@mcp/core/ports/types';
 
 export const MODULE_REGISTRY_PORT = Symbol('IModuleRegistry');
 

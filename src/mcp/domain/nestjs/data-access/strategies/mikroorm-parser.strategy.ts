@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import {
-  extractClassNames,
-  extractEntityTableName,
-  extractMikroORMProperties,
-} from '@/mcp/util/util/parser';
+import { extractClassNames, extractEntityTableName, extractMikroORMProperties } from '@/mcp/util/util/parser';
 import type {
   EntityParserStrategy,
   OrmType,
   ParsedProperty,
   ParsedRelation,
-} from './entity-parser.strategy';
+} from '@mcp/domain/nestjs/data-access/strategies/entity-parser.strategy';
 
 @Injectable()
 export class MikroORMParserStrategy implements EntityParserStrategy {
@@ -25,9 +21,7 @@ export class MikroORMParserStrategy implements EntityParserStrategy {
 
   extractEntityClass(content: string): string | null {
     const classNames = extractClassNames(content);
-    const entityClass = classNames.find(
-      (c) => content.includes(`class ${c}`) && content.includes('@Entity'),
-    );
+    const entityClass = classNames.find((c) => content.includes(`class ${c}`) && content.includes('@Entity'));
     return entityClass ?? classNames[0] ?? null;
   }
 

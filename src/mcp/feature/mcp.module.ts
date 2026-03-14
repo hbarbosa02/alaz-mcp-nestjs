@@ -1,9 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { McpModule, McpTransportType } from '@rekog/mcp-nest';
 import { McpCoreModule } from '@/mcp/core/mcp-core.module';
 import { NestjsDomainModule } from '@/mcp/domain/nestjs/nestjs.domain.module';

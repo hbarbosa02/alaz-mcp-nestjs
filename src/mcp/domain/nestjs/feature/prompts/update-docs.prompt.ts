@@ -42,10 +42,8 @@ export class UpdateDocsPrompt {
       moduleTableLines.push('| ... | docs/features/<MODULE>.md |');
     }
 
-    const changelogPath =
-      context.docsLayout.changelog ?? 'docs/changes/4 - Changelog.md';
-    const entitiesPath =
-      context.docsLayout.entities ?? 'docs/diagrams/DATABASE-ENTITIES.md';
+    const changelogPath = context.docsLayout.changelog ?? 'docs/changes/4 - Changelog.md';
+    const entitiesPath = context.docsLayout.entities ?? 'docs/diagrams/DATABASE-ENTITIES.md';
 
     const content = [
       `# Update documentation: ${moduleName}`,

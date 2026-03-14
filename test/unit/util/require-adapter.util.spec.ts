@@ -8,25 +8,19 @@ describe('requireAdapter', () => {
   });
 
   it('should throw when adapter is null', () => {
-    expect(() =>
-      requireAdapter(null, 'EntityIntrospector', 'nestjs'),
-    ).toThrow(
+    expect(() => requireAdapter(null, 'EntityIntrospector', 'nestjs')).toThrow(
       'EntityIntrospector not registered for nestjs. Check FrameworkAdapterRegistry.',
     );
   });
 
   it('should throw when adapter is undefined', () => {
-    expect(() =>
-      requireAdapter(undefined, 'ModuleRegistry', 'angular'),
-    ).toThrow(
+    expect(() => requireAdapter(undefined, 'ModuleRegistry', 'angular')).toThrow(
       'ModuleRegistry not registered for angular. Check FrameworkAdapterRegistry.',
     );
   });
 
   it('should use "unknown" when framework is null', () => {
-    expect(() =>
-      requireAdapter(null, 'DocumentationReader', null),
-    ).toThrow(
+    expect(() => requireAdapter(null, 'DocumentationReader', null)).toThrow(
       'DocumentationReader not registered for unknown. Check FrameworkAdapterRegistry.',
     );
   });

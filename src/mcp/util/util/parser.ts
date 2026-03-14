@@ -10,17 +10,12 @@ export interface DecoratorMatch {
   fullMatch: string;
 }
 
-export function extractDecorators(
-  content: string,
-  decoratorName?: string,
-): DecoratorMatch[] {
+export function extractDecorators(content: string, decoratorName?: string): DecoratorMatch[] {
   const matches: DecoratorMatch[] = [];
   let m: RegExpExecArray | null;
 
   const regex = new RegExp(
-    decoratorName
-      ? `@${decoratorName}\\s*(?:\\(([^)]*)\\))?`
-      : '@(\\w+)\\s*(?:\\(([^)]*)\\))?',
+    decoratorName ? `@${decoratorName}\\s*(?:\\(([^)]*)\\))?` : '@(\\w+)\\s*(?:\\(([^)]*)\\))?',
     'g',
   );
 
@@ -103,9 +98,7 @@ export function extractMikroORMProperties(content: string): {
   return { properties, relations };
 }
 
-export function extractImports(
-  content: string,
-): { from: string; specifiers: string[] }[] {
+export function extractImports(content: string): { from: string; specifiers: string[] }[] {
   const imports: { from: string; specifiers: string[] }[] = [];
   const regex = /import\s+(?:\{([^}]+)\}|(\w+))\s+from\s+['"]([^'"]+)['"]/g;
   let m: RegExpExecArray | null;
@@ -124,8 +117,6 @@ export function extractImports(
 }
 
 export function extractEntityTableName(content: string): string | null {
-  const m = content.match(
-    /@Entity\s*\(\s*\{\s*tableName\s*:\s*['"]([^'"]+)['"]/,
-  );
+  const m = content.match(/@Entity\s*\(\s*\{\s*tableName\s*:\s*['"]([^'"]+)['"]/);
   return m ? m[1] : null;
 }

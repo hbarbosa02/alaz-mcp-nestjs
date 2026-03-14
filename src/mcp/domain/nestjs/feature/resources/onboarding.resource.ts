@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Resource } from '@rekog/mcp-nest';
+import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 import { FrameworkDetectorService } from '@/mcp/core/data-access/services/framework-detector.service';
 import { toReadResourceResult } from '@/mcp/core/util/read-resource-result.util';
 import { FrameworkAdapterRegistryService } from '@/mcp/domain/nestjs/data-access/services/framework-adapter-registry.service';
@@ -20,22 +21,14 @@ export class OnboardingResource {
     description: 'Aggregated onboarding guide for the project',
     mimeType: 'text/markdown',
   })
-  async getOnboarding() {
+  async getOnboarding(): Promise<ReadResourceResult> {
     this.mcpLogger.logResourceRead('alaz://onboarding', {});
     const framework = await this.frameworkDetector.detect();
-    const unsupportedMsg =
-      this.adapterRegistry.getUnsupportedMessage(framework);
+    const unsupportedMsg = this.adapterRegistry.getUnsupportedMessage(framework);
 
     if (unsupportedMsg) {
-      this.mcpLogger.logResourceResult(
-        'alaz://onboarding',
-        unsupportedMsg.length,
-      );
-      return toReadResourceResult(
-        'alaz://onboarding',
-        'text/markdown',
-        unsupportedMsg,
-      );
+      this.mcpLogger.logResourceResult('alaz://onboarding', unsupportedMsg.length);
+      return toReadResourceResult('alaz://onboarding', 'text/markdown', unsupportedMsg);
     }
 
     const docReader = requireAdapter(
@@ -86,9 +79,7 @@ export class OnboardingResource {
     sections.push('|--------|------------|-----------|');
 
     for (const m of modules.slice(0, 20)) {
-      sections.push(
-        `| ${m.name} | ${m.hasController ? '✓' : '-'} | ${m.entityNames.length} |`,
-      );
+      sections.push(`| ${m.name} | ${m.hasController ? '✓' : '-'} | ${m.entityNames.length} |`);
     }
 
     if (modules.length > 20) {

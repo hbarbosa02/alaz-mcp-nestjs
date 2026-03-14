@@ -3,10 +3,7 @@ import { Prompt } from '@rekog/mcp-nest';
 import { z } from 'zod';
 import { ProjectContextService } from '@/mcp/domain/nestjs/data-access/services/project-context.service';
 import { McpLoggerService } from '@/mcp/core/data-access/services/mcp-logger.service';
-import {
-  withConfirmationRequirement,
-  toPromptResult,
-} from '@/mcp/util/data-access/events/confirmation-prompt.event';
+import { withConfirmationRequirement, toPromptResult } from '@/mcp/util/data-access/events/confirmation-prompt.event';
 
 @Injectable()
 export class NewModulePrompt {
@@ -20,24 +17,12 @@ export class NewModulePrompt {
     description:
       'Template to create a module following project conventions. Output includes executable steps — agent MUST ask developer for confirmation before executing.',
     parameters: z.object({
-      moduleName: z
-        .string()
-        .describe('Module name (e.g. billing, notification)'),
-      hasController: z
-        .boolean()
-        .describe('Whether the module will have a controller'),
-      hasEntity: z
-        .boolean()
-        .describe(
-          'Whether the module will have entities (MikroORM, TypeORM, or Objection)',
-        ),
+      moduleName: z.string().describe('Module name (e.g. billing, notification)'),
+      hasController: z.boolean().describe('Whether the module will have a controller'),
+      hasEntity: z.boolean().describe('Whether the module will have entities (MikroORM, TypeORM, or Objection)'),
     }),
   })
-  async getPrompt(params: {
-    moduleName: string;
-    hasController: boolean;
-    hasEntity: boolean;
-  }): Promise<{
+  async getPrompt(params: { moduleName: string; hasController: boolean; hasEntity: boolean }): Promise<{
     messages: { role: 'user'; content: { type: 'text'; text: string } }[];
   }> {
     this.mcpLogger.logPromptReceived('create-module', params);
@@ -54,7 +39,7 @@ export class NewModulePrompt {
             '│   ├── services/',
             '│   └── index.ts',
             '├── feature/',
-            '│   ├── ' + moduleName + '.module.ts',
+            `│   ├── ${moduleName}.module.ts`,
             ...(hasController ? [`│   ├── ${moduleName}.controller.ts`] : []),
             '│   └── index.ts',
             '└── util/',
@@ -65,9 +50,9 @@ export class NewModulePrompt {
             'Follow the flat module structure:',
             '```',
             `src/${moduleName}/`,
-            '├── ' + moduleName + '.module.ts',
+            `├── ${moduleName}.module.ts`,
             ...(hasController ? [`├── ${moduleName}.controller.ts`] : []),
-            '├── ' + moduleName + '.service.ts',
+            `├── ${moduleName}.service.ts`,
             '└── index.ts',
             '```',
           ];
@@ -99,9 +84,9 @@ export class NewModulePrompt {
       sections.push(
         '## 4. Controller',
         'Use the decorators:',
-        "- `@ApiTags('" + moduleName + "')`",
+        `- \`@ApiTags('${moduleName}')\``,
         '- `@ApiBearerAuth()`',
-        "- `@Controller('" + moduleName + "')`",
+        `- \`@Controller('${moduleName}')\``,
         '- `@Permissions(PermissionCode.*)` for protected endpoints',
         '- DTOs with `createZodDto` from nestjs-zod',
         '',

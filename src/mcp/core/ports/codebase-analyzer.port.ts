@@ -1,4 +1,4 @@
-import type { EndpointInfo } from './types';
+import type { EndpointInfo } from '@mcp/core/ports/types';
 
 export const CODEBASE_ANALYZER_PORT = Symbol('ICodebaseAnalyzer');
 

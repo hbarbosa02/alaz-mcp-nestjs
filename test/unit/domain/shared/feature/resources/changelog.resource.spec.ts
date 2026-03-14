@@ -47,16 +47,12 @@ describe('ChangelogResource', () => {
   });
 
   it('should return Git changelog when available', async () => {
-    gitChangelog.generateChangelog.mockResolvedValue(
-      '# Changelog\n\n## [Unreleased]',
-    );
+    gitChangelog.generateChangelog.mockResolvedValue('# Changelog\n\n## [Unreleased]');
     docReader.getChangelog.mockResolvedValue('# Static Changelog');
 
     const result = await sut.getChangelog();
 
-    expect((result.contents[0] as { text: string }).text).toContain(
-      '[Unreleased]',
-    );
+    expect((result.contents[0] as { text: string }).text).toContain('[Unreleased]');
     expect(docReader.getChangelog).not.toHaveBeenCalled();
   });
 
@@ -66,9 +62,7 @@ describe('ChangelogResource', () => {
 
     const result = await sut.getChangelog();
 
-    expect((result.contents[0] as { text: string }).text).toBe(
-      '# Static Changelog',
-    );
+    expect((result.contents[0] as { text: string }).text).toBe('# Static Changelog');
   });
 
   it('should fallback to static docs when Git changelog is empty', async () => {
@@ -77,9 +71,7 @@ describe('ChangelogResource', () => {
 
     const result = await sut.getChangelog();
 
-    expect((result.contents[0] as { text: string }).text).toBe(
-      '# Static Changelog',
-    );
+    expect((result.contents[0] as { text: string }).text).toBe('# Static Changelog');
   });
 
   it('should return fallback message when both sources are empty', async () => {

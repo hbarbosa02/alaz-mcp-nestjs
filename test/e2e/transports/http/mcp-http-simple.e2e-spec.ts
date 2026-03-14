@@ -57,10 +57,7 @@ describe('MCP HTTP - Simple bootstrap (E2E)', () => {
     const jsonMatch = text.match(/\{"jsonrpc"[^}]+\}/);
     if (jsonMatch) {
       const data = JSON.parse(jsonMatch[0]);
-      expect(
-        (data as unknown as { result?: { serverInfo?: unknown } }).result
-          ?.serverInfo,
-      ).toBeDefined();
+      expect((data as unknown as { result?: { serverInfo?: unknown } }).result?.serverInfo).toBeDefined();
     }
   });
 

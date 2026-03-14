@@ -56,9 +56,7 @@ describe('EndpointListerTool', () => {
 
     const result = await sut.listEndpoints({});
 
-    expect(result).toContain(
-      '| Method | Path | Controller | Permissions | Auth |',
-    );
+    expect(result).toContain('| Method | Path | Controller | Permissions | Auth |');
     expect(result).toContain('GET');
     expect(result).toContain('/user');
     expect(result).toContain('UserController');
@@ -96,9 +94,7 @@ describe('EndpointListerTool', () => {
     const { frameworkDetector, adapterRegistry } = createFrameworkAdapterMocks({
       codebaseAnalyzer,
     });
-    adapterRegistry.getUnsupportedMessage.mockReturnValue(
-      'Angular: This feature is not supported.',
-    );
+    adapterRegistry.getUnsupportedMessage.mockReturnValue('Angular: This feature is not supported.');
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

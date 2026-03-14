@@ -40,11 +40,7 @@ export class McpLoggerService {
 
     this.logger.log(`Prompt received: ${name}\n${argsFormatted}`);
 
-    const fileEntry = [
-      `[${timestamp}] PROMPT RECEIVED: ${name}`,
-      argsFormatted,
-      '---',
-    ].join('\n');
+    const fileEntry = [`[${timestamp}] PROMPT RECEIVED: ${name}`, argsFormatted, '---'].join('\n');
 
     this.appendToFile(fileEntry);
   }
@@ -64,11 +60,7 @@ export class McpLoggerService {
 
     this.logger.log(`Tool invoked: ${name}\n${argsFormatted}`);
 
-    const fileEntry = [
-      `[${timestamp}] TOOL INVOKED: ${name}`,
-      argsFormatted,
-      '---',
-    ].join('\n');
+    const fileEntry = [`[${timestamp}] TOOL INVOKED: ${name}`, argsFormatted, '---'].join('\n');
 
     this.appendToFile(fileEntry);
   }
@@ -88,11 +80,7 @@ export class McpLoggerService {
 
     this.logger.log(`Resource read: ${uri}\n${paramsFormatted}`);
 
-    const fileEntry = [
-      `[${timestamp}] RESOURCE READ: ${uri}`,
-      paramsFormatted,
-      '---',
-    ].join('\n');
+    const fileEntry = [`[${timestamp}] RESOURCE READ: ${uri}`, paramsFormatted, '---'].join('\n');
 
     this.appendToFile(fileEntry);
   }
