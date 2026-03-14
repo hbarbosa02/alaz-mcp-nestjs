@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional, Inject } from '@nestjs/common';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { ProjectRootContextService } from '@/mcp/core/data-access/services/project-root-context.service';
 
-const execFileAsync = promisify(execFile);
+export const EXEC_FILE_ASYNC = Symbol('EXEC_FILE_ASYNC');
+
+export type ExecFileAsyncFn = (
+  cmd: string,
+  args: string[],
+  opts: { cwd: string; timeout: number },
+) => Promise<{ stdout: string; stderr: string }>;
 
 export interface CommitInfo {
   hash: string;
@@ -16,13 +22,20 @@ export interface CommitInfo {
 @Injectable()
 export class GitContextService {
   private readonly timeout = 10000;
+  private readonly execFileAsync: ExecFileAsyncFn;
 
-  constructor(private readonly projectRootContext: ProjectRootContextService) {}
+  constructor(
+    private readonly projectRootContext: ProjectRootContextService,
+    @Optional() @Inject(EXEC_FILE_ASYNC) execFileOverride?: ExecFileAsyncFn,
+  ) {
+    this.execFileAsync =
+      execFileOverride ?? (promisify(execFile) as ExecFileAsyncFn);
+  }
 
   async getRecentCommits(days = 7): Promise<CommitInfo[]> {
     try {
       const projectRoot = this.projectRootContext.getProjectRoot();
-      const { stdout } = await execFileAsync(
+      const { stdout } = await this.execFileAsync(
         'git',
         [
           'log',
@@ -42,7 +55,7 @@ export class GitContextService {
 
   async getModuleChanges(moduleName: string, days = 7): Promise<CommitInfo[]> {
     try {
-      const { stdout } = await execFileAsync(
+      const { stdout } = await this.execFileAsync(
         'git',
         [
           'log',
@@ -68,7 +81,7 @@ export class GitContextService {
   async getDiff(ref?: string): Promise<string> {
     try {
       const args = ref ? ['diff', ref] : ['diff'];
-      const { stdout } = await execFileAsync('git', args, {
+      const { stdout } = await this.execFileAsync('git', args, {
         cwd: this.projectRootContext.getProjectRoot(),
         timeout: this.timeout,
       });
@@ -82,7 +95,7 @@ export class GitContextService {
     try {
       const sortFlag =
         sortOrder === 'asc' ? 'version:refname' : '-version:refname';
-      const { stdout } = await execFileAsync(
+      const { stdout } = await this.execFileAsync(
         'git',
         ['tag', '--sort=' + sortFlag],
         {
@@ -119,7 +132,7 @@ export class GitContextService {
         args.push(`${fromRef}..HEAD`);
       }
 
-      const { stdout } = await execFileAsync('git', args, {
+      const { stdout } = await this.execFileAsync('git', args, {
         cwd: this.projectRootContext.getProjectRoot(),
         timeout: this.timeout,
       });
@@ -132,7 +145,7 @@ export class GitContextService {
 
   async getTagDate(tag: string): Promise<string | null> {
     try {
-      const { stdout } = await execFileAsync(
+      const { stdout } = await this.execFileAsync(
         'git',
         ['log', '-1', '--format=%ad', '--date=short', tag],
         {
@@ -149,7 +162,9 @@ export class GitContextService {
 
   private parseGitLog(output: string): CommitInfo[] {
     const commits: CommitInfo[] = [];
-    const blocks = output.split(/\n(?=[a-f0-9]{40}\|\|\|)/);
+    const trimmed = output.trim();
+    if (trimmed.length === 0) return commits;
+    const blocks = trimmed.split(/\n(?=[a-f0-9]{40}\|\|\|)/);
 
     for (const block of blocks) {
       const lines = block.trim().split('\n');
