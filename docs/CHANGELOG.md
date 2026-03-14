@@ -2,12 +2,10 @@
 
 ## [Unreleased]
 
-### Other
-
-- add .cursorignore to exclude agent access to node_modules, env files, and credentials (security, performance)
-
 ### Added
 
+- code-convention rule (`.cursor/rules/code-convention.mdc`) and code-convention agent (`.cursor/agents/code-convention.md`) for senior-level code quality: contextual error messages, strategic comments, edge case handling, DRY patterns; integrated with AGENTS.md, mcp-development, add-mcp-tool, pre-commit, unit-test, e2e-test, lint-reviewer
+- 5 prompt-as-tool wrapper tools for Cursor compatibility: `get-create-module-guide`, `get-create-endpoint-guide`, `get-update-docs-guide`, `get-code-review-checklist`, `get-investigate-bug-guide` (same content as corresponding prompts; use when MCP client does not support prompt invocation)
 - .cursorignore to exclude node_modules, .env, and credential files from agent access
 - Dockerfile and docker-compose for local execution (HTTP and STDIO modes)
 - Docker usage documentation in README, MCP-SERVER.md, and MCP-SETUP.md
@@ -16,6 +14,7 @@
 
 ### Changed
 
+- code-convention fixes: add requireAdapter util, contextual error messages, entityNotFoundMessage/moduleNotFoundMessage, fix empty-string-in-array (entity-schema, entity-diagram), replace non-null assertions in E2E tests, improve project-context comments
 - migrate test folder to DDD-aligned structure: unit tests mirror src (core, domain/nestjs, domain/shared, util, feature), E2E tests grouped by transport under e2e/transports/, add @test/* path alias
 - FrameworkDetectorService: per-project-root caching to avoid repeated file I/O (package.json, composer.json)
 - ProjectRootContextService: fallback to process.env.PROJECT_ROOT when AsyncLocalStorage context is lost (STDIO resources)
@@ -24,6 +23,17 @@
 - exclude non-testable files from coverage (ports, angular/laravel placeholders), set branch threshold to 72%
 - add injectable exec file to GitContextService for testability
 - add new specs (mcp-logger, framework-adapter-registry, mcp-nestjs.module) and expand existing specs for coverage improvement
+
+### Documentation
+
+- update MCP-FLOWS-AND-ARCHITECTURE.md: Tools (12), dependency graph with prompt-as-tool tools, Applications table with Cursor-compatible tool alternatives
+- update MCP-SETUP.md: E2E validation table (12 tools), example prompts for prompt-as-tool tools
+- update context-discoverer-skill: add 5 prompt-guide tools to project map
+
+### Other
+
+- add .cursorignore to exclude agent access to node_modules, env files, and credentials (security, performance)
+- add @stylistic/eslint-plugin and update ESLint/Prettier config (padding-line-between-statements, printWidth 120)
 
 ## [1.3.0] - 2026-03-13
 

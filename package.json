@@ -25,6 +25,7 @@
     "@nestjs/core": "^11",
     "@nestjs/platform-express": "^11",
     "@rekog/mcp-nest": "^1.9.7",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "glob": "^11",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
