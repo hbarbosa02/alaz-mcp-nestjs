@@ -1,12 +1,12 @@
 # MCP Framework Port Interfaces
 
-Este documento descreve os contratos de interface (ports) que cada domínio de framework deve implementar para integrar-se ao MCP. Os adapters NestJS já implementam essas interfaces; Angular e Laravel estão planejados.
+This document describes the interface contracts (ports) that each framework domain must implement to integrate with the MCP. NestJS adapters already implement these interfaces; Angular and Laravel are planned.
 
-## Portas Principais
+## Main Ports
 
 ### IModuleRegistry
 
-Lista e obtém informações sobre módulos do projeto.
+Lists and retrieves information about project modules.
 
 ```typescript
 interface IModuleRegistry {
@@ -15,15 +15,15 @@ interface IModuleRegistry {
 }
 ```
 
-| Framework | Equivalente | Status |
+| Framework | Equivalent | Status |
 |-----------|-------------|--------|
-| NestJS | `*.module.ts` em `src/` | Implementado |
-| Angular | `*.module.ts` em `src/app/` | Em breve |
-| Laravel | Módulos/namespaces em `app/` | Em breve |
+| NestJS | `*.module.ts` in `src/` | Implemented |
+| Angular | `*.module.ts` in `src/app/` | Coming soon |
+| Laravel | Modules/namespaces in `app/` | Coming soon |
 
 ### IEntityIntrospector
 
-Inspeciona entidades/modelos do projeto (ORM, schema).
+Inspects project entities/models (ORM, schema).
 
 ```typescript
 interface IEntityIntrospector {
@@ -32,15 +32,15 @@ interface IEntityIntrospector {
 }
 ```
 
-| Framework | Equivalente | Status |
+| Framework | Equivalent | Status |
 |-----------|-------------|--------|
-| NestJS | MikroORM, TypeORM, Objection entities | Implementado |
-| Angular | N/A (frontend) — possivelmente services/state | Em breve |
-| Laravel | Eloquent Models | Em breve |
+| NestJS | MikroORM, TypeORM, Objection entities | Implemented |
+| Angular | N/A (frontend) — possibly services/state | Coming soon |
+| Laravel | Eloquent Models | Coming soon |
 
 ### ICodebaseAnalyzer
 
-Analisa endpoints/rotas da API.
+Analyzes API endpoints/routes.
 
 ```typescript
 interface ICodebaseAnalyzer {
@@ -49,15 +49,15 @@ interface ICodebaseAnalyzer {
 }
 ```
 
-| Framework | Equivalente | Status |
+| Framework | Equivalent | Status |
 |-----------|-------------|--------|
-| NestJS | Controllers com `@Get`, `@Post`, etc. | Implementado |
-| Angular | N/A (frontend) | Em breve |
-| Laravel | Controllers, rotas em `routes/` | Em breve |
+| NestJS | Controllers with `@Get`, `@Post`, etc. | Implemented |
+| Angular | N/A (frontend) | Coming soon |
+| Laravel | Controllers, routes in `routes/` | Coming soon |
 
 ### IDocumentationReader
 
-Lê documentação do projeto.
+Reads project documentation.
 
 ```typescript
 interface IDocumentationReader {
@@ -65,12 +65,22 @@ interface IDocumentationReader {
   getArchitectureDocs(): Promise<Record<string, string>>;
   getApiConventions(): Promise<string | null>;
   getReadme(): Promise<string | null>;
+  /** API overview doc (e.g. docs/architecture/API-OVERVIEW.md) */
+  getApiOverview(): Promise<string | null>;
+  /** Cursor rules from .cursor/rules/ */
+  getCursorRules(): Promise<Record<string, string>>;
+  /** Testing conventions doc */
+  getTestingDocs(): Promise<string | null>;
+  /** Read doc at relative path */
+  readDoc(relativePath: string): Promise<string | null>;
+  /** Changelog doc (e.g. docs/CHANGELOG.md, docs/changes/*.md) */
+  getChangelog(): Promise<string | null>;
 }
 ```
 
 ### IProjectContext
 
-Fornece contexto do projeto (padrões, stack, layout de docs).
+Provides project context (patterns, stack, docs layout).
 
 ```typescript
 interface IProjectContext {
@@ -78,85 +88,85 @@ interface IProjectContext {
 }
 ```
 
-## Tipos Compartilhados
+## Shared Types
 
-Definidos em `src/mcp/core/ports/types.ts`:
+Defined in `src/mcp/core/ports/types.ts`:
 
-- `ModuleInfo` — nome, path, hasController, entityNames, etc.
+- `ModuleInfo` — name, path, hasController, entityNames, etc.
 - `EntitySchema` — name, tableName, properties, relations
 - `EndpointInfo` — method, path, controllerClass, permissions, authType
 
 ## FrameworkAdapterRegistry
 
-O `FrameworkAdapterRegistryService` (em `nestjs/data-access/services/`) retorna o adapter correto conforme o framework detectado:
+The `FrameworkAdapterRegistryService` (in `src/mcp/domain/nestjs/data-access/services/`) returns the correct adapter based on the detected framework:
 
-- `nestjs` → adapters NestJS (implementados)
-- `angular` → `null` (mensagem "Em breve")
-- `laravel` → `null` (mensagem "Em breve")
-- `null` → mensagem "Framework não suportado"
+- `nestjs` → NestJS adapters (implemented)
+- `angular` → `null` (message "Coming soon")
+- `laravel` → `null` (message "Coming soon")
+- `null` → message "Framework not supported"
 
-## Equivalentes por Framework
+## Equivalents by Framework
 
-As interfaces atuais são orientadas a NestJS. Outros frameworks podem expor equivalentes conceituais:
+Current interfaces are NestJS-oriented. Other frameworks may expose conceptual equivalents:
 
-| Porta NestJS        | Equivalente Angular        | Equivalente Laravel        |
+| NestJS Port        | Angular Equivalent        | Laravel Equivalent        |
 |---------------------|----------------------------|----------------------------|
 | `IModuleRegistry`   | `IComponentRegistry`       | `IModuleRegistry` (namespaces) |
-| `IEntityIntrospector` | N/A (frontend) ou services/state | `IModelRegistry` (Eloquent) |
-| `ICodebaseAnalyzer` | N/A (frontend) ou rotas de serviços | `IRouteAnalyzer` (routes/) |
-| `IDocumentationReader` | Sim (docs do projeto)     | Sim (docs do projeto)      |
-| `IProjectContext`   | Sim (angular.json, tsconfig) | Sim (composer.json, config/) |
+| `IEntityIntrospector` | N/A (frontend) or services/state | `IModelRegistry` (Eloquent) |
+| `ICodebaseAnalyzer` | N/A (frontend) or service routes | `IRouteAnalyzer` (routes/) |
+| `IDocumentationReader` | Yes (project docs)     | Yes (project docs)      |
+| `IProjectContext`   | Yes (angular.json, tsconfig) | Yes (composer.json, config/) |
 
-**Nota:** Angular pode priorizar `IComponentRegistry` para componentes e NgModules. Laravel pode priorizar `IModelRegistry` para Eloquent Models e `IRouteAnalyzer` para rotas em `routes/`. A decisão de mapear para as portas existentes ou criar novas fica para a implementação futura.
+**Note:** Angular may prioritize `IComponentRegistry` for components and NgModules. Laravel may prioritize `IModelRegistry` for Eloquent Models and `IRouteAnalyzer` for routes in `routes/`. The decision to map to existing ports or create new ones is left for future implementation.
 
-## Implementação Futura
+## Future Implementation
 
-Para adicionar suporte a Angular ou Laravel:
+To add support for Angular or Laravel:
 
-1. Implementar as interfaces em `mcp/domain/angular/` ou `mcp/domain/laravel/`
-2. Registrar os adapters no `FrameworkAdapterRegistryService`
-3. Atualizar `FrameworkDetectorService` se necessário (composer.json para Laravel)
-4. Adicionar `AngularDomainModule` ou `LaravelDomainModule` aos imports do `McpModule`
+1. Implement the interfaces in `mcp/domain/angular/` or `mcp/domain/laravel/`
+2. Register the adapters in `FrameworkAdapterRegistryService`
+3. Update `FrameworkDetectorService` if needed (composer.json for Laravel)
+4. Add `AngularDomainModule` or `LaravelDomainModule` to `McpModule` imports
 
 ---
 
-## Considerações Futuras (Phase 4)
+## Future Considerations (Phase 4)
 
-### Detecção multi-manifest (Laravel e composer.json)
+### Multi-manifest detection (Laravel and composer.json)
 
-O `FrameworkDetectorService` já suporta detecção multi-manifest:
+The `FrameworkDetectorService` already supports multi-manifest detection:
 
 - **package.json**: NestJS (`@nestjs/core`), Angular (`@angular/core`)
-- **composer.json**: Laravel (`laravel/framework` em `require` ou `require-dev`)
+- **composer.json**: Laravel (`laravel/framework` in `require` or `require-dev`)
 
-A ordem de verificação: primeiro `package.json`, depois `composer.json`. Projetos PHP puros (Laravel) não têm `package.json` com dependências de framework; projetos Node podem ter ambos (ex.: Laravel + Vite).
+Verification order: first `package.json`, then `composer.json`. Pure PHP projects (Laravel) do not have `package.json` with framework dependencies; Node projects may have both (e.g. Laravel + Vite).
 
-Contrato de detecção:
+Detection contract:
 
-1. Ler `package.json` → se `@nestjs/core` ou `@angular/core` → retornar framework
-2. Ler `composer.json` → se `laravel/framework` → retornar `laravel`
-3. Caso contrário → retornar `null`
+1. Read `package.json` → if `@nestjs/core` or `@angular/core` → return framework
+2. Read `composer.json` → if `laravel/framework` → return `laravel`
+3. Otherwise → return `null`
 
-### Estratégia de recursos estáticos (alaz://)
+### Static resource strategy (alaz://)
 
-**Implementado: Opção C** — Recursos genéricos que delegam ao adapter do framework.
+**Implemented: Option C** — Generic resources that delegate to the framework adapter.
 
-Recursos estáticos como `alaz://conventions/api`, `alaz://authentication`, `alaz://architecture`:
+Static resources such as `alaz://conventions/api`, `alaz://authentication`, `alaz://architecture`:
 
-- **Opção A**: Manter como templates NestJS até haver equivalentes por framework
-- **Opção B**: Criar variantes por framework (`alaz://conventions/nestjs`, `alaz://conventions/laravel`, etc.)
-- **Opção C** ✓: Recursos genéricos que delegam ao adapter do framework (ex.: `alaz://conventions/api` → adapter retorna conteúdo conforme framework)
+- **Option A**: Keep as NestJS templates until framework equivalents exist
+- **Option B**: Create variants per framework (`alaz://conventions/nestjs`, `alaz://conventions/laravel`, etc.)
+- **Option C** ✓: Generic resources that delegate to the framework adapter (e.g. `alaz://conventions/api` → adapter returns content based on framework)
 
-Cada recurso (`ArchitectureResource`, `ConventionsResource`, `AuthenticationResource`, `OnboardingResource`, `ChangelogResource`, `ModuleDocsResource`, `ModuleEndpointsResource`, `EntityDiagramResource`) injeta `FrameworkDetectorService` e `FrameworkAdapterRegistryService`. O fluxo: detecta framework → se não suportado retorna mensagem "Em breve" → senão obtém adapter do registry e delega. URIs permanecem genéricos; o conteúdo varia conforme o framework detectado.
+Each resource (`ArchitectureResource`, `ConventionsResource`, `AuthenticationResource`, `OnboardingResource`, `ChangelogResource`, `ModuleDocsResource`, `ModuleEndpointsResource`, `EntityDiagramResource`) injects `FrameworkDetectorService` and `FrameworkAdapterRegistryService`. Flow: detect framework → if not supported return "Coming soon" message → otherwise get adapter from registry and delegate. URIs remain generic; content varies by detected framework.
 
-### Equivalentes de prompts por framework
+### Prompt equivalents by framework
 
-| NestJS (atual) | Angular (futuro) | Laravel (futuro) |
+| NestJS (current) | Angular (future) | Laravel (future) |
 |----------------|------------------|-------------------|
-| `create-module` | `create-component` | `create-module` ou `make:module` |
+| `create-module` | `create-component` | `create-module` or `make:module` |
 | `create-endpoint` | N/A (frontend) | `create-controller` / `make:controller` |
 | `update-documentation` | `update-documentation` | `update-documentation` |
 | `code-review` | `code-review` | `code-review` |
 | `investigate-bug` | `investigate-bug` | `investigate-bug` |
 
-Criar seção "Future framework prompts" em docs ao implementar Angular/Laravel. Os prompts NestJS-specific (`create-module`, `create-endpoint`) terão equivalentes conceituais em cada ecossistema.
+Create a "Future framework prompts" section in docs when implementing Angular/Laravel. NestJS-specific prompts (`create-module`, `create-endpoint`) will have conceptual equivalents in each ecosystem.

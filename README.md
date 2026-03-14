@@ -1,6 +1,6 @@
 # Alaz MCP Server
 
-MCP Server that exposes the **live context** of any NestJS project to AI agents (Cursor, Claude Desktop, GitHub Copilot).
+MCP Server (alaz-nestjs-mcp v1.3.0) that exposes the **live context** of any NestJS project to AI agents (Cursor, Claude Desktop, GitHub Copilot).
 
 ## What it does
 
@@ -90,7 +90,7 @@ Add to your project's or Cursor's `.cursor/mcp.json`:
   "mcpServers": {
     "alaz-nestjs-stdio": {
       "command": "npx",
-      "args": ["ts-node", "src/mcp/feature/mcp-stdio.entry.ts"],
+      "args": ["ts-node", "-r", "tsconfig-paths/register", "src/mcp/feature/mcp-stdio.entry.ts"],
       "cwd": "/path/to/alaz-mcp-nestjs",
       "env": {
         "PROJECT_ROOT": "${workspaceFolder}"
@@ -113,6 +113,11 @@ Tools accept an optional `projectRoot` parameter to override the config per requ
 | `check-conventions` | Validates project conventions |
 | `get-recent-changes` | Recent commits |
 | `get-test-summary` | Test summary |
+| `get-create-module-guide` | Step-by-step guide to create a module (Cursor-compatible) |
+| `get-create-endpoint-guide` | Step-by-step guide to add an endpoint (Cursor-compatible) |
+| `get-update-docs-guide` | Guide to update module documentation (Cursor-compatible) |
+| `get-code-review-checklist` | Code review checklist (Cursor-compatible) |
+| `get-investigate-bug-guide` | Guide to investigate a bug (Cursor-compatible) |
 
 ## Resources
 
@@ -120,8 +125,9 @@ Tools accept an optional `projectRoot` parameter to override the config per requ
 - `alaz://architecture` — Architecture overview
 - `alaz://conventions/api`, `/testing`, `/cqrs` — Conventions
 - `alaz://authentication` — Auth and RBAC
-- `alaz://changelog` — Changelog (Git-based, versioned by tags; fallback to static docs)
+- `alaz://changelog` — Changelog (Git-based, versioned by tags; fallback to CHANGELOG.md or docs/changes/*.md)
 - `alaz://modules/{name}` — Module docs
+- `alaz://modules/{name}/endpoints` — Module endpoints
 - `alaz://entities/{name}` — Entity schema
 
 ## Documentation

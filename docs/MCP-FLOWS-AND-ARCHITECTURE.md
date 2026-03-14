@@ -125,13 +125,13 @@ The MCP is **project-agnostic**: the project root is dynamic and comes from the 
 
 ```mermaid
 flowchart TD
-    A[Request] --> B{projectRoot em tool param?}
-    B -->|Sim| C[Usar param]
-    B -->|Nao| D{HTTP: header X-Project-Root?}
-    D -->|Sim| E[Usar header]
-    D -->|Nao| F{STDIO: env PROJECT_ROOT da config?}
-    F -->|Sim| G[Usar env do processo]
-    F -->|Nao| H[Erro MCP: path obrigatório]
+    A[Request] --> B{projectRoot in tool param?}
+    B -->|Yes| C[Use param]
+    B -->|No| D{HTTP: header X-Project-Root?}
+    D -->|Yes| E[Use header]
+    D -->|No| F{STDIO: env PROJECT_ROOT from config?}
+    F -->|Yes| G[Use process env]
+    F -->|No| H[MCP error: path required]
     C --> I[ProjectRootContextService]
     E --> I
     G --> I
@@ -310,7 +310,7 @@ flowchart LR
 
 ## 10. Resources & Prompts Overview
 
-Static and template resources follow **Option C** (see `docs/MCP-FRAMEWORK-PORTS.md`): they delegate to the framework adapter. If the framework is not supported (e.g. Angular, Laravel), they return "Em breve". URIs remain generic; content varies by detected framework.
+Static and template resources follow **Option C** (see `docs/MCP-FRAMEWORK-PORTS.md`): they delegate to the framework adapter. If the framework is not supported (e.g. Angular, Laravel), they return "Coming soon". URIs remain generic; content varies by detected framework.
 
 All resources use the `toReadResourceResult()` helper (`src/mcp/core/util/read-resource-result.util.ts`) to return the MCP `ReadResourceResult` format `{ contents: [{ uri, mimeType, text }] }`, ensuring spec compliance and compatibility with clients such as Cursor.
 
@@ -363,36 +363,60 @@ flowchart TB
 ```mermaid
 flowchart TD
     subgraph src["src/mcp/"]
-        subgraph data["data-access/"]
-            S0[project-root-context.service.ts]
-            S1[project-context.service.ts]
-            S2[module-registry.service.ts]
-            S3[entity-introspector.service.ts]
-            S4[codebase-analyzer.service.ts]
-            S5[documentation-reader.service.ts]
-            S6[git-context.service.ts]
-            S7[git-changelog.service.ts]
+        subgraph core["core/"]
+            subgraph coreData["data-access/services/"]
+                S0[project-root-context.service.ts]
+                S1[git-context.service.ts]
+                S2[git-changelog.service.ts]
+                S3[framework-detector.service.ts]
+                S4[path-resolver.service.ts]
+                S5[file-reader.service.ts]
+                S6[mcp-logger.service.ts]
+            end
+            subgraph middleware["feature/middleware/"]
+                MW1[project-root.middleware.ts]
+            end
         end
 
-        subgraph middleware["feature/middleware/"]
-            MW1[project-root.middleware.ts]
-        end
-
-        subgraph strategies["data-access/strategies/"]
-            ST1[mikroorm-parser.strategy.ts]
-            ST2[typeorm-parser.strategy.ts]
-            ST3[objection-parser.strategy.ts]
+        subgraph domain["domain/"]
+            subgraph nestjs["nestjs/"]
+                subgraph nestjsData["data-access/"]
+                    subgraph nestjsServices["services/"]
+                        N0[project-context.service.ts]
+                        N1[module-registry.service.ts]
+                        N2[entity-introspector.service.ts]
+                        N3[codebase-analyzer.service.ts]
+                        N4[documentation-reader.service.ts]
+                        N5[framework-adapter-registry.service.ts]
+                    end
+                    subgraph strategies["strategies/"]
+                        ST1[mikroorm-parser.strategy.ts]
+                        ST2[typeorm-parser.strategy.ts]
+                        ST3[objection-parser.strategy.ts]
+                    end
+                end
+                subgraph nestjsFeature["feature/"]
+                    T[tools/]
+                    R[resources/]
+                    P[prompts/]
+                end
+            end
+            subgraph shared["shared/"]
+                SH[feature/tools, resources/]
+            end
         end
 
         subgraph feature["feature/"]
-            T[tools/]
-            R[resources/]
-            P[prompts/]
+            F1[mcp.module.ts]
+            F2[mcp-stdio.module.ts]
+            F3[mcp-stdio.entry.ts]
         end
 
         subgraph util["util/"]
-            U1[FileReaderService]
-            U2[PathResolverService]
+            U1[require-adapter.util.ts]
+            U2[parser.ts]
+            U3[confirmation-prompt.event.ts]
+            U4[env.schema.ts]
         end
     end
 ```

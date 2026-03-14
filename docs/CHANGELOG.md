@@ -26,6 +26,7 @@
 
 ### Documentation
 
+- add alaz://modules/{name}/endpoints to README, fix STDIO config (-r tsconfig-paths/register), translate MCP-FRAMEWORK-PORTS and MCP-FLOWS to English, fix FrameworkAdapterRegistry path and file structure diagram (util/, mcp-logger), add MCP-FLOWS link in MCP-SERVER, merge duplicate [1.2.0] Documentation in CHANGELOG, extend update-documentation cross-refs
 - update MCP-FLOWS-AND-ARCHITECTURE.md: Tools (12), dependency graph with prompt-as-tool tools, Applications table with Cursor-compatible tool alternatives
 - update MCP-SETUP.md: E2E validation table (12 tools), example prompts for prompt-as-tool tools
 - update context-discoverer-skill: add 5 prompt-guide tools to project map
@@ -66,6 +67,11 @@
 - FrameworkDetectorService for package.json and composer.json detection
 - empty Angular and Laravel domain modules (placeholders)
 
+### Changed
+
+- reorganize MCP into DDD structure (core, domain/nestjs, domain/shared)
+- apply code formatting across services and resources
+
 ### Documentation
 
 - MCP-FRAMEWORK-PORTS.md with interface contracts and future considerations
@@ -74,14 +80,6 @@
 - framework adapter ports (IModuleRegistry, IEntityIntrospector, ICodebaseAnalyzer, IDocumentationReader, IProjectContext)
 - FrameworkAdapterRegistry with routing to NestJS adapters
 - tools return clear message when framework is unsupported or coming soon
-
-### Changed
-
-- reorganize MCP into DDD structure (core, domain/nestjs, domain/shared)
-- apply code formatting across services and resources
-
-### Documentation
-
 - add MCP flows and architecture report with Mermaid diagrams
 - **MCP project-agnostic**: project root from mcp.json config (env.PROJECT_ROOT for STDIO, headers["X-Project-Root"] for HTTP) instead of fixed env; no fallback — missing path returns MCP error
 

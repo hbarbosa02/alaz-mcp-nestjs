@@ -1,21 +1,21 @@
 # Alaz MCP Server
 
-MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, GitHub Copilot). Suporte para Angular e Laravel está planejado.
+MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, GitHub Copilot). Support for Angular and Laravel is planned.
 
 **Transport validation:** HTTP, SSE, and STDIO are validated by E2E tests (`npm run test:e2e`). See [MCP-SETUP.md](./MCP-SETUP.md) for step-by-step configuration and example prompts.
 
 ## Architecture
 
-The server dynamically reads the target project in real time:
+The server dynamically reads the target project in real time. For detailed flows, diagrams, and file structure, see [MCP-FLOWS-AND-ARCHITECTURE.md](./MCP-FLOWS-AND-ARCHITECTURE.md).
 
 - **Filesystem**: `src/`, `docs/`, `.cursor/rules/`
 - **Git**: `git log`, `git diff`, `git tag` for recent changes and changelog generation
 - **Static parsing**: MikroORM, TypeORM, Objection entities; controllers; decorators
-- **package.json** e **composer.json**: Framework detection (NestJS, Angular, Laravel) e stack detection (ORM, validation, test framework, etc.)
+- **package.json** and **composer.json**: Framework detection (NestJS, Angular, Laravel) and stack detection (ORM, validation, test framework, etc.)
 
 ### Framework detection
 
-O servidor detecta o framework do projeto via `package.json` (NestJS, Angular) ou `composer.json` (Laravel). Tools NestJS-specific retornam mensagem clara quando o projeto não é NestJS. Ver [MCP-FRAMEWORK-PORTS.md](./MCP-FRAMEWORK-PORTS.md) para contratos de interface e considerações futuras.
+The server detects the project framework via `package.json` (NestJS, Angular) or `composer.json` (Laravel). NestJS-specific tools return a clear message when the project is not NestJS. See [MCP-FRAMEWORK-PORTS.md](./MCP-FRAMEWORK-PORTS.md) for interface contracts and future considerations.
 
 ## Transport modes
 
@@ -109,7 +109,7 @@ See [MCP-SETUP.md](./MCP-SETUP.md) for mcp.json configuration with Docker.
 | `alaz://conventions/testing` | Testing patterns |
 | `alaz://conventions/cqrs` | CQRS and Jobs |
 | `alaz://authentication` | Auth and RBAC |
-| `alaz://changelog` | Changelog generated from Git (versioned by tags). Fallback to static file in docs/changes/ when repository is not available |
+| `alaz://changelog` | Changelog generated from Git (versioned by tags). Fallback to CHANGELOG.md or docs/changes/*.md when repository is not available |
 
 ### Templates (dynamic)
 
