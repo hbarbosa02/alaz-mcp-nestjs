@@ -1,6 +1,6 @@
-# MCP Framework Port Interfaces
+# Framework ports (MCP)
 
-This document describes the interface contracts (ports) that each framework domain must implement to integrate with the MCP. NestJS adapters already implement these interfaces; Angular and Laravel are planned.
+Ports each framework **domain** is expected to satisfy. **NestJS** is implemented. **Angular** and **Laravel** register as missing adapters: callers get a clear “coming soon” / not-supported response until those modules exist.
 
 ## Main Ports
 
@@ -117,22 +117,18 @@ Current interfaces are NestJS-oriented. Other frameworks may expose conceptual e
 | `IDocumentationReader` | Yes (project docs)     | Yes (project docs)      |
 | `IProjectContext`   | Yes (angular.json, tsconfig) | Yes (composer.json, config/) |
 
-**Note:** Angular may prioritize `IComponentRegistry` for components and NgModules. Laravel may prioritize `IModelRegistry` for Eloquent Models and `IRouteAnalyzer` for routes in `routes/`. The decision to map to existing ports or create new ones is left for future implementation.
+**Note:** When Angular or Laravel ship, the team may map to the existing port names (e.g. `IComponentRegistry` / `IModelRegistry`) or split ports. That choice is out of scope until those adapters are implemented.
 
-## Future Implementation
+## Future work
 
-To add support for Angular or Laravel:
+### New framework adapters (Angular / Laravel)
 
-1. Implement the interfaces in `mcp/domain/angular/` or `mcp/domain/laravel/`
-2. Register the adapters in `FrameworkAdapterRegistryService`
-3. Update `FrameworkDetectorService` if needed (composer.json for Laravel)
-4. Add `AngularDomainModule` or `LaravelDomainModule` to `McpModule` imports
+1. Implement ports under `mcp/domain/angular/` or `mcp/domain/laravel/`
+2. Wire `FrameworkAdapterRegistryService`
+3. Extend `FrameworkDetectorService` if discovery rules change
+4. Import `AngularDomainModule` or `LaravelDomainModule` from `McpModule`
 
----
-
-## Future Considerations (Phase 4)
-
-### Multi-manifest detection (Laravel and composer.json)
+### Multi-manifest detection (Laravel and `composer.json`)
 
 The `FrameworkDetectorService` already supports multi-manifest detection:
 

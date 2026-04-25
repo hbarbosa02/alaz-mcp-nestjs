@@ -1,6 +1,6 @@
-# Alaz MCP Server — Setup Guide
+# Alaz MCP — Client setup
 
-Step-by-step guide to configure the Alaz MCP Server with Cursor, Claude Desktop, and GitHub Copilot. All transports (HTTP, SSE, STDIO) are validated by E2E tests.
+How to run the Alaz MCP server and register it in **Cursor**, **Claude Desktop**, and **GitHub Copilot**. Transports: Streamable HTTP (`/mcp`), SSE (`/sse`), STDIO. Coverage: `npm run test:e2e` (see [§ Transport validation](#6-transport-validation)).
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@ Step-by-step guide to configure the Alaz MCP Server with Cursor, Claude Desktop,
 
 ## 0. Docker (optional)
 
-You can run the server with Docker instead of installing dependencies locally.
+Run the server from a clone of this repo without a local `npm install` (images build from the Dockerfile).
 
 ### HTTP mode with Docker
 
@@ -18,7 +18,7 @@ cd /path/to/alaz-mcp-nestjs
 docker compose up --build
 ```
 
-The server runs at `http://localhost:3100`. Use the same mcp.json configuration as Option A below (HTTP).
+MCP URL: `http://localhost:3100/mcp`. Use the same JSON as [§ HTTP configuration](#step-22-http-configuration).
 
 ### STDIO mode with Docker
 
@@ -69,14 +69,14 @@ npm install
 npm run start:dev
 ```
 
-The server runs at `http://localhost:3100`. Endpoints:
+Listen address: `http://localhost:3100`. Routes:
 
 - `/mcp` — Streamable HTTP (primary)
 - `/sse` — Server-Sent Events
 
 ### Option B: STDIO mode (lightweight, no server)
 
-No server process needed. The MCP client spawns the process on demand. Use when the target project has no database or Redis running.
+The client spawns a process; no HTTP listener. Handy when you do not run this server beside the target app.
 
 ---
 
@@ -290,10 +290,10 @@ All transports are covered by E2E tests (`npm run test:e2e`):
 
 | Transport | Test file | Validated |
 |-----------|-----------|-----------|
-| Streamable HTTP | `test/e2e/transports/http/mcp-http.e2e-spec.ts` | Connection, tools/list (12 tools), tools/call (8 tools), resources/list, resource templates, prompts/list, prompts/get (create-module via SDK Client), resources (onboarding, changelog, architecture, conventions/api, modules/user, modules/user/endpoints, entities/User) |
-| HTTP simple | `test/e2e/transports/http/mcp-http-simple.e2e-spec.ts` | Bootstrap, initialize session, reject without X-Project-Root |
-| SSE | `test/e2e/transports/sse/mcp-sse.e2e-spec.ts` | Endpoint at /sse, X-Project-Root requirement |
-| STDIO | `test/e2e/transports/stdio/mcp-stdio.e2e-spec.ts` | Initialize, tools/list, tools/call (7 context tools), resources/list, resources/read (alaz://onboarding), prompts/get (create-module) |
+| Streamable HTTP | `test/e2e/transports/http/mcp-http.e2e-spec.ts` | `tools/list` (12), `tools/call` (8 of 12 exercised), 7 static resources, 3 templates, `prompts/list`, `resources/read` + `prompts/get` on fixture project |
+| HTTP simple | `test/e2e/transports/http/mcp-http-simple.e2e-spec.ts` | Bootstrap, initialize session, reject without `X-Project-Root` |
+| SSE | `test/e2e/transports/sse/mcp-sse.e2e-spec.ts` | Endpoint at `/sse`, `X-Project-Root` requirement |
+| STDIO | `test/e2e/transports/stdio/mcp-stdio.e2e-spec.ts` | Initialize, `tools/list`, `tools/call` (8 of 12, same set as HTTP E2E), `resources/list`, `resources/read` (alaz://onboarding), `prompts/get` (create-module) |
 
 **Note:** `prompts/get` is E2E-tested via HTTP (MCP SDK Client) and STDIO. Prompts return MCP GetPromptResult format (`{ messages: [...] }`).
 
@@ -307,4 +307,4 @@ All transports are covered by E2E tests (`npm run test:e2e`):
 | Connection refused | Start the server with `npm run start:dev` for HTTP/SSE |
 | STDIO not found | Use absolute path for `cwd` in mcp.json |
 | Framework not supported | Target project must be NestJS (package.json with @nestjs/core) |
-| invalid_union when reading alaz:// URIs (e.g. alaz://onboarding) | Fixed: resources now return the proper MCP `ReadResourceResult` format (`{ contents: [{ uri, mimeType, text }] }`). Ensure you use the latest server version. |
+| `invalid_union` on `resources/read` (e.g. `alaz://onboarding`) | Server must return MCP `ReadResourceResult` (`contents: [{ uri, mimeType, text }]`). Upgrade if you are on a build that predates that fix. |

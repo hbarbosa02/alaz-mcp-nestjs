@@ -27,6 +27,7 @@
 
 ### Documentation
 
+- Project-docs-architect pass on `README.md` and `docs/*.md`: DRY client config in MCP-SETUP, MCP-SERVER as the tool/resource reference (duplicated `mcp.json` blocks removed from README), shorter landing README, merged future-work in MCP-FRAMEWORK-PORTS, flows title/intro and use-case heading; E2E table unchanged
 - add alaz://modules/{name}/endpoints to README, fix STDIO config (-r tsconfig-paths/register), translate MCP-FRAMEWORK-PORTS and MCP-FLOWS to English, fix FrameworkAdapterRegistry path and file structure diagram (util/, mcp-logger), add MCP-FLOWS link in MCP-SERVER, merge duplicate [1.2.0] Documentation in CHANGELOG, extend update-documentation cross-refs
 - update MCP-FLOWS-AND-ARCHITECTURE.md: Tools (12), dependency graph with prompt-as-tool tools, Applications table with Cursor-compatible tool alternatives
 - update MCP-SETUP.md: E2E validation table (12 tools), example prompts for prompt-as-tool tools

@@ -1,8 +1,8 @@
-# Alaz MCP Server — Flows, Diagrams & Architecture Report
+# Alaz MCP — Flows, diagrams, and package layout
 
-MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, etc.). This document describes the architecture, data flows, and applications.
+Request paths through transports, data-access services, and the target NestJS tree. For `mcp.json` and tool lists, see [MCP-SETUP.md](./MCP-SETUP.md) and [MCP-SERVER.md](./MCP-SERVER.md).
 
-> **Viewing Mermaid diagrams**: The preview in Cursor/VSCode requires the [Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) extension. Install it and reopen the preview. On GitHub, diagrams render natively.
+> **Mermaid in the editor:** Cursor/VSCode: [Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid). GitHub renders these diagrams in the file view.
 
 ## 1. Architecture Overview
 
@@ -23,7 +23,7 @@ flowchart TB
     subgraph MCP["Alaz MCP Server"]
         subgraph Feature["MCP Feature Layer"]
             Tools["Tools (12)"]
-            Resources["Resources (8)"]
+            Resources["7 static URIs + 3 templates"]
             Prompts["Prompts (5)"]
         end
 
@@ -344,7 +344,7 @@ flowchart TB
     end
 ```
 
-## 11. Applications
+## 11. Use cases
 
 | Use Case | Tools/Resources | Description |
 |----------|-----------------|-------------|
@@ -451,6 +451,7 @@ flowchart LR
     D --> E[Register in McpStdioModule]
 ```
 
-1. Create the class in `src/mcp/domain/nestjs/feature/tools/`, `resources/` or `prompts/` (or `src/mcp/domain/shared/feature/` for shared capabilities)
-2. Use `@Tool`, `@Resource`, `@ResourceTemplate` or `@Prompt` from `@rekog/mcp-nest`
-3. Register in `NestjsDomainModule` or `SharedDomainModule` (imported by `McpNestjsModule` and `McpStdioModule`)
+1. Create the class in `src/mcp/domain/nestjs/feature/tools/`, `resources/` or `prompts/` (or `src/mcp/domain/shared/feature/` for shared capabilities such as `get-recent-changes`).
+2. Use `@Tool`, `@Resource`, `@ResourceTemplate` or `@Prompt` from `@rekog/mcp-nest`.
+3. Register in `NestjsDomainModule` or `SharedDomainModule` (imported by `McpNestjsModule` and `McpStdioModule`).
+4. When you add user-visible tools or resources, update `test/e2e/setup/mcp-client.setup.ts` and the E2E notes in [MCP-SETUP.md](./MCP-SETUP.md) if expectations change.

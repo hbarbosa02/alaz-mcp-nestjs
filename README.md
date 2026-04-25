@@ -1,76 +1,71 @@
 # Alaz MCP Server
 
-MCP Server (alaz-nestjs-mcp v1.3.0) that exposes the **live context** of any NestJS project to AI agents (Cursor, Claude Desktop, GitHub Copilot).
+**alaz-nestjs-mcp** (v1.3.0) is an [MCP](https://modelcontextprotocol.io/) server that exposes a **target NestJS project’s** live context to AI clients (Cursor, Claude Desktop, GitHub Copilot): modules, entities, routes, conventions, docs, and Git history as **tools**, **resources**, and **prompts**.
 
 ## What it does
 
-Transforms documentation, conventions, module structure and git history into queryable context via the Model Context Protocol (MCP).
+The client supplies the project root (`X-Project-Root` in HTTP/SSE, or `PROJECT_ROOT` in STDIO). The server reads that tree and answers with stack-aware output (ORM, validation, tests, Redis, BullMQ, etc. from `package.json` and `composer.json` when present).
 
-- **Stack detection**: Reads `package.json` to detect ORM (MikroORM, TypeORM, Objection), validation (nestjs-zod, class-validator), test framework (Jest, Vitest), Redis, BullMQ — prompts and resources adapt automatically.
-- **Dynamic changelog**: Generates changelog from Git history, versioned by tags (Keep a Changelog format). Falls back to static docs when repository is unavailable.
+- **Stack** — Detects ORM (MikroORM, TypeORM, Objection), validation (Zod, class-validator), test runner (Jest, Vitest), optional Redis and BullMQ. Prompts and resources follow what the project uses.
+- **Changelog** — From Git (Conventional Commits; grouped by last tag when tags exist). If Git is missing or unusable, falls back to `CHANGELOG.md` or `docs/changes/*.md` in the target project.
 
-## Installation
+**Runtime:** Node.js 18+.
+
+## Install
 
 ```bash
 npm install
 ```
 
-## Configuration
+The **analyzed app** is not configured in this repo’s `.env`. Set the target path in the MCP client (`mcp.json`); in Cursor, use `${workspaceFolder}` for the workspace you want inspected.
 
-The project root path is **required** and must come from the MCP configuration (mcp.json), not from `.env`. Use `${workspaceFolder}` for the current workspace.
-
-Create a `.env` file for the server (optional):
+Optional server `.env` (this process only):
 
 ```env
 PORT=3100
 NODE_ENV=development
 ```
 
-## Usage
+## Run
 
-### HTTP mode (primary)
+### HTTP (default)
 
 ```bash
 npm run start:dev
 ```
 
-The MCP is available at `http://localhost:3100/mcp`. The client must send the `X-Project-Root` header with the project path.
+MCP base URL: `http://localhost:3100/mcp`. Clients must send `X-Project-Root` with the absolute path to the NestJS project.
 
-### STDIO mode (lightweight, no server)
+### STDIO (no HTTP server)
 
 ```bash
 npm run start:stdio
 ```
 
-Requires `PROJECT_ROOT` in the MCP config (see below). Useful when the target project environment is not running (Docker, database, etc.).
+Set `PROJECT_ROOT` in `mcp.json` (see [docs/MCP-SETUP.md](docs/MCP-SETUP.md)). Use when you do not want a long-running server or the target app is not up.
 
 ## Docker
 
-### HTTP mode
-
-Build and run the server in HTTP mode (port 3100):
+**HTTP** — From this repo:
 
 ```bash
 docker compose up --build
 ```
 
-The MCP is available at `http://localhost:3100/mcp`. Stop with `Ctrl+C` or `docker compose down`.
+Serves `http://localhost:3100/mcp`. Stop: `Ctrl+C` or `docker compose down`.
 
-### STDIO mode
-
-Run the server in STDIO mode via Docker. Requires the project path to analyze:
+**STDIO** — Mount the project to analyze and set `PROJECT_ROOT`:
 
 ```bash
-docker compose run --rm -e PROJECT_ROOT=/workspace -v /path/to/your/project:/workspace:ro app-stdio
+docker compose run --rm -e PROJECT_ROOT=/workspace -v /path/to/your/nestjs-app:/workspace:ro app-stdio
 ```
 
-Replace `/path/to/your/project` with the absolute path to the NestJS project you want to analyze. For Cursor, use `${workspaceFolder}` in mcp.json (see [docs/MCP-SETUP.md](docs/MCP-SETUP.md)).
+Use your real app path. Cursor: put `${workspaceFolder}` in `mcp.json` as in [docs/MCP-SETUP.md](docs/MCP-SETUP.md).
 
-## Cursor configuration
+## Quick Cursor snip (HTTP)
 
-Add to your project's or Cursor's `.cursor/mcp.json`:
+Add to `.cursor/mcp.json` (project or user):
 
-**HTTP** (requires `X-Project-Root` header):
 ```json
 {
   "mcpServers": {
@@ -84,53 +79,59 @@ Add to your project's or Cursor's `.cursor/mcp.json`:
 }
 ```
 
-**STDIO** (recommended for workspace-based projects):
-```json
-{
-  "mcpServers": {
-    "alaz-nestjs-stdio": {
-      "command": "npx",
-      "args": ["ts-node", "-r", "tsconfig-paths/register", "src/mcp/feature/mcp-stdio.entry.ts"],
-      "cwd": "/path/to/alaz-mcp-nestjs",
-      "env": {
-        "PROJECT_ROOT": "${workspaceFolder}"
-      }
-    }
-  }
-}
-```
+**STDIO** and **SSE** snippets, Docker-driven clients, and Claude/Copilot: [docs/MCP-SETUP.md](docs/MCP-SETUP.md).
 
-Tools accept an optional `projectRoot` parameter to override the config per request.
+Tools may take an optional `projectRoot` to override the header/env for a single call.
 
-## Available Tools
+## Tools
 
 | Tool | Description |
 |------|-------------|
-| `list-modules` | Lists all modules |
-| `get-module-detail` | Module details |
+| `list-modules` | All modules (controllers, entities, tests) |
+| `get-module-detail` | One module, full detail |
 | `get-entity-schema` | Entity schema (MikroORM, TypeORM, Objection) |
-| `list-endpoints` | Lists API endpoints |
-| `check-conventions` | Validates project conventions |
-| `get-recent-changes` | Recent commits |
-| `get-test-summary` | Test summary |
-| `get-create-module-guide` | Step-by-step guide to create a module (Cursor-compatible) |
-| `get-create-endpoint-guide` | Step-by-step guide to add an endpoint (Cursor-compatible) |
-| `get-update-docs-guide` | Guide to update module documentation (Cursor-compatible) |
-| `get-code-review-checklist` | Code review checklist (Cursor-compatible) |
-| `get-investigate-bug-guide` | Guide to investigate a bug (Cursor-compatible) |
+| `list-endpoints` | HTTP routes (optional `moduleName` filter) |
+| `check-conventions` | Convention check for a module |
+| `get-recent-changes` | Recent commits (default window: 7 days) |
+| `get-test-summary` | Test summary (optional module) |
+| `get-create-module-guide` | Create-module steps (Cursor-friendly) |
+| `get-create-endpoint-guide` | Add-endpoint steps (Cursor-friendly) |
+| `get-update-docs-guide` | Update module docs (Cursor-friendly) |
+| `get-code-review-checklist` | Review checklist (Cursor-friendly) |
+| `get-investigate-bug-guide` | Bug-investigation steps (Cursor-friendly) |
 
 ## Resources
 
-- `alaz://onboarding` — Recommended entry point
-- `alaz://architecture` — Architecture overview
-- `alaz://conventions/api`, `/testing`, `/cqrs` — Conventions
+**Static**
+
+- `alaz://onboarding` — Stack, modules, entry pointers
+- `alaz://architecture` — Architecture / API overview
+- `alaz://conventions/api`, `alaz://conventions/testing`, `alaz://conventions/cqrs` — Conventions
 - `alaz://authentication` — Auth and RBAC
-- `alaz://changelog` — Changelog (Git-based, versioned by tags; fallback to CHANGELOG.md or docs/changes/*.md)
-- `alaz://modules/{name}` — Module docs
-- `alaz://modules/{name}/endpoints` — Module endpoints
-- `alaz://entities/{name}` — Entity schema
+- `alaz://changelog` — Changelog (Git; else file fallback above)
 
-## Documentation
+**Templates** — Replace placeholders: `alaz://modules/{moduleName}`, `alaz://modules/{moduleName}/endpoints`, `alaz://entities/{entityName}`
 
-- [docs/MCP-SERVER.md](docs/MCP-SERVER.md) — Technical details, tools, resources, prompts, Docker
-- [docs/MCP-SETUP.md](docs/MCP-SETUP.md) — Step-by-step setup (Cursor, Claude Desktop, Copilot), Docker, and example prompts
+## Prompts
+
+Five prompts map to the `get-*-guide` / `get-code-review-checklist` tools for clients that only list tools. Details: [docs/MCP-SERVER.md](docs/MCP-SERVER.md).
+
+## Project docs (this repository)
+
+| Doc | Contents |
+|-----|----------|
+| [docs/MCP-SETUP.md](docs/MCP-SETUP.md) | Clients: HTTP / SSE / STDIO, Docker, `mcp.json`, troubleshooting |
+| [docs/MCP-SERVER.md](docs/MCP-SERVER.md) | Transports, tools, resources, prompts, env, extending the server |
+| [docs/MCP-FLOWS-AND-ARCHITECTURE.md](docs/MCP-FLOWS-AND-ARCHITECTURE.md) | Flows, Mermaid diagrams, `src/mcp` layout |
+| [docs/MCP-FRAMEWORK-PORTS.md](docs/MCP-FRAMEWORK-PORTS.md) | Port interfaces, NestJS vs future frameworks |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | **This repo** release history (not the target app’s) |
+
+## Development
+
+```bash
+npm test
+npm run test:e2e
+npm run precommit
+```
+
+`precommit` runs lint, Prettier check, and unit tests (see `.githooks` / `package.json`).

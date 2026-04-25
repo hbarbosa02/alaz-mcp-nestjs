@@ -1,154 +1,106 @@
-# Alaz MCP Server
+# Alaz MCP Server — Technical reference
 
-MCP Server that exposes the live context of any NestJS project to AI agents (Cursor, Claude Desktop, GitHub Copilot). Support for Angular and Laravel is planned.
+NestJS-first MCP server: live project context (filesystem, Git, static analysis) for Cursor, Claude Desktop, and Copilot. Angular and Laravel adapters are **planned**; registry placeholders return a clear “coming soon” path until implemented. See [MCP-FRAMEWORK-PORTS.md](./MCP-FRAMEWORK-PORTS.md).
 
-**Transport validation:** HTTP, SSE, and STDIO are validated by E2E tests (`npm run test:e2e`). See [MCP-SETUP.md](./MCP-SETUP.md) for step-by-step configuration and example prompts.
+**E2E:** `npm run test:e2e` covers HTTP, SSE, and STDIO. **Client setup** (all transports, `mcp.json` examples): [MCP-SETUP.md](./MCP-SETUP.md). **Diagrams and package layout:** [MCP-FLOWS-AND-ARCHITECTURE.md](./MCP-FLOWS-AND-ARCHITECTURE.md).
 
 ## Architecture
 
-The server dynamically reads the target project in real time. For detailed flows, diagrams, and file structure, see [MCP-FLOWS-AND-ARCHITECTURE.md](./MCP-FLOWS-AND-ARCHITECTURE.md).
+The **target** project root is resolved per request: HTTP/SSE `X-Project-Root`, STDIO `PROJECT_ROOT`, or optional `projectRoot` on tools. There is no implicit default; missing config yields an error.
 
-- **Filesystem**: `src/`, `docs/`, `.cursor/rules/`
-- **Git**: `git log`, `git diff`, `git tag` for recent changes and changelog generation
-- **Static parsing**: MikroORM, TypeORM, Objection entities; controllers; decorators
-- **package.json** and **composer.json**: Framework detection (NestJS, Angular, Laravel) and stack detection (ORM, validation, test framework, etc.)
+- **Tree:** `src/`, `docs/`, `.cursor/rules/`
+- **Git:** `git log`, `git diff`, `git tag` (recent changes, changelog)
+- **Parsing:** controllers, decorators, entities (MikroORM, TypeORM, Objection)
+- **Manifests:** `package.json` and `composer.json` for framework and stack detection
 
 ### Framework detection
 
-The server detects the project framework via `package.json` (NestJS, Angular) or `composer.json` (Laravel). NestJS-specific tools return a clear message when the project is not NestJS. See [MCP-FRAMEWORK-PORTS.md](./MCP-FRAMEWORK-PORTS.md) for interface contracts and future considerations.
+`package.json` (NestJS, Angular) and `composer.json` (Laravel) drive `FrameworkDetectorService`. Nest-only tools return an explicit message when the project is not NestJS. Adapters and contracts: [MCP-FRAMEWORK-PORTS.md](./MCP-FRAMEWORK-PORTS.md).
 
-## Transport modes
+## Transports
 
-All transports are validated by E2E tests. For step-by-step setup (Cursor, Claude Desktop, Copilot) and example prompts, see [MCP-SETUP.md](./MCP-SETUP.md).
+| Mode | How | Project root |
+|------|-----|----------------|
+| Streamable HTTP | `/mcp` — `npm run start:dev` | Header `X-Project-Root` |
+| SSE | `/sse` — same process as HTTP | Same header |
+| STDIO | `npm run start:stdio` | `env.PROJECT_ROOT` in MCP config |
 
-### Streamable HTTP (primary)
+**Docker:** HTTP via `docker compose up --build`; STDIO via `docker compose run ... app-stdio` with a bind mount. See [MCP-SETUP.md](./MCP-SETUP.md#0-docker-optional).
 
-Runs on the `/mcp` route of the API. Requires `npm run start:dev`. The client must send the `X-Project-Root` header with the project path.
-
-```bash
-npm run start:dev
-```
-
-### SSE (Server-Sent Events)
-
-Runs on the `/sse` route. Same server as HTTP. Requires `X-Project-Root` header.
-
-### STDIO (lightweight mode)
-
-Runs as a separate process. Does not require database or Redis. Requires `PROJECT_ROOT` in the MCP config.
-
-```bash
-npm run start:stdio
-```
-
-### Docker
-
-| Mode | Command | Use case |
-|------|---------|----------|
-| **HTTP** | `docker compose up --build` | Server at `http://localhost:3100/mcp` |
-| **STDIO** | `docker compose run --rm -e PROJECT_ROOT=/workspace -v /path/to/project:/workspace:ro app-stdio` | Spawned by MCP client; mount project to analyze |
-
-See [MCP-SETUP.md](./MCP-SETUP.md) for mcp.json configuration with Docker.
-
-### Quick config reference
-
-**HTTP/SSE** — Add to mcp.json:
-```json
-{
-  "mcpServers": {
-    "alaz-nestjs": {
-      "url": "http://localhost:3100/mcp",
-      "headers": { "X-Project-Root": "${workspaceFolder}" }
-    }
-  }
-}
-```
-
-**STDIO** — Add to mcp.json:
-```json
-{
-  "mcpServers": {
-    "alaz-nestjs-stdio": {
-      "command": "npx",
-      "args": ["ts-node", "-r", "tsconfig-paths/register", "src/mcp/feature/mcp-stdio.entry.ts"],
-      "cwd": "/path/to/alaz-mcp-nestjs",
-      "env": { "PROJECT_ROOT": "${workspaceFolder}" }
-    }
-  }
-}
-```
+**Config snippets** (HTTP, SSE, STDIO, including Docker-spawned clients) are maintained in [MCP-SETUP.md § Cursor configuration](./MCP-SETUP.md#2-cursor-configuration) to avoid drift from the README.
 
 ## Tools
 
 | Tool | Parameters | Description |
 |------|------------|-------------|
-| `list-modules` | `projectRoot?` | Lists modules with controller, entities, tests |
-| `get-module-detail` | `moduleName`, `projectRoot?` | Full module details |
-| `get-entity-schema` | `entityName`, `orm?`, `projectRoot?` | Entity schema (MikroORM, TypeORM, Objection). ORM auto-detected if omitted |
-| `list-endpoints` | `moduleName?`, `projectRoot?` | Lists endpoints (optional filter by module) |
-| `check-conventions` | `moduleName`, `projectRoot?` | Validates project conventions |
-| `get-recent-changes` | `days?`, `projectRoot?` | Recent commits (default 7 days) |
+| `list-modules` | `projectRoot?` | Modules with controller, entities, tests |
+| `get-module-detail` | `moduleName`, `projectRoot?` | Full module detail |
+| `get-entity-schema` | `entityName`, `orm?`, `projectRoot?` | Entity schema; ORM inferred if `orm` omitted |
+| `list-endpoints` | `moduleName?`, `projectRoot?` | Routes; optional module filter |
+| `check-conventions` | `moduleName`, `projectRoot?` | Convention validation |
+| `get-recent-changes` | `days?`, `projectRoot?` | Commits (default 7 days) |
 | `get-test-summary` | `moduleName?`, `projectRoot?` | Test summary |
-| `get-create-module-guide` | `moduleName`, `hasController`, `hasEntity`, `projectRoot?` | Step-by-step guide to create a module (tool equivalent of `create-module` prompt) |
-| `get-create-endpoint-guide` | `moduleName`, `httpMethod`, `description`, `projectRoot?` | Step-by-step guide to add an endpoint (tool equivalent of `create-endpoint` prompt) |
-| `get-update-docs-guide` | `moduleName`, `projectRoot?` | Guide to update module documentation (tool equivalent of `update-documentation` prompt) |
-| `get-code-review-checklist` | `moduleName`, `projectRoot?` | Code review checklist (tool equivalent of `code-review-checklist` prompt) |
-| `get-investigate-bug-guide` | `moduleName`, `bugDescription`, `projectRoot?` | Guide to investigate a bug (tool equivalent of `investigate-bug` prompt) |
+| `get-create-module-guide` | `moduleName`, `hasController`, `hasEntity`, `projectRoot?` | Same as `create-module` prompt |
+| `get-create-endpoint-guide` | `moduleName`, `httpMethod`, `description`, `projectRoot?` | Same as `create-endpoint` prompt |
+| `get-update-docs-guide` | `moduleName`, `projectRoot?` | Same as `update-documentation` prompt |
+| `get-code-review-checklist` | `moduleName`, `projectRoot?` | Same as `code-review-checklist` prompt |
+| `get-investigate-bug-guide` | `moduleName`, `bugDescription`, `projectRoot?` | Same as `investigate-bug` prompt |
 
-**Note:** The `get-*-guide` and `get-code-review-checklist` tools return the same content as the corresponding prompts. Use these tools when the MCP client (e.g. Cursor) does not support prompt invocation — only tools are callable via `call_mcp_tool`.
+The `get-*-guide` and `get-investigate-bug-guide` / `get-code-review-checklist` tools exist because some hosts (e.g. Cursor) expose tools but not `prompts/get`. Content matches the named prompts.
 
 ## Resources
 
 ### Static
 
-| URI | Description |
-|-----|-------------|
-| `alaz://onboarding` | Aggregated onboarding guide |
-| `alaz://architecture` | API Overview |
+| URI | Role |
+|-----|------|
+| `alaz://onboarding` | Onboarding aggregate |
+| `alaz://architecture` | API / architecture overview |
 | `alaz://conventions/api` | API conventions |
-| `alaz://conventions/testing` | Testing patterns |
-| `alaz://conventions/cqrs` | CQRS and Jobs |
-| `alaz://authentication` | Auth and RBAC |
-| `alaz://changelog` | Changelog generated from Git (versioned by tags). Fallback to CHANGELOG.md or docs/changes/*.md when repository is not available |
+| `alaz://conventions/testing` | Testing |
+| `alaz://conventions/cqrs` | CQRS / jobs |
+| `alaz://authentication` | Auth / RBAC |
+| `alaz://changelog` | Git changelog (tag sections when tags exist); else files under target project |
 
-### Templates (dynamic)
+### Templates
 
-| URI Template | Description |
-|--------------|-------------|
-| `alaz://modules/{moduleName}` | Module docs and structure |
+| URI pattern | Role |
+|-------------|------|
+| `alaz://modules/{moduleName}` | Module doc |
 | `alaz://entities/{entityName}` | Entity schema |
-| `alaz://modules/{moduleName}/endpoints` | Module endpoints |
+| `alaz://modules/{moduleName}/endpoints` | Module routes |
 
 ## Prompts
 
-| Prompt | Arguments | Description |
-|--------|------------|-------------|
-| `create-module` | `moduleName`, `hasController`, `hasEntity` | Template to create a module. Output includes executable steps — agent MUST ask developer for confirmation before executing. |
-| `create-endpoint` | `moduleName`, `httpMethod`, `description` | Template for a new endpoint. Output includes executable steps — agent MUST ask developer for confirmation before executing. |
-| `update-documentation` | `moduleName` | Guide to update docs. Output includes executable steps — agent MUST ask developer for confirmation before executing. |
-| `code-review-checklist` | `moduleName` | Review checklist |
-| `investigate-bug` | `moduleName`, `bugDescription` | Guide to investigate a bug. Output includes executable steps — agent MUST ask developer for confirmation before executing. |
+| Prompt | Arguments | Notes |
+|--------|-----------|--------|
+| `create-module` | `moduleName`, `hasController`, `hasEntity` | Executable steps; agent should confirm with the developer before changing files |
+| `create-endpoint` | `moduleName`, `httpMethod`, `description` | Same |
+| `update-documentation` | `moduleName` | Same |
+| `code-review-checklist` | `moduleName` | Checklist only |
+| `investigate-bug` | `moduleName`, `bugDescription` | Executable steps; confirm first |
 
-**Cursor compatibility:** Cursor does not expose prompt invocation to the agent — only tools are callable. Use the corresponding `get-*-guide` / `get-code-review-checklist` tools instead (see Tools table above).
+**Cursor:** use the matching `get-*` tool when prompts are not invocable.
 
-## Project root
+## Project root (required)
 
-The project root path is **required** and must come from the MCP configuration:
+- **HTTP/SSE:** `headers["X-Project-Root"]` in `mcp.json` (e.g. `"${workspaceFolder}"`).
+- **STDIO:** `env.PROJECT_ROOT` in `mcp.json`.
 
-- **HTTP**: `headers["X-Project-Root"]` in mcp.json (e.g. `"${workspaceFolder}"`)
-- **STDIO**: `env.PROJECT_ROOT` in mcp.json (e.g. `"${workspaceFolder}"`)
+Optional per-call override: `projectRoot` on tools.
 
-Tools accept an optional `projectRoot` parameter to override per request. If the path is not provided, the MCP returns an error.
+## Server environment (this process)
 
-## Environment variables (server)
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `PORT` | `3100` | HTTP port |
+| `NODE_ENV` | — | e.g. `development` / `production` |
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PORT` | No | HTTP port (default 3100) |
-| `NODE_ENV` | No | development/staging/production |
+The analyzed app’s path is **not** a server env var.
 
-## Adding new Tools/Resources/Prompts
+## Adding tools, resources, or prompts
 
-1. Create the class in `src/mcp/domain/nestjs/feature/tools/`, `resources/` or `prompts/` (or `src/mcp/domain/shared/feature/` for shared capabilities)
-2. Use the `@Tool`, `@Resource`, `@ResourceTemplate` or `@Prompt` decorators from `@rekog/mcp-nest`
-3. Register in `NestjsDomainModule` or `SharedDomainModule` (imported by `McpNestjsModule` and `McpStdioModule`)
+1. Implement under `src/mcp/domain/nestjs/feature/tools/`, `resources/`, or `prompts/`, or `src/mcp/domain/shared/feature/` if shared with STDIO (e.g. `get-recent-changes`).
+2. Use `@Tool`, `@Resource`, `@ResourceTemplate`, or `@Prompt` from `@rekog/mcp-nest`.
+3. Register in `NestjsDomainModule` or `SharedDomainModule` (pulled in by `McpNestjsModule` and `McpStdioModule` / `McpStdioAppModule`).
+4. If you add user-visible surfaces, update E2E expectations in `test/e2e/setup/mcp-client.setup.ts` and the transport table in [MCP-SETUP.md § Transport validation](./MCP-SETUP.md#6-transport-validation).
