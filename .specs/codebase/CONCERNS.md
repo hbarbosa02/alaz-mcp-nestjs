@@ -2,17 +2,21 @@
 
 **Analysis date:** 2026-04-25
 
+**Project state (decisions, todos, deferred work):** [`.specs/project/STATE.md`](../project/STATE.md) — e.g. **AD-001**–**AD-003** status, **Active blockers** (none as of last update), and **Deferred ideas** (full Angular / Laravel adapters).
+
 ## Tech debt
 
-**Resolved (AD-001 / AD-002, 2026):** `PROJECT_ROOT` is optional in `env.schema.ts` (no machine-specific default). MCP server version comes from `MCP_SERVER_VERSION` in `src/mcp/core/mcp-server-package.ts` (re-exports `package.json` `version`) and is used in `mcp.module.ts` and `mcp-stdio.module.ts`.
+**Resolved (AD-001, 2026-04-25):** `PROJECT_ROOT` is optional in `env.schema.ts` (no machine-specific default; avoids silently pointing at the wrong tree on other machines). HTTP analysis is rooted by `X-Project-Root` (middleware + ALS), not that env value; STDIO entrypoints require `PROJECT_ROOT` in the process environment. See `test/unit/util/feature/schemas/env.spec.ts`.
 
-**Placeholder framework domains (partial progress, AD-003)**
+**Resolved (AD-002, 2026-04-25):** MCP server version is a single source of truth from `package.json` via `MCP_SERVER_VERSION` in `src/mcp/core/mcp-server-package.ts`, used in `mcp.module.ts` and `mcp-stdio.module.ts`. See `test/unit/core/mcp-server-package.spec.ts`.
 
-- **Issue:** Angular and Laravel **adapters** are not implemented; users still get “coming soon” via `FrameworkAdapterRegistryService` for those frameworks.
+**Partially addressed (AD-003, 2026-04-25) — open remainder tracked as deferred**
+
+- **Done in repo:** `AngularDomainModule` and `LaravelDomainModule` are **imported** in `McpNestjsModule` and `McpStdioModule`; JSDoc on domain modules and `FrameworkAdapterRegistryService` documents port-based extension. `framework-detector.service.spec.ts` covers precedence, `devDependencies`, and Laravel `require-dev`.
+- **Issue (deferred in STATE):** Full **port implementations** for Angular and Laravel are not shipped; **adapters** are still missing, so users still get “coming soon” via `FrameworkAdapterRegistryService` for those frameworks.
 - **Files:** `src/mcp/domain/angular/`, `src/mcp/domain/laravel/`, `framework-adapter-registry.service.ts`
-- **Status:** `AngularDomainModule` and `LaravelDomainModule` are **imported** in `McpNestjsModule` and `McpStdioModule`; JSDoc documents port-based extension. Detection tests were expanded (Nest vs Angular precedence, `devDependencies`, `require-dev` for Laravel).
-- **Impact:** Same user-facing gap until real port implementations are registered.
-- **Next:** Add adapter services in those domains and route them in `FrameworkAdapterRegistryService` when ready.
+- **Impact:** Same user-facing gap until real adapters are registered. Do not claim full Angular / Laravel support in product copy until adapter-level tests cover those surfaces (per AD-003).
+- **Next (matches STATE *Deferred ideas*):** Implement adapter services, register them in `FrameworkAdapterRegistryService`, and add tests before marketing support.
 
 ## Security considerations
 
@@ -37,7 +41,7 @@
 
 **Project root context (ALS + env fallback)**
 
-- **Why:** STDIO and HTTP differ; `getProjectRoot` must work when MCP library callbacks lose ALS.
+- **Why:** STDIO and HTTP differ; `getProjectRoot` must work when MCP library callbacks lose ALS. After **AD-001**, `PROJECT_ROOT` in env schema has no default; HTTP uses `X-Project-Root` + ALS. If new code reads `ConfigService`-backed `PROJECT_ROOT` for HTTP and assumes a default root, that path should be reviewed (likely unnecessary for current HTTP flow).
 - **Files:** `src/mcp/core/data-access/services/project-root-context.service.ts`, `mcp-stdio.entry.ts`, middleware
 - **Common failures:** Missing header (HTTP 400 with clear JSON); empty `PROJECT_ROOT` in STDIO.
 - **Safe modification:** Add tests in `project-root-context.service.spec.ts` and e2E when changing bootstrap order.
