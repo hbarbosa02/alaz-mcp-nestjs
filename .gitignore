@@ -24,11 +24,7 @@ lerna-debug.log*
 **/tmp
 
 coverage
-# Cursor: keep team rules and project skills; ignore other local IDE state
-.cursor/**
-!.cursor/rules/
-!.cursor/rules/**
-!.cursor/skills/
-!.cursor/skills/**
-
 .vscode
+
+# Cursor — keep local MCP client config (paths, keys) out of the repo
+.cursor/mcp.json
