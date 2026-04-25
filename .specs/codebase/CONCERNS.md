@@ -2,7 +2,7 @@
 
 **Analysis date:** 2026-04-25
 
-**Project state (decisions, todos, deferred work):** [`.specs/project/STATE.md`](../project/STATE.md) — e.g. **AD-001**–**AD-005** status, **Active blockers** (none as of last update), and **Deferred ideas** (full Angular / Laravel adapters).
+**Project state (decisions, todos, deferred work):** [`.specs/project/STATE.md`](../project/STATE.md) — e.g. **AD-001**–**AD-006**, **Active blockers** (none as of last update), and **Deferred ideas** (full Angular / Laravel adapters).
 
 ## Tech debt
 
@@ -17,6 +17,8 @@
 - **Files:** `src/mcp/domain/angular/`, `src/mcp/domain/laravel/`, `framework-adapter-registry.service.ts`
 - **Impact:** Same user-facing gap until real adapters are registered. Do not claim full Angular / Laravel support in product copy until adapter-level tests cover those surfaces (per AD-003).
 - **Next (matches STATE *Deferred ideas*):** Implement adapter services, register them in `FrameworkAdapterRegistryService`, and add tests before marketing support.
+
+**Policy (AD-006, 2026-04-25) — operator documentation DRY:** Full `mcp.json` and transport matrix live in **`docs/MCP-SETUP.md`**. `README.md` is the landing; `docs/MCP-SERVER.md` links to setup for config. Avoid re-duplicating long JSON in multiple files without updating `STATE.md`.
 
 **Documented in code and tests (AD-004, 2026-04-25):** `FrameworkDetectorService` documents LRU (max 10) keying on the raw project root string; unit tests assert cache hits, separate keys for different strings, and re-detection after eviction. See `src/mcp/core/data-access/services/framework-detector.service.ts` and `test/unit/core/data-access/services/framework-detector.service.spec.ts`.
 

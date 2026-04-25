@@ -1,53 +1,57 @@
 # Alaz NestJS MCP
 
-**Vision:** A Model Context Protocol server that turns a NestJS (and future framework) workspace into live, queryable context for AI clients.
+**Vision:** A [Model Context Protocol](https://modelcontextprotocol.io/) server that turns a NestJS (and, later, other framework) workspace into **live, queryable context** for AI clients.
 
-**For:** Teams and individuals using Cursor, Claude Desktop, GitHub Copilot, or any MCP client that needs accurate project state without manual copy-paste.
+**Audience:** Teams and individuals using Cursor, Claude Desktop, GitHub Copilot, or any MCP host that can call tools, read resources, and (where supported) run prompts.
 
-**Solves:** AI assistants often lack up-to-date module structure, ORM entity shapes, API surface, conventions, and recent git activity; this server exposes that context as tools, resources, and prompts.
+**Problem:** Assistants often lack current module structure, ORM entity shapes, HTTP surface, conventions, and recent Git history. This server exposes that as **tools**, **resources**, and **prompts** rooted at a configured project path.
 
 ## Goals
 
-- **G1 — Trustworthy context:** Responses reflect the configured project root (HTTP header or `PROJECT_ROOT` in STDIO) and the detected stack (ORM, validation, tests, queues).
-- **G2 — Low-friction adoption:** Clear HTTP and STDIO/Docker paths documented in `README.md` and `docs/MCP-SETUP.md`; no secrets required in repo for basic use.
-- **G3 — Extensible framework layer:** Adapters and ports allow NestJS first, with a path to other stacks without rewriting the core MCP surface.
-- **G4 — Observable quality:** lint, unit tests, and e2e transports stay green for releases; changelog and semver track user-visible changes.
+- **G1 — Trustworthy context:** Answers reflect the configured project root (`X-Project-Root` for HTTP/SSE, `PROJECT_ROOT` for STDIO) and the detected stack (ORM, validation, tests, queues, etc.).
+- **G2 — Low-friction adoption:** Operator docs in `README.md` (landing) and **`docs/MCP-SETUP.md` (full `mcp.json` and transport matrix)**; no repository secrets for basic use.
+- **G3 — Extensible framework layer:** Ports and adapters keep the MCP surface stable; NestJS is fully implemented, Angular/Laravel are placeholders until adapters exist.
+- **G4 — Observable quality:** Lint, unit tests, E2E transports, and `precommit` stay green; semver and `docs/CHANGELOG.md` track this **product** repo (not the analyzed app).
 
-## Tech Stack
+## Tech stack (this repository)
 
-**Core:**
+- **Runtime:** Node.js 18+ (dev types target Node 22 per `package.json`)
+- **Framework:** NestJS 11, TypeScript 5.9
+- **MCP:** `@modelcontextprotocol/sdk` ^1.27, `@rekog/mcp-nest` ^1.9, Zod 4
 
-- Framework: NestJS 11
-- Language: TypeScript 5.9
-- Runtime: Node.js (see `@types/node` 22 in dev)
-
-**Key dependencies:** `@modelcontextprotocol/sdk` ^1.27, `@rekog/mcp-nest` ^1.9, `zod` 4, `glob` 11, `jest` 29, `@nestjs/*` 11
+Details: [`.specs/codebase/STACK.md`](../codebase/STACK.md)
 
 ## Scope
 
-**v1 includes (shipped in current line, e.g. 1.3.x):**
+**Shipped in the current line (e.g. 1.3.x):**
 
-- HTTP MCP transport with `X-Project-Root` and streamable configuration aligned with current MCP clients
-- STDIO entry for local/workspace analysis without a long-lived HTTP process
-- Stack detection from `package.json` (and composer for PHP paths where applicable)
-- Tools: `list-modules`, `get-module-detail`, `get-entity-schema`, `list-endpoints`, `check-conventions`, `get-recent-changes`, `get-test-summary`
-- Resources: onboarding, architecture, conventions, changelog, module/entity deep links (`alaz://` URIs)
-- Docker support for both transports
+- Streamable HTTP (`/mcp`) and SSE (`/sse`) with `X-Project-Root`; STDIO entry without a long-lived HTTP process
+- Stack / framework hints from target `package.json` and `composer.json` when present
+- **12 tools** — module/entity/endpoint exploration, conventions, Git and test summaries, and **five “prompt-as-tool” guides** for clients that do not expose `prompts/get` (see `README.md` and `docs/MCP-SERVER.md`)
+- **Resources** — static `alaz://` URIs plus module/entity templates; static resources use **Option C** (delegate via framework adapter; see `docs/MCP-FRAMEWORK-PORTS.md`)
+- **Five prompts** — parity with the guide tools where applicable
+- Docker image/compose for HTTP and STDIO-style runs
 
-**Explicitly out of scope (for this product, not the analyzed target app):**
+**Out of scope (this product, not the analyzed Nest app):**
 
-- Hosting or deploying end-user Nest applications
-- Storing or enforcing secrets inside the server beyond normal env (port, `PROJECT_ROOT` where needed)
-- Replacing the IDE, Git, or ORM—this server *describes* the project; it does not run the user’s app by default
+- Hosting or running the user’s production Nest application
+- Storing end-user secrets beyond normal process env (`PORT`, optional local `.env`); analyzed path comes from MCP config, not guessing disks
+- Replacing the IDE, Git, or ORM — the server **describes** the tree; it does not execute the target app
 
 ## Constraints
 
-- **Technical:** Project root must be supplied by MCP config (or override per call); the server does not guess arbitrary disk paths in production.
-- **Compatibility:** Must stay aligned with `@modelcontextprotocol/sdk` and client expectations (e.g. resource and prompt result shapes).
-- **Resources:** Ongoing maintenance and feature work depend on available maintainer time; prioritize correctness of exposed context over breadth of new tools.
+- **Config:** Project root is required from MCP config (or per-tool `projectRoot` override). No silent default to an arbitrary path in production (see `env.schema` and **AD-001** in `STATE.md`).
+- **Protocol:** Stay aligned with MCP resource/prompt result shapes expected by current clients.
+- **Maintenance:** Favor correctness of exposed context over growing tool count without clear agent workflows.
 
 ## References
 
-- Root README: `README.md`
-- Changelog: `docs/CHANGELOG.md`
-- Server details: `docs/MCP-SERVER.md`, `docs/MCP-SETUP.md`
+| Artifact | Role |
+|----------|------|
+| `README.md` | Quick install, one HTTP `mcp.json` example, tool/resource index |
+| `docs/MCP-SETUP.md` | **Canonical** client setup: HTTP, SSE, STDIO, Docker, Cursor/Claude/Copilot |
+| `docs/MCP-SERVER.md` | Tools, resources, prompts, env, extension points |
+| `docs/MCP-FLOWS-AND-ARCHITECTURE.md` | Flows, Mermaid diagrams, `src/mcp` layout |
+| `docs/MCP-FRAMEWORK-PORTS.md` | Port interfaces, registry, future frameworks |
+| `docs/CHANGELOG.md` | This repository’s release history |
+| `.specs/` | TLC spec-driven project memory and brownfield map |

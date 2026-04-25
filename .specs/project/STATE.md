@@ -1,6 +1,6 @@
 # State
 
-**Last Updated:** 2026-04-25
+**Last updated:** 2026-04-25
 **Current work:** None
 
 ---
@@ -77,6 +77,20 @@
 
 ---
 
+### AD-006: Single canonical place for MCP client JSON (2026-04-25)
+
+**Decision:** **Do not** maintain identical long `mcp.json` examples in `README.md` and `docs/MCP-SERVER.md`. The **full** matrix (HTTP, SSE, STDIO, Docker-spawned clients, Claude, Copilot) lives in **`docs/MCP-SETUP.md`**. The README keeps a **short** landing (install, run, one HTTP snippet, pointers). `docs/MCP-SERVER.md` describes tools/resources/prompts and links to MCP-SETUP for config.
+
+**Reason:** Reduces drift when ports, paths, or client names change; matches project-docs-architect DRY / KISS.
+
+**Trade-off:** Readers must follow one link for SSE/STDIO; acceptable for a small repo.
+
+**Impact:** Commits touching docs only; no runtime change.
+
+**Status:** **Documented** — see repo commit `11ced01` and `docs/CHANGELOG.md` [Unreleased] Documentation.
+
+---
+
 ## Active blockers
 
 _(None.)_
@@ -91,12 +105,13 @@ _(None yet.)_
 
 ## Quick tasks completed
 
-| #   | Description                         | Date       | Commit | Status  |
-| --- | ----------------------------------- | ---------- | ------ | ------- |
+| #   | Description                         | Date       | Commit  | Status  |
+| --- | ----------------------------------- | ---------- | ------- | ------- |
 | 001 | Initialize `.specs/project/` (TLC)  | 2026-04-25 | e35b801 | Done    |
 | 002 | Brownfield map — 7 files in `.specs/codebase/` | 2026-04-25 | e35b801 | Done    |
 | 003 | Implement AD-001, AD-002, AD-003 (code + tests) | 2026-04-25 | e35b801 | Done    |
 | 004 | **AD-004** cache docs/tests; **AD-005** GitHub Actions CI | 2026-04-25 | — | Done    |
+| 005 | **Docs:** `README` + `docs/*.md` revision (project-docs-architect), **AD-006** | 2026-04-25 | 11ced01 | Done    |
 
 ---
 
@@ -109,13 +124,14 @@ _(None yet.)_
 ## Todos
 
 - [x] Run **Map codebase** — done (see `.specs/codebase/`)
-- [x] Record **AD-001**, **AD-002**, and **AD-003** in **Recent decisions**
+- [x] Record **AD-001**–**AD-005** in **Recent decisions**
 - [x] Implement **AD-001** — env schema: remove non-portable `PROJECT_ROOT` default
 - [x] Implement **AD-002** — `McpModule.forRoot` version from `package.json`
 - [x] **AD-003** initial tranche — wire placeholder domain modules, document extension points, expand detection tests
-- [x] Record **AD-004** (framework detection cache) and **AD-005** (CI gap) from **CONCERNS**
+- [x] Record **AD-004** (framework detection cache) and **AD-005** (CI) from **CONCERNS**
 - [x] Implement **AD-004** — JSDoc + cache/LRU/eviction unit tests
 - [x] Implement **AD-005** — `.github/workflows/ci.yml`
+- [x] **AD-006** + docs pass — align `.specs` with published `docs/` and README (this update)
 
 ---
 

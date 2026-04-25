@@ -1,51 +1,41 @@
 # Roadmap
 
-**Current milestone:** 1.3.x — Maintenance, Docker, and transport hardening
-**Status:** In Progress
+**Current milestone:** 1.3.x — Transports, Docker, quality, and documentation
+**Status:** In progress (patch/minor as `docs/CHANGELOG.md` and tags indicate)
 
 ---
 
-## 1.3.x — Maintenance, Docker, and transport hardening
+## 1.3.x — Transports, Docker, quality, documentation
 
-**Goal:** Keep HTTP, SSE, and STDIO paths reliable; document Docker; improve tests and static resources so MCP clients get consistent responses.
+**Goal:** Keep HTTP, SSE, and STDIO reliable; keep operator docs accurate and **DRY** (single home for `mcp.json` long form in `docs/MCP-SETUP.md`); extend tests and resources so MCP clients get consistent responses.
 
-**Target:** Ongoing; patch/minor releases as `docs/CHANGELOG.md` and tags indicate.
+### Done / stable (as of last `.specs` sync)
 
-### Features
+- E2E coverage for HTTP, SSE, STDIO; `prompts/get` and resource shapes aligned with MCP `ReadResourceResult` / `GetPromptResult`
+- JSON/streamable HTTP behavior; framework detection cache (LRU, per-root) and STDIO `ProjectRootContext` fallbacks
+- DDD-style `src` / `test` layout; `npm run precommit` (lint, format, unit tests) via `.githooks`
+- Docker Compose for HTTP and STDIO-oriented runs; `README` + **MCP-SETUP** describe usage
+- **Documentation pass:** `README` shortened; `MCP-SETUP` owns full `mcp.json` variants; `MCP-SERVER` is technical reference without duplicate JSON blocks (see `STATE` quick task 005 and **AD-006**)
 
-**Core MCP server (HTTP + resources + prompts)** — IN PROGRESS (active unreleased work per changelog)
+### Still in motion (unreleased or iterative)
 
-- JSON/streamable HTTP behavior and prompt `GetPromptResult` compliance
-- Framework detection caching and `PROJECT_ROOT` fallbacks for STDIO
-- Test layout aligned with DDD-style source tree; E2E coverage for transports
-
-**Operations (Docker, docs)** — IN PROGRESS
-
-- `docker compose` for HTTP and STDIO modes documented in README and `docs/`
-
-**E2E and quality** — IN PROGRESS
-
-- E2E tests for `prompts/get` and transport surfaces; coverage thresholds and exclusions tuned for real code
+- Further changelog items under `docs/CHANGELOG.md` **[Unreleased]** until the next tag
+- Ongoing **CONCERNS** items: security posture for non-localhost HTTP, path hardening, adapter completeness for non-Nest frameworks
 
 ---
 
 ## Next (planned / TBD)
 
-**Goal:** Move multi-framework story forward only where it pays off; avoid scope creep in core.
+**Goal:** Advance multi-framework work only with concrete need and tests; avoid core scope creep.
 
 ### Features
 
-**Non-NestJS adapters (Angular, Laravel)** — PLANNED
-
-- Placeholder domains exist; expand only when there is a concrete client need and test strategy
-
-**Additional tools / resources** — PLANNED
-
-- New tools only when a clear, repeatable agent workflow needs them; document in `docs/MCP-SERVER.md` and changelog
+- **Non-NestJS adapters (Angular, Laravel):** Placeholder modules wired; real adapters + registry routing still **deferred** (see `STATE.md` *Deferred ideas*)
+- **New tools / resources:** Only with a clear, repeatable agent workflow; update `docs/MCP-SERVER.md` and changelog
 
 ---
 
 ## Future considerations
 
-- Deeper framework-specific introspection (e.g. more ORM edge cases) without duplicating the target app’s runtime
-- Optional auth or project allowlists if server is ever exposed beyond localhost (product decision not in current v1)
+- Deeper ORM / edge-case introspection without running the target app’s runtime
+- Optional auth or project allowlists if the server is ever exposed beyond localhost (product decision; not in current v1)

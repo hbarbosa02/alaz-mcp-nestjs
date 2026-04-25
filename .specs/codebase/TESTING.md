@@ -10,7 +10,7 @@
 
 - **Unit:** `test/unit/**` mirrors `src/**` — `core/`, `domain/nestjs/`, `domain/shared/`, `util/`, `feature/`
 - **E2E:** `test/e2e/transports/{http,sse,stdio}/*.e2e-spec.ts`
-- **Naming:** `*.spec.ts` (unit), `*.e2e-spec.ts` (e2E)
+- **Naming:** `*.spec.ts` (unit), `*.e2e-spec.ts` (E2E)
 - **Fixtures:** `test/e2e/fixtures/sample-project` — minimal Nest project used as `X-Project-Root` / analysis target
 - **Helpers:** `test/helpers/` (e.g. `mock-data.ts`); E2E expectations centralized in `test/e2e/setup/mcp-client.setup.ts`
 
@@ -35,6 +35,7 @@
 | `npm test`      | Jest default — unit `*.spec.ts` only (`testRegex` in `jest.config.js`) |
 | `npm run test:e2e` | E2E config |
 | `npm run test:cov` | Unit + coverage report |
+| `npm run precommit` | Lint + `format:check` + unit tests (default local gate before commit) |
 | `npm run build` + `npm run lint` | Build and lint (no tests) |
 
 **Configuration files:** `jest.config.js` (root), `jest-e2e.config.js` (extends and overrides regex)
@@ -74,4 +75,4 @@
 | Full  | After transport, middleware, or cross-module MCP change | `npm test` && `npm run test:e2e` |
 | Release | Pre-tag / pre-publish | `npm run build` && `npm run lint` && `npm test` && `npm run test:e2e` |
 
-*CI:* No `/.github` or GitLab pipeline file was present in the repo at analysis time; gate checks are local/scripts-driven unless added later.
+*CI:* **`.github/workflows/ci.yml`** runs on push/PR to `main`/`master`: `lint`, `format:check`, `test`, `test:e2e`, `build` (Node 22, `npm ci`) — see **AD-005** in `.specs/project/STATE.md`. Local work still uses `npm run precommit` or full commands as above.

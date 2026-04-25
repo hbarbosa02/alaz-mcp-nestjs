@@ -26,7 +26,7 @@ This document covers **out-of-process and third-party** dependencies the MCP ser
 ## HTTP transport (MCP product server)
 
 - **Express** (via `@nestjs/platform-express`): default Nest HTTP stack
-- **Client integration:** Any MCP client that can send `X-Project-Root` to `http://host:port/mcp` (documented in `README.md`, `docs/MCP-SETUP.md`)
+- **Client integration:** Any MCP client that can send `X-Project-Root` to `http://host:port/mcp` — full examples in **`docs/MCP-SETUP.md`**; short HTTP snippet in `README.md` (**AD-006**)
 
 **Webhooks / REST callbacks:** None in this codebase for the MCP process itself.
 

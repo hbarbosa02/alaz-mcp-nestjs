@@ -41,3 +41,5 @@ Observed in this repository (MCP server code and tests). Conventions for **analy
 ## Project-specific rules
 
 - `.cursor/rules/mcp-development.mdc`: tool/resource/prompt registration locations, `withConfirmationRequirement` for executable-step prompts, naming of `alaz://` URIs
+- **TLC / `.specs/`:** When shipping AD-level or user-visible doc changes, update `.specs/project/STATE.md` and relevant `codebase/*.md` so brownfield and decisions stay in sync (see tlc-spec-driven `state-management`).
+

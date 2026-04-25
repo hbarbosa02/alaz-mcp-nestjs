@@ -1,6 +1,8 @@
 # Architecture
 
-**Pattern:** Single NestJS application hosting one MCP “product” with **ports/adapters** for multiple target frameworks; **only NestJS** is fully implemented today.
+**Pattern:** One NestJS application hosting the MCP “product” with **ports/adapters** for target frameworks. **Only NestJS** is fully implemented; static `alaz://` resources use **Option C** (framework adapter delegation — see `docs/MCP-FRAMEWORK-PORTS.md`).
+
+**MCP surface (current):** **12 tools** (module/entity/endpoint/changes/tests/conventions + five **prompt-as-tool** guides for clients without `prompts/get`), **7 static + 3 template** resources, **5 prompts** (see `docs/MCP-SERVER.md`).
 
 ## High-level structure
 

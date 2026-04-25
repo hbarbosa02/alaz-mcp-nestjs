@@ -21,7 +21,7 @@
 │   │   ├── setup/                     # mcp client expectations, env
 │   │   └── transports/                # http, sse, stdio
 │   └── helpers/
-├── docs/                   # MCP-SERVER, CHANGELOG, setup, architecture
+├── docs/                   # MCP-SETUP (canonical client config), MCP-SERVER, FLOWS, FRAMEWORK-PORTS, CHANGELOG
 ├── docker / compose files (as present in repo)
 └── [config] eslint, jest, nest-cli, tsconfig, etc.
 ```
@@ -69,6 +69,7 @@
 
 | Directory        | Role |
 | ---------------- | ---- |
-| `.specs/`        | TLC Spec-Driven project + codebase docs (this tree) |
-| `docs/`          | Operator and developer documentation for the MCP product |
+| `.specs/`        | TLC spec-driven project memory: `project/` (vision, roadmap, state) and `codebase/` (brownfield) |
+| `.cursor/`       | Editor rules, agents, skills (conventions for *this* repo and for analyzed apps where applicable) |
+| `docs/`          | Shipped operator docs; **start at `MCP-SETUP.md` for client configuration** |
 | `test/e2e/setup` | Shared expectations (tool names, resource URIs, headers) for transport tests |
