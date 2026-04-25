@@ -1,0 +1,31 @@
+---
+description: When and how to use the TLC Spec-Driven skill (.cursor/skills/spec-driven)
+alwaysApply: true
+---
+
+# Spec-Driven skill — invocation
+
+## When to read and follow it
+
+**Load `.cursor/skills/spec-driven/SKILL.md` (and on-demand files under that folder)** when the user’s goal matches **planning, documenting, or executing** work in the adaptive **Specify → (Design) → (Tasks) → Execute** pipeline, or **session / project memory** (`.specs/`). Use **natural language**; exact phrases are hints, not strict commands.
+
+| Situation | Typical user intent (examples) |
+| --- | --- |
+| **New / brownfield project** | “Initialize project”, “setup project”, “create roadmap”, “map codebase”, “analyze existing code” |
+| **Feature work** | “Specify feature …”, “define requirements”, “design”, “architecture”, “break into tasks”, “implement”, “build”, “validate”, “UAT”, “verify work” |
+| **Small / ad-hoc** | “Quick fix”, “quick task”, “bug fix”, small tweak (use **Quick mode** when scope is tiny — see below) |
+| **Continuity** | “Pause work”, “end session”, “resume work”, “continue” |
+| **Project memory** | “Record decision”, “log blocker”, “add todo”, “document concerns”, “tech debt” |
+
+**Do not** treat the spec-driven skill as the right tool for: **generic architecture-decomposition analysis** (use a dedicated architecture workflow/skill if present), or **standalone technical design doc authoring** when the user asked for a different doc process (`create-technical-design-doc` and similar). For everything else in the table, prefer spec-driven.
+
+## How to apply it (summary)
+
+1. **Auto-size depth** — Small: Quick mode (describe → implement → verify → commit; guardrails: ~≤3 files, no big design, no new deps). Medium: brief specify + execute with design/tasks **inline**. Large/complex: full spec IDs, `design.md`, `tasks.md` as needed.
+2. **Phases** — **Specify** and **Execute** are always in play at the right depth; **Design** and **Tasks** are **skipped** when the change is obvious and small; if inline steps explode (>5 or messy deps), **stop** and add formal `tasks.md` (safety valve).
+3. **Artifacts** — Put outputs under **`.specs/`** (see `README.md` in the skill folder for layout: `project/`, `codebase/`, `features/`, `quick/`).
+4. **Context** — Prefer base load: `PROJECT.md`, `ROADMAP.md`, `STATE.md` when they exist; load **one** feature’s spec/design/tasks at a time, not several specs in parallel.
+5. **Research** — Follow the skill’s **Knowledge Verification Chain** (codebase → project docs → MCP/web → flag uncertainty); do not fabricate APIs or behavior.
+6. **Commits** — One logical task or step per commit; commit messages must match this repo’s Conventional Commits rule in `commit-pattern.mdc` and `npm run precommit` when you commit.
+
+**Reference:** deeper behavior, tables, and command mapping live in `.cursor/skills/spec-driven/README.md`.
