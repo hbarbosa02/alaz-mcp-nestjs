@@ -27,6 +27,7 @@ module.exports = {
   },
   testEnvironment: 'node',
   moduleNameMapper: {
+    '^@app/package$': '<rootDir>/package.json',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
     '^@mcp/core/(.*)$': '<rootDir>/src/mcp/core/$1',

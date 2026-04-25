@@ -1,0 +1,5 @@
+#!/bin/sh
+# Pre-commit analysis: lint, format check, unit tests (see package.json "precommit").
+set -e
+echo "Pre-commit: running npm run precommit..."
+npm run precommit

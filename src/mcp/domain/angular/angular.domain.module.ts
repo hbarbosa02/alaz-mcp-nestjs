@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 
 /**
- * Angular domain module (placeholder).
- * Suporte para projetos Angular estará disponível em breve.
- * Quando implementado, fornecerá IModuleRegistry, IEntityIntrospector, etc.
- * equivalentes para o ecossistema Angular (componentes, módulos, etc.).
+ * Placeholder domain for future Angular adapters. Imported by `McpNestjsModule` / `McpStdioModule`
+ * so real providers can land here without rewiring the graph (AD-003).
+ *
+ * When implemented: register services that implement the core ports under `src/mcp/core/ports/`,
+ * then route them from `FrameworkAdapterRegistryService` when `FrameworkDetectorService` reports `angular`.
  */
 @Module({
   imports: [],

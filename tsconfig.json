@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
+      "@app/package": ["package.json"],
       "@/*": ["src/*"],
       "@test/*": ["test/*"],
       "@mcp/core/*": ["src/mcp/core/*"],

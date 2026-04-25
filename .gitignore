@@ -24,6 +24,11 @@ lerna-debug.log*
 **/tmp
 
 coverage
-.cursor
+# Cursor: keep team rules and project skills; ignore other local IDE state
+.cursor/**
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/skills/
+!.cursor/skills/**
 
 .vscode

@@ -1,0 +1,66 @@
+---
+description: Conventional Commits, message format, and pre-commit analysis (local hook + checks)
+alwaysApply: true
+---
+
+# Commit pattern and pre-commit analysis
+
+## When to use this
+
+Apply **before every `git commit`** (human or agent): validate the **message** and that **pre-commit analysis** has passed (or will pass) via `npm run precommit`.
+
+## Commit message — Conventional Commits
+
+**Format (required):**
+
+```text
+<type>(<optional-scope>): <imperative subject>
+```
+
+- **type** (pick one): `feat` | `fix` | `docs` | `style` | `refactor` | `test` | `chore` | `ci` | `perf` | `build`
+- **scope** (optional): area in lower kebab-case, e.g. `mcp`, `git-context`, `e2e`
+- **subject**: imperative mood, no trailing period, **≤ 72 characters**; describe *what* and *why* in a single line
+
+**Body** (optional, after a blank line): explain motivation, trade-offs, or follow-ups. Wrap at ~72 chars. Reference issues, e.g. `Closes #12`.
+
+**Footer** (optional): `BREAKING CHANGE: ...` or `Refs #id`.
+
+**Examples**
+
+```text
+fix(mcp): return empty list when project root is missing
+
+feat: add get-recent-changes prompt wrapper for Cursor clients
+```
+
+**Anti-patterns**
+
+- ❌ `WIP` / `fix stuff` / only a ticket id as subject
+- ❌ Vague: `update`, `changes`, `misc`
+- ❌ Ending the subject with `.`
+
+## Pre-commit analysis (automation + checklist)
+
+**Automated (required when hook is active):** `core.hooksPath` points to `.githooks`. On commit, the hook runs `npm run precommit` (see `package.json`).
+
+**Manual if hook failed or skipped:** run the same: `npm run precommit`
+
+**Checklist (must be satisfied before pushing)**
+
+1. **Lint:** `npm run lint` — no new ESLint errors in `{src,test}/**/*.ts`
+2. **Format:** `npm run format:check` — Prettier is clean
+3. **Tests:** `npm test` — relevant unit tests pass; for risky changes, also `npm run test:e2e`
+4. **Scope:** commit contains a **single logical change**; unrelated edits belong in a separate commit
+5. **Secrets / noise:** no `.env` keys, tokens, or large generated artifacts; no accidental `node_modules` or `dist/`
+6. **Docs:** if behavior changed, user-visible docs (e.g. `README.md`, `docs/`) updated in the same PR when required
+
+## Quick commands
+
+| Goal        | Command                    |
+| ----------- | -------------------------- |
+| Full gate   | `npm run precommit`        |
+| Fix lint    | `npm run lint:fix`         |
+| Fix format  | `npm run format`           |
+| All tests   | `npm test`                 |
+
+If `precommit` fails, fix the reported step, then recommit with a message that matches the format above.

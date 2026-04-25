@@ -16,6 +16,11 @@ export const UNSUPPORTED_FRAMEWORK_MESSAGE =
 
 export const FRAMEWORK_COMING_SOON_MESSAGE = 'Suporte para este framework estará disponível em breve.';
 
+/**
+ * Maps `FrameworkDetectorService` output to port implementations. NestJS uses the injected
+ * domain services; Angular and Laravel return `null` here until adapters exist, and
+ * `getUnsupportedMessage` drives user-facing copy (AD-003).
+ */
 @Injectable()
 export class FrameworkAdapterRegistryService {
   constructor(

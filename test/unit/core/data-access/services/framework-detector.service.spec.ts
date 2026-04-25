@@ -62,6 +62,43 @@ describe('FrameworkDetectorService', () => {
     expect(result).toBe('angular');
   });
 
+  it('should prefer nestjs over angular when both appear in package.json', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            dependencies: {
+              '@nestjs/core': '^11',
+              '@angular/core': '^17',
+            },
+          }),
+        );
+      }
+      return Promise.resolve(null);
+    });
+
+    const result = await sut.detect();
+
+    expect(result).toBe('nestjs');
+  });
+
+  it('should detect angular from devDependencies only', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            devDependencies: { '@angular/core': '^17' },
+          }),
+        );
+      }
+      return Promise.resolve(null);
+    });
+
+    const result = await sut.detect();
+
+    expect(result).toBe('angular');
+  });
+
   it('should detect laravel from composer.json', async () => {
     fileReader.readFile.mockImplementation((path: string) => {
       if (path === 'package.json') return Promise.resolve(null);
@@ -69,6 +106,24 @@ describe('FrameworkDetectorService', () => {
         return Promise.resolve(
           JSON.stringify({
             require: { 'laravel/framework': '^11' },
+          }),
+        );
+      }
+      return Promise.resolve(null);
+    });
+
+    const result = await sut.detect();
+
+    expect(result).toBe('laravel');
+  });
+
+  it('should detect laravel from composer require-dev only', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') return Promise.resolve(null);
+      if (path === 'composer.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            'require-dev': { 'laravel/framework': '^11' },
           }),
         );
       }

@@ -5,6 +5,19 @@ describe('envSchema', () => {
     const result = envSchema.parse({});
     expect(result.PORT).toBe(3100);
     expect(result.NODE_ENV).toBe('development');
+    expect(result.PROJECT_ROOT).toBeUndefined();
+  });
+
+  it('should not set a default PROJECT_ROOT (HTTP uses X-Project-Root; STDIO uses process.env)', () => {
+    const result = envSchema.parse({});
+
+    expect(result.PROJECT_ROOT).toBeUndefined();
+  });
+
+  it('should accept an explicit PROJECT_ROOT', () => {
+    const result = envSchema.parse({ PROJECT_ROOT: '/var/workspace/app' });
+
+    expect(result.PROJECT_ROOT).toBe('/var/workspace/app');
   });
 
   it('should apply PORT default', () => {
