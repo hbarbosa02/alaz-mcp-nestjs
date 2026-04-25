@@ -65,9 +65,9 @@ _(None yet.)_
 
 | #   | Description                         | Date       | Commit | Status  |
 | --- | ----------------------------------- | ---------- | ------ | ------- |
-| 001 | Initialize `.specs/project/` (TLC)  | 2026-04-25 | —      | Done    |
-| 002 | Brownfield map — 7 files in `.specs/codebase/` | 2026-04-25 | —      | Done    |
-| 003 | Implement AD-001, AD-002, AD-003 (code + tests) | 2026-04-25 | —      | Done    |
+| 001 | Initialize `.specs/project/` (TLC)  | 2026-04-25 | e35b801 | Done    |
+| 002 | Brownfield map — 7 files in `.specs/codebase/` | 2026-04-25 | e35b801 | Done    |
+| 003 | Implement AD-001, AD-002, AD-003 (code + tests) | 2026-04-25 | e35b801 | Done    |
 
 ---
 
