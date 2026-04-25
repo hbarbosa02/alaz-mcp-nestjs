@@ -4,8 +4,14 @@ import { ProjectRootContextService } from '@/mcp/core/data-access/services/proje
 
 export type FrameworkType = 'nestjs' | 'angular' | 'laravel' | null;
 
+/** AD-004: max distinct project-root *strings* (LRU evicts oldest insertion when full). */
 const CACHE_MAX_SIZE = 10;
 
+/**
+ * Caches `detect()` per `getProjectRoot()` return value. Keys are not normalized
+ * (e.g. two strings that resolve to the same path may get separate entries).
+ * See `framework-detector.service.spec.ts` and `.specs/project/STATE.md` (AD-004).
+ */
 @Injectable()
 export class FrameworkDetectorService {
   private readonly cache = new Map<string, Promise<FrameworkType>>();

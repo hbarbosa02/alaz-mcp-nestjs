@@ -49,6 +49,34 @@
 
 ---
 
+### AD-004: Framework detection cache — keying and LRU (2026-04-25)
+
+**Decision:** Keep the current LRU cache (max 10 keys) in `FrameworkDetectorService`, keyed by the *resolved* project root string. Do not add canonical-path normalization in this pass unless profiling or user reports show duplicate entries for the same logical project as a problem.
+
+**Reason:** CONCERNS notes that different string forms of the “same” root (e.g. path variants) can cache separately; capacity is small and bounded. Changing keying (e.g. `realpath`) is a trade-off and needs targeted tests.
+
+**Trade-off:** Possible duplicate cache slots for equivalent roots; mitigated by LRU size and test coverage in `framework-detector.service.spec.ts`.
+
+**Impact:** `src/mcp/core/data-access/services/framework-detector.service.ts` (see **Fragile areas** in `.specs/codebase/CONCERNS.md`).
+
+**Status:** **Implemented** — JSDoc on `FrameworkDetectorService` and `CACHE_MAX_SIZE`; unit tests cover per-root caching, separate keys for distinct path strings, and re-detection after eviction (`test/unit/core/data-access/services/framework-detector.service.spec.ts`).
+
+---
+
+### AD-005: In-repo CI pipeline (2026-04-25)
+
+**Decision:** Add a GitHub Actions workflow; keep local `npm run precommit` (lint, format, test) for pre-push discipline. The pipeline should run `lint`, `format:check`, `test`, `test:e2e`, and `build` on push/PR to `main`/`master`, matching CONCERNS *Test / ops gaps*.
+
+**Reason:** Automated verification in-repo; catches regressions for contributors and forks.
+
+**Trade-off:** CI minutes and e2e runtime (~40s+ for stdio); Node version pinned in workflow (22).
+
+**Impact:** `.github/workflows/ci.yml`; see `.specs/codebase/CONCERNS.md`.
+
+**Status:** **Implemented** — `ci.yml` uses `actions/checkout` and `actions/setup-node` (Node 22, `npm ci`).
+
+---
+
 ## Active blockers
 
 _(None.)_
@@ -68,6 +96,7 @@ _(None yet.)_
 | 001 | Initialize `.specs/project/` (TLC)  | 2026-04-25 | e35b801 | Done    |
 | 002 | Brownfield map — 7 files in `.specs/codebase/` | 2026-04-25 | e35b801 | Done    |
 | 003 | Implement AD-001, AD-002, AD-003 (code + tests) | 2026-04-25 | e35b801 | Done    |
+| 004 | **AD-004** cache docs/tests; **AD-005** GitHub Actions CI | 2026-04-25 | — | Done    |
 
 ---
 
@@ -84,6 +113,9 @@ _(None yet.)_
 - [x] Implement **AD-001** — env schema: remove non-portable `PROJECT_ROOT` default
 - [x] Implement **AD-002** — `McpModule.forRoot` version from `package.json`
 - [x] **AD-003** initial tranche — wire placeholder domain modules, document extension points, expand detection tests
+- [x] Record **AD-004** (framework detection cache) and **AD-005** (CI gap) from **CONCERNS**
+- [x] Implement **AD-004** — JSDoc + cache/LRU/eviction unit tests
+- [x] Implement **AD-005** — `.github/workflows/ci.yml`
 
 ---
 

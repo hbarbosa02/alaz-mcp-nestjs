@@ -189,4 +189,95 @@ describe('FrameworkDetectorService', () => {
 
     expect(fileReader.readFile).toHaveBeenCalled();
   });
+
+  /** AD-004: in-memory key is the raw project root string; same root reuses one detection. */
+  it('should call readFile once for package.json when detecting twice for the same root', async () => {
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            dependencies: { '@nestjs/core': '^11' },
+          }),
+        );
+      }
+      return Promise.resolve(null);
+    });
+
+    await sut.detect();
+    await sut.detect();
+
+    const pkgCalls = fileReader.readFile.mock.calls.filter((c) => c[0] === 'package.json');
+    expect(pkgCalls).toHaveLength(1);
+  });
+
+  /** AD-004: different root strings are separate cache keys (no path canonicalization). */
+  it('should not share cache between different project root strings', async () => {
+    let n = 0;
+    const projectRootContext = {
+      getProjectRoot: jest.fn().mockImplementation(() => (n++ === 0 ? '/a/x' : '/b/y')),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FrameworkDetectorService,
+        { provide: FileReaderService, useValue: fileReader },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
+      ],
+    }).compile();
+
+    const detector = module.get(FrameworkDetectorService);
+    fileReader.readFile.mockImplementation((path: string) => {
+      if (path === 'package.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            dependencies: { '@nestjs/core': '^11' },
+          }),
+        );
+      }
+      return Promise.resolve(null);
+    });
+
+    await detector.detect();
+    await detector.detect();
+
+    const pkgCalls = fileReader.readFile.mock.calls.filter((c) => c[0] === 'package.json');
+    expect(pkgCalls).toHaveLength(2);
+  });
+
+  /**
+   * AD-004: when the 11th distinct root is added, the oldest key is evicted; a later
+   * detect for that evicted root runs uncached detection again.
+   */
+  it('should re-run detection for an evicted project root', async () => {
+    const projectRootContext = {
+      getProjectRoot: jest.fn(),
+    } as unknown as jest.Mocked<ProjectRootContextService>;
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FrameworkDetectorService,
+        { provide: FileReaderService, useValue: fileReader },
+        { provide: ProjectRootContextService, useValue: projectRootContext },
+      ],
+    }).compile();
+
+    const detector = module.get(FrameworkDetectorService);
+    fileReader.readFile.mockResolvedValue(null);
+
+    for (let i = 0; i < 10; i++) {
+      projectRootContext.getProjectRoot.mockReturnValue(`/r${i}`);
+      await detector.detect();
+    }
+
+    const callsAfterTen = fileReader.readFile.mock.calls.length;
+    expect(callsAfterTen).toBeGreaterThan(0);
+
+    projectRootContext.getProjectRoot.mockReturnValue('/r10');
+    await detector.detect();
+
+    projectRootContext.getProjectRoot.mockReturnValue('/r0');
+    await detector.detect();
+
+    expect(fileReader.readFile.mock.calls.length).toBeGreaterThan(callsAfterTen);
+  });
 });
