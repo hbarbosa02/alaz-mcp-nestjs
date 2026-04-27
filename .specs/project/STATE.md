@@ -1,6 +1,6 @@
 # State
 
-**Last updated:** 2026-04-25
+**Last updated:** 2026-04-27
 **Current work:** None
 
 ---
@@ -91,6 +91,20 @@
 
 ---
 
+### AD-007: Project root context — ALS + validated env fallback (2026-04-27)
+
+**Decision:** `ProjectRootContextService.getProjectRoot()` resolves in order: **AsyncLocalStorage** (HTTP `X-Project-Root` via middleware `run()`, tool-level `run()`, or STDIO `enterWith`), then **`ConfigService.get('PROJECT_ROOT')`** (same validated env schema as the app — supports `.env`, not only `process.env` before bootstrap). STDIO entry validates root **after** `createApplicationContext` via `ConfigService`, then `enterWith`. Do **not** use `enterWith` for HTTP (multi-tenant roots).
+
+**Reason:** CONCERNS *Fragile areas* — MCP callbacks can run off the request async chain; a single env-backed fallback avoids hard-coding `process.env` and aligns with Nest config loading.
+
+**Trade-off:** `ProjectRootContextService` requires global `ConfigModule.forRoot` (already true for HTTP and STDIO app modules).
+
+**Impact:** `project-root-context.service.ts`, `mcp-stdio.entry.ts`, `test/unit/core/data-access/services/project-root-context.service.spec.ts`.
+
+**Status:** **Implemented**
+
+---
+
 ## Active blockers
 
 _(None.)_
@@ -132,6 +146,7 @@ _(None yet.)_
 - [x] Implement **AD-004** — JSDoc + cache/LRU/eviction unit tests
 - [x] Implement **AD-005** — `.github/workflows/ci.yml`
 - [x] **AD-006** + docs pass — align `.specs` with published `docs/` and README (this update)
+- [x] **AD-007** — project root ALS + `ConfigService` fallback; STDIO bootstrap reads root after Nest config load
 
 ---
 
